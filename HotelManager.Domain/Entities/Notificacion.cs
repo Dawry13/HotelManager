@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace HotelManager.HotelManager.Domain.Entities
 {
-    internal class Notificacion
+    public class Notificacion
     {
+        public int IdNotificacion { get; set; }
+        public int IdReserva { get; set; }
+        public string Mensaje { get; set; }
+        public DateTime Fecha { get; set; }
+        public bool Leida { get; set; }
     }
 }

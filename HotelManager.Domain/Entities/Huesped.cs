@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace HotelManager.HotelManager.Domain.Entities
 {
-    internal class Huesped
+    public class Huesped
     {
+        public int IdHuesped { get; set; }
+        public string Nombre { get; set; }
+        public string Documento { get; set; }
+        public string Telefono { get; set; }
+        public string Correo { get; set; }
     }
 }

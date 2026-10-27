@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HotelManager.HotelManager.Domain.Entities;
 
-namespace HotelManager.HotelManager.Business.interfaces
+namespace HotelManager.Business.Interfaces
 {
-    internal class IHuespedResository
+    public interface IHuespedResository : IBaseRepository<Huesped>
     {
+        Huesped GetByDocumento(string documento);
+        bool ExisteDocumento(string documento, int? excluirIdHuesped = null);
     }
 }

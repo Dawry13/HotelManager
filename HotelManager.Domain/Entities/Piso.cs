@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace HotelManager.HotelManager.Domain.Entities
 {
-    internal class Piso
+    public class Piso
     {
+        public int IdPiso { get; set; }
+        public int Numero { get; set; }
+        public bool Estado { get; set; }
+        public int IdHotel { get; set; }
     }
 }

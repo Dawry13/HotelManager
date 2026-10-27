@@ -1,12 +1,12 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HotelManager.HotelManager.Domain.Entities;
 
-namespace HotelManager.HotelManager.Business.interfaces
+namespace HotelManager.Business.Interfaces
 {
-    internal class IHotelResository
+    public interface IHotelResository : IBaseRepository<Hotel>
     {
+        IEnumerable<Hotel> GetActivos();
+        IEnumerable<Piso> GetPisos(int idHotel);                      
+        bool ExistePisoActivo(int idHotel, int numero, int? excluirIdPiso = null); 
     }
 }

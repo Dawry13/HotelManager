@@ -52,6 +52,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="HotelManager.Business\Interfaces\IBaseRepository.cs" />
     <Compile Include="HotelManager.Business\Interfaces\IHabitacionesResository.cs" />
     <Compile Include="HotelManager.Business\Interfaces\IHotelResository.cs" />
     <Compile Include="HotelManager.Business\Interfaces\IHuespedResository.cs" />

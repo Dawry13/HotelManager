@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HotelManager.HotelManager.Domain.Entities
 {
-    internal class HistorialReserva
+    public class HistorialReserva
     {
     }
 }

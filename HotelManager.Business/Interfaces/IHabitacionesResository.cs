@@ -1,12 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HotelManager.HotelManager.Domain.Entities;
+using HotelManager.HotelManager.Domain.Enums;
 
-namespace HotelManager.HotelManager.Business.interfaces
+namespace HotelManager.Business.Interfaces
 {
-    internal class IHabitacionesResository
+    public interface IHabitacionesResository : IBaseRepository<Habitacion>
     {
+        IEnumerable<Habitacion> GetByPiso(int idPiso);
+        IEnumerable<Habitacion> GetByHotel(int idHotel);
+        bool ExisteNumeroEnHotel(int idHotel, int numero, int? excluirIdHabitacion = null);
+        IEnumerable<Habitacion> GetDisponibles(DateTime entrada, DateTime salida, int huespedes, int? idHotel = null); 
+        bool CambiarEstado(int idHabitacion, EstadoHabitacion nuevoEstado);                  
     }
 }
