@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FF4C2CBF-BE2C-4185-8DB7-E186FE8E78AC}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>HotelManager</RootNamespace>
-    <AssemblyName>HotelManager</AssemblyName>
+    <ProjectGuid>{A499B708-BC3C-4224-9A4D-01C9E2E3F670}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>HotelManager.Data</RootNamespace>
+    <AssemblyName>HotelManager.Data</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,8 +32,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -46,15 +50,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HotelManager.Domain\Entities\Habitacion.cs" />
-    <Compile Include="HotelManager.Domain\Entities\HistorialReserva.cs" />
-    <Compile Include="HotelManager.Domain\Entities\Hotel.cs" />
-    <Compile Include="HotelManager.Domain\Entities\Huesped.cs" />
-    <Compile Include="HotelManager.Domain\Entities\Notificacion.cs" />
-    <Compile Include="HotelManager.Domain\Entities\Piso.cs" />
-    <Compile Include="HotelManager.Domain\Entities\Reserva.cs" />
-    <Compile Include="HotelManager.Domain\Entities\Tarifa.cs" />
-    <Compile Include="HotelManager.Domain\Enums\Estados.cs" />
+    <Compile Include="Base\BaseRepository.cs" />
+    <Compile Include="Interfaces\IBaseRepository.cs" />
+    <Compile Include="Interfaces\IHabitacionRepository.cs" />
+    <Compile Include="Interfaces\IHistorialReservaRepository.cs" />
+    <Compile Include="Interfaces\IHotelRepository.cs" />
+    <Compile Include="Interfaces\IHuespedRepository.cs" />
+    <Compile Include="Interfaces\INotificacionRepository.cs" />
+    <Compile Include="Interfaces\IPisoRepository.cs" />
+    <Compile Include="Interfaces\IReservaRepository.cs" />
+    <Compile Include="Interfaces\ITarifaRepository.cs" />
+    <Compile Include="Repositories\HabitacionRepository.cs" />
+    <Compile Include="Repositories\HistorialReservaRepository.cs" />
+    <Compile Include="Repositories\HotelRepository.cs" />
+    <Compile Include="Repositories\HuespedRepository.cs" />
+    <Compile Include="Repositories\NotificacionRepository.cs" />
+    <Compile Include="Repositories\PisoRepository.cs" />
+    <Compile Include="Repositories\ReservaRepository.cs" />
+    <Compile Include="Repositories\TarifaRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -76,8 +89,21 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="HotelManager.Presentation\Forms\" />
-    <Folder Include="HotelManager.Presentation\Models\" />
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HotelManager.Business\HotelManager.Business.csproj">
+      <Project>{05cc778d-fd99-4ae6-a708-d409def1157c}</Project>
+      <Name>HotelManager.Business</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HotelManager.Presentation\HotelManager.Presentation.csproj">
+      <Project>{ada9fd11-7aae-4786-b839-98528ddfd7ab}</Project>
+      <Name>HotelManager.Presentation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HotelManager\HotelManager.Domain\HotelManager.Domain.csproj">
+      <Project>{c78e3751-03ed-458c-8ad4-66899b65945c}</Project>
+      <Name>HotelManager.Domain</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

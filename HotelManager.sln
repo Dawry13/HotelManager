@@ -8,11 +8,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Business", "..\HotelManager.Business\HotelManager.Business.csproj", "{05CC778D-FD99-4AE6-A708-D409DEF1157C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Business", "HotelManager.Business\HotelManager.Business.csproj", "{05CC778D-FD99-4AE6-A708-D409DEF1157C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Presentation", "..\HotelManager.Presentation\HotelManager.Presentation.csproj", "{ADA9FD11-7AAE-4786-B839-98528DDFD7AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Presentation", "HotelManager.Presentation\HotelManager.Presentation.csproj", "{ADA9FD11-7AAE-4786-B839-98528DDFD7AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Data", "..\HotelManager.Data\HotelManager.Data.csproj", "{A499B708-BC3C-4224-9A4D-01C9E2E3F670}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Data", "HotelManager.Data\HotelManager.Data.csproj", "{A499B708-BC3C-4224-9A4D-01C9E2E3F670}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Domain", "HotelManager.Domain\HotelManager.Domain.csproj", "{C78E3751-03ED-458C-8AD4-66899B65945C}"
 EndProject

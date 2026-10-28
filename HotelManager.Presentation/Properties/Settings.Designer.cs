@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace HotelManager.Properties
+namespace HotelManager.Presentation.Properties
 {
 
 
