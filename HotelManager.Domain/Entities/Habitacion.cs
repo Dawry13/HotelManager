@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HotelManager.HotelManager.Domain.Enums;
+using HotelManager.Domain.Enums;
 
-namespace HotelManager.HotelManager.Domain.Entities
+namespace HotelManager.Domain.Entities
 {
     public class Habitacion
     {
@@ -17,3 +17,4 @@ namespace HotelManager.HotelManager.Domain.Entities
         public int IdPiso { get; set; }
     }
 }
+

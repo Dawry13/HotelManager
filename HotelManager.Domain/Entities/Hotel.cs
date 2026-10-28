@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace HotelManager.HotelManager.Domain.Entities
+namespace HotelManager.Domain.Entities
 {
     public class Hotel
     {
@@ -12,5 +8,6 @@ namespace HotelManager.HotelManager.Domain.Entities
         public string Nombre { get; set; }
         public string Direccion { get; set; }
         public bool Estado { get; set; }
+        public List<Piso> Pisos { get; set; }
     }
 }
