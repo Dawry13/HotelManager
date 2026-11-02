@@ -61,7 +61,8 @@ namespace HotelManager.Data.Repositories
                 new SqlParameter("@id", e.IdReserva)) > 0;
 
         // RN-010 y RN-012: solo bloquean las reservas activas (misma regla que el trigger).
-        public bool HaySolapamiento(int idHabitacion, DateTime entrada, DateTime salida, int? excluirIdReserva = null)
+        // Una salida el mismo día que otra entrada NO cuenta como solapamiento.
+        public bool ExisteSolapamiento(int idHabitacion, DateTime entrada, DateTime salida, int? excluirIdReserva)
             => Convert.ToInt32(Scalar(
                 @"SELECT COUNT(1) FROM reservas
                   WHERE id_habitacion=@h
@@ -72,6 +73,10 @@ namespace HotelManager.Data.Repositories
                 new SqlParameter("@en", entrada.Date),
                 new SqlParameter("@sa", salida.Date),
                 new SqlParameter("@x", SqlDbType.Int) { Value = DbVal(excluirIdReserva) })) > 0;
+
+        // Se conserva por compatibilidad con código que ya lo llame; delega en ExisteSolapamiento.
+        public bool HaySolapamiento(int idHabitacion, DateTime entrada, DateTime salida, int? excluirIdReserva = null)
+            => ExisteSolapamiento(idHabitacion, entrada, salida, excluirIdReserva);
 
         public IEnumerable<Reserva> GetByHuesped(int idHuesped)
             => Query("SELECT * FROM reservas WHERE id_huesped=@h ORDER BY fecha_entrada DESC",

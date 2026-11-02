@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq.Expressions;
 using HotelManager.Data.Interfaces;
 
 namespace HotelManager.Data.Base
@@ -72,30 +71,5 @@ namespace HotelManager.Data.Base
         }
 
         protected static object DbVal(object v) => v ?? DBNull.Value;
-
-        public IEnumerable<T> Find(Expression<Func<T, bool>> predicado)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IBaseRepository<T>.Add(T entidad)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IBaseRepository<T>.Update(T entidad)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Remove(T entidad)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int SaveChanges()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

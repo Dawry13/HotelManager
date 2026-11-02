@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using HotelManager.Data.Base;
-using HotelManager.Domain.Interfaces;
+using HotelManager.Data.Interfaces;
 using HotelManager.Domain.Entities;
 using HotelManager.Domain.Enums;
 
 
 namespace HotelManager.Data.Repositories
 {
-    public class HabitacionRepository : BaseRepository<Habitacion>, IHabitacionesRepository
+    public class HabitacionRepository : BaseRepository<Habitacion>, IHabitacionRepository
     {
         protected override string TableName => "Habitaciones";
         protected override string KeyColumn => "IdHabitacion";

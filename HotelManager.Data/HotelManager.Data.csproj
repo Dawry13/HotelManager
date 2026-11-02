@@ -92,15 +92,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HotelManager.Business\HotelManager.Business.csproj">
-      <Project>{05cc778d-fd99-4ae6-a708-d409def1157c}</Project>
-      <Name>HotelManager.Business</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HotelManager.Presentation\HotelManager.Presentation.csproj">
-      <Project>{ada9fd11-7aae-4786-b839-98528ddfd7ab}</Project>
-      <Name>HotelManager.Presentation</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HotelManager\HotelManager.Domain\HotelManager.Domain.csproj">
+    <ProjectReference Include="..\HotelManager.Domain\HotelManager.Domain.csproj">
       <Project>{c78e3751-03ed-458c-8ad4-66899b65945c}</Project>
       <Name>HotelManager.Domain</Name>
     </ProjectReference>

@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using HotelManager.Business.Dtos;
+using HotelManager.Business.Exceptions;
+using HotelManager.Business.Interfaces;
+using HotelManager.Data.Interfaces;
+using HotelManager.Domain.Enums;
+
+namespace HotelManager.Business.Services
+{
+    public class DisponibilidadService : IDisponibilidadService
+    {
+        private readonly IHabitacionRepository _habitacionRepository;
+        private readonly IPisoRepository _pisoRepository;
+        private readonly IReservaRepository _reservaRepository;
+        private readonly ITarifaService _tarifaService;
+
+        public DisponibilidadService(
+            IHabitacionRepository habitacionRepository,
+            IPisoRepository pisoRepository,
+            IReservaRepository reservaRepository,
+            ITarifaService tarifaService)
+        {
+            _habitacionRepository = habitacionRepository;
+            _pisoRepository = pisoRepository;
+            _reservaRepository = reservaRepository;
+            _tarifaService = tarifaService;
+        }
+
+        // CU-006: RN-007, RN-008, RN-009, RN-010, RN-011
+        public IEnumerable<HabitacionDisponibleDto> Consultar(DisponibilidadRequestDto request)
+        {
+            if (request == null)
+                throw new BusinessException("La consulta es obligatoria.");
+
+            var entrada = request.Entrada.Date;
+            var salida = request.Salida.Date;
+
+            if (salida <= entrada)
+                throw new BusinessException("La fecha de salida debe ser posterior a la fecha de entrada.");      // RN-008
+            if (entrada < DateTime.Today)
+                throw new BusinessException("No se permiten consultas para fechas anteriores a hoy.");            // RN-009
+            if (request.CantidadHuespedes <= 0)
+                throw new BusinessException("La cantidad de huéspedes debe ser mayor que cero.");
+
+            var habitaciones = request.IdHotel.HasValue
+                ? _habitacionRepository.GetByHotel(request.IdHotel.Value)
+                : _habitacionRepository.GetAll();
+
+            var pisos = _pisoRepository.GetAll().ToDictionary(p => p.IdPiso);
+            var noches = (salida - entrada).Days;
+            var resultado = new List<HabitacionDisponibleDto>();
+
+            foreach (var h in habitaciones)
+            {
+                if (h.Estado != EstadoHabitacion.Disponible) continue;                       // RN-007
+                if (h.Capacidad < request.CantidadHuespedes) continue;                       // RN-011
+                if (!pisos.ContainsKey(h.IdPiso) || !pisos[h.IdPiso].Estado) continue;
+                if (_reservaRepository.ExisteSolapamiento(h.IdHabitacion, entrada, salida, null)) continue; // RN-010, RN-012
+
+                var costo = _tarifaService.CalcularCostoTotal(h.IdHabitacion, entrada, salida);
+
+                resultado.Add(new HabitacionDisponibleDto
+                {
+                    IdHabitacion = h.IdHabitacion,
+                    IdPiso = h.IdPiso,
+                    IdHotel = pisos[h.IdPiso].IdHotel,
+                    Numero = h.Numero,
+                    Capacidad = h.Capacidad,
+                    Noches = noches,
+                    CostoEstimado = costo,
+                    TarifaPorNoche = Math.Round(costo / noches, 2)
+                });
+            }
+
+            // La UI decide qué mostrar si la lista viene vacía ("no existe disponibilidad")
+            return resultado.OrderBy(r => r.IdHotel).ThenBy(r => r.Numero).ToList();
+        }
+    }
+}
