@@ -28,7 +28,7 @@ namespace HotelManager.Business.Services
             _tarifaService = tarifaService;
         }
 
-        // CU-006: RN-007, RN-008, RN-009, RN-010, RN-011
+       
         public IEnumerable<HabitacionDisponibleDto> Consultar(DisponibilidadRequestDto request)
         {
             if (request == null)
@@ -38,10 +38,9 @@ namespace HotelManager.Business.Services
             var salida = request.Salida.Date;
 
             if (salida <= entrada)
-                throw new BusinessException("La fecha de salida debe ser posterior a la fecha de entrada.");      // RN-008
+                throw new BusinessException("La fecha de salida debe ser posterior a la fecha de entrada.");      
             if (entrada < DateTime.Today)
-                throw new BusinessException("No se permiten consultas para fechas anteriores a hoy.");            // RN-009
-            if (request.CantidadHuespedes <= 0)
+                throw new BusinessException("No se permiten consultas para fechas anteriores a hoy.");            
                 throw new BusinessException("La cantidad de huéspedes debe ser mayor que cero.");
 
             var habitaciones = request.IdHotel.HasValue
@@ -54,10 +53,10 @@ namespace HotelManager.Business.Services
 
             foreach (var h in habitaciones)
             {
-                if (h.Estado != EstadoHabitacion.Disponible) continue;                       // RN-007
-                if (h.Capacidad < request.CantidadHuespedes) continue;                       // RN-011
+                if (h.Estado != EstadoHabitacion.Disponible) continue;                      
+                if (h.Capacidad < request.CantidadHuespedes) continue;                      
                 if (!pisos.ContainsKey(h.IdPiso) || !pisos[h.IdPiso].Estado) continue;
-                if (_reservaRepository.ExisteSolapamiento(h.IdHabitacion, entrada, salida, null)) continue; // RN-010, RN-012
+                if (_reservaRepository.ExisteSolapamiento(h.IdHabitacion, entrada, salida, null)) continue; 
 
                 var costo = _tarifaService.CalcularCostoTotal(h.IdHabitacion, entrada, salida);
 
@@ -74,7 +73,7 @@ namespace HotelManager.Business.Services
                 });
             }
 
-            // La UI decide qué mostrar si la lista viene vacía ("no existe disponibilidad")
+            
             return resultado.OrderBy(r => r.IdHotel).ThenBy(r => r.Numero).ToList();
         }
     }

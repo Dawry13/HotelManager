@@ -7,7 +7,7 @@ namespace HotelManager.Business.Dtos
         public DateTime Entrada { get; set; }
         public DateTime Salida { get; set; }
         public int CantidadHuespedes { get; set; }
-        public int? IdHotel { get; set; }   // opcional: "Seleccionar hotel si aplica"
+        public int? IdHotel { get; set; }  
     }
 
     public class HabitacionDisponibleDto

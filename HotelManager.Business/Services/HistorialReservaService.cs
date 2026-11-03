@@ -18,7 +18,7 @@ namespace HotelManager.Business.Services
             _historialRepository = historialRepository;
         }
 
-        // CU-010 / RF-013
+        
         public IEnumerable<HistorialReservaDto> ConsultarPorReserva(int idReserva)
         {
             if (idReserva <= 0)

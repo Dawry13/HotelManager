@@ -19,7 +19,7 @@ namespace HotelManager.Business.Services
             _hotelRepository = hotelRepository;
         }
 
-        // RN-001, RN-002, RN-003
+       
         public PisoDto Crear(PisoDto dto)
         {
             if (dto == null) throw new BusinessException("Los datos del piso son obligatorios.");
@@ -62,7 +62,7 @@ namespace HotelManager.Business.Services
             var piso = ObtenerEntidad(idPiso);
             if (piso.Estado) return;
 
-            // RN-003: al reactivar no puede chocar con otro piso activo del mismo número
+            
             if (_pisoRepository.ExisteNumeroActivo(piso.IdHotel, piso.Numero, piso.IdPiso))
                 throw new BusinessException("No se puede activar: ya existe un piso activo con ese número.");
 

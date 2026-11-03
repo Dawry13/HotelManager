@@ -22,7 +22,7 @@ namespace HotelManager.Business.Services
             if (habitacion == null)
                 throw new BusinessException("La habitación no existe.");
 
-            // Tarifa vigente para esa fecha; si no hay, se usa la tarifa base de la habitación
+            
             var tarifa = _tarifaRepository.GetVigente(idHabitacion, fecha.Date);
             return tarifa != null ? tarifa.PrecioPorNoche : habitacion.Tarifa;
         }

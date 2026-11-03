@@ -66,7 +66,7 @@ namespace HotelManager.Business.Services
             return ToDto(habitacion);
         }
 
-        // CU-004 / RF-004 / RN-007
+        
         public void CambiarEstado(int idHabitacion, EstadoHabitacion nuevoEstado)
         {
             var habitacion = ObtenerEntidad(idHabitacion);

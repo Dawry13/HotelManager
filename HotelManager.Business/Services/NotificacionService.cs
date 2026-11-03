@@ -6,10 +6,7 @@ using HotelManager.Domain.Enums;
 
 namespace HotelManager.Business.Services
 {
-    /// <summary>
-    /// Registra la notificación asociada a una reserva (RF-014).
-    /// El envío real al servicio externo se conectaría aquí.
-    /// </summary>
+   
     public class NotificacionService : INotificacionService
     {
         private readonly INotificacionRepository _notificaciones;

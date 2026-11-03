@@ -1,12 +1,12 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-// Interfaces y repositorios (capa Data)
+
 using HotelManager.Data.Base;
 using HotelManager.Data.Interfaces;
 using HotelManager.Data.Repositories;
 
-// Interfaces y servicios (capa Business)
+
 using HotelManager.Business.Interfaces;
 using HotelManager.Business.Services;
 
@@ -14,9 +14,7 @@ namespace HotelManager.Business
 {
     public static class DependencyInjection
     {
-        /// <summary>
-        /// Registra repositorios y servicios del sistema.
-        /// </summary>
+        
         public static IServiceCollection AddHotelManager(this IServiceCollection services)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
@@ -27,7 +25,7 @@ namespace HotelManager.Business
             return services;
         }
 
-        // ---------- Capa Data ----------
+       
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IHotelRepository, HotelRepository>();
@@ -42,7 +40,7 @@ namespace HotelManager.Business
             return services;
         }
 
-        // ---------- Capa Business ----------
+        
         private static IServiceCollection AddBusinessServices(this IServiceCollection services)
         {
             services.AddScoped<IHotelService, HotelService>();

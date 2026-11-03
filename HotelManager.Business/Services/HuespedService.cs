@@ -18,7 +18,7 @@ namespace HotelManager.Business.Services
             _huespedRepository = huespedRepository;
         }
 
-        // CU-005 / RF-005
+       
         public HuespedDto Registrar(HuespedDto dto)
         {
             Validar(dto);
@@ -80,7 +80,7 @@ namespace HotelManager.Business.Services
             return _huespedRepository.GetAll().Select(ToDto).ToList();
         }
 
-        // Búsqueda exacta por documento usando Buscar(texto) del repositorio
+        
         private Huesped BuscarExacto(string documento)
         {
             return _huespedRepository.Buscar(documento)
@@ -93,7 +93,7 @@ namespace HotelManager.Business.Services
             if (string.IsNullOrWhiteSpace(dto.Nombre)) throw new BusinessException("El nombre es obligatorio.");
             if (string.IsNullOrWhiteSpace(dto.Documento)) throw new BusinessException("El documento es obligatorio.");
 
-            // El correo es necesario para poder notificar (RN-014); validación básica de formato
+            
             if (string.IsNullOrWhiteSpace(dto.Correo))
                 throw new BusinessException("El correo es obligatorio para enviar notificaciones.");
             if (!dto.Correo.Contains("@") || dto.Correo.StartsWith("@") || dto.Correo.EndsWith("@"))

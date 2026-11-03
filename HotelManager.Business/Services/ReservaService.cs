@@ -36,18 +36,18 @@ namespace HotelManager.Business.Services
             _notificaciones = notificaciones;
         }
 
-        // CU-007
+       
         public ReservaDto Crear(CrearReservaDto dto)
         {
-            ValidarFechas(dto.FechaEntrada, dto.FechaSalida);                          // RN-008, RN-009
+            ValidarFechas(dto.FechaEntrada, dto.FechaSalida);                         
 
             if (_huespedes.GetById(dto.HuespedId) == null)
                 throw new BusinessException("El huésped no está registrado.");
 
-            var habitacion = ObtenerHabitacionReservable(dto.HabitacionId, dto.CantidadHuespedes); // RN-007, RN-011
+            var habitacion = ObtenerHabitacionReservable(dto.HabitacionId, dto.CantidadHuespedes);
 
             if (_reservas.ExisteSolapamiento(dto.HabitacionId, dto.FechaEntrada, dto.FechaSalida))
-                throw new BusinessException("La habitación ya tiene una reserva activa en esas fechas."); // RN-010
+                throw new BusinessException("La habitación ya tiene una reserva activa en esas fechas."); 
 
             var reserva = new Reserva
             {
@@ -56,17 +56,17 @@ namespace HotelManager.Business.Services
                 Entrada = dto.FechaEntrada.Date,
                 Salida = dto.FechaSalida.Date,
                 Huespedes = dto.CantidadHuespedes,
-                CostoTotal = CalcularCosto(habitacion, dto.FechaEntrada, dto.FechaSalida),        // RN-013
+                CostoTotal = CalcularCosto(habitacion, dto.FechaEntrada, dto.FechaSalida),        
                 Estado = EstadoReserva.Confirmada
             };
 
             reserva.IdReserva = _reservas.Add(reserva);
             RegistrarHistorial(reserva.IdReserva, "Creación", null, reserva.Estado);
-            NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Confirmacion);               // RN-014, RN-015
+            NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Confirmacion);               
             return Mapear(reserva);
         }
 
-        // CU-008
+        
         public ReservaDto Modificar(ModificarReservaDto dto)
         {
             var reserva = _reservas.GetById(dto.ReservaId);
@@ -105,7 +105,7 @@ namespace HotelManager.Business.Services
                 throw new BusinessException("La reserva ya está cancelada.");
 
             var estadoAnterior = reserva.Estado;
-            reserva.Estado = EstadoReserva.Cancelada;                                  // RN-012
+            reserva.Estado = EstadoReserva.Cancelada;                                
 
             if (!_reservas.Update(reserva))
                 throw new BusinessException("No se pudo cancelar la reserva.");
@@ -127,14 +127,14 @@ namespace HotelManager.Business.Services
             return _reservas.GetByHuesped(idHuesped).Select(Mapear).ToList();
         }
 
-        // ---------- helpers privados ----------
+       
 
         private static void ValidarFechas(DateTime entrada, DateTime salida)
         {
             if (salida.Date <= entrada.Date)
-                throw new BusinessException("La fecha de salida debe ser posterior a la de entrada.");  // RN-008
+                throw new BusinessException("La fecha de salida debe ser posterior a la de entrada.");  
             if (entrada.Date < DateTime.Today)
-                throw new BusinessException("No se permiten reservas en fechas pasadas.");              // RN-009
+                throw new BusinessException("No se permiten reservas en fechas pasadas.");              
         }
 
         private Habitacion ObtenerHabitacionReservable(int idHabitacion, int huespedes)
@@ -142,19 +142,19 @@ namespace HotelManager.Business.Services
             var habitacion = _habitaciones.GetById(idHabitacion);
             if (habitacion == null) throw new BusinessException("La habitación no existe.");
             if (!EsReservable(habitacion))
-                throw new BusinessException("La habitación no está disponible para reservas.");         // RN-007
+                throw new BusinessException("La habitación no está disponible para reservas.");         
             if (huespedes <= 0 || huespedes > habitacion.Capacidad)
-                throw new BusinessException("La cantidad de huéspedes excede la capacidad de la habitación."); // RN-011
+                throw new BusinessException("La cantidad de huéspedes excede la capacidad de la habitación."); 
             return habitacion;
         }
 
-        // AJUSTAR al valor real de tu enum EstadoHabitacion (RN-007).
+       
         private static bool EsReservable(Habitacion h)
         {
             return h.Estado == EstadoHabitacion.Disponible;
         }
 
-        // RN-013: noche a noche, con la tarifa vigente; si no hay, usa la tarifa base de la habitación.
+        
         private decimal CalcularCosto(Habitacion habitacion, DateTime entrada, DateTime salida)
         {
             var tarifas = _tarifas.GetByHabitacion(habitacion.IdHabitacion).ToList();
@@ -180,7 +180,7 @@ namespace HotelManager.Business.Services
             });
         }
 
-        // RN-015: un fallo de notificación nunca invalida la reserva.
+        
         private void NotificarSinFallar(int idReserva, TipoNotificacion tipo)
         {
             try { _notificaciones.Notificar(idReserva, tipo); }
