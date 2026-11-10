@@ -1,0 +1,142 @@
+﻿@model ReservaItemViewModel
+@{
+    ViewBag.Title = "Reserva #" + Model.Id;
+    var huesped = (HuespedDto)ViewBag.Huesped;
+    var historial = (List<HistorialReservaDto>)ViewBag.Historial;
+    var notificaciones = (List<NotificacionDto>)ViewBag.Notificaciones;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    var puedeFinalizar = (Model.Estado == "Confirmada" || Model.Estado == "Modificada") && Model.Entrada.Date <= DateTime.Today;
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon green"><i class="bi bi-calendar-check"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / <a href="@Url.Action("Index")">Reservas</a> / #@Model.Id</div>
+            <h1>Reserva #@Model.Id <span class="hm-badge @EstadoHelper.CssReserva(Model.Estado) fs-6 align-middle ms-1">@Model.Estado</span></h1>
+            <p class="hm-sub">@Model.Hotel · Habitación @Model.Habitacion</p>
+        </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        @if (Model.EsActiva)
+        {
+            <a class="btn btn-primary" href="@Url.Action("Modificar", new { id = Model.Id })"><i class="bi bi-pencil me-1"></i> Modificar</a>
+        }
+        @if (Model.Estado == "Pendiente")
+        {
+            using (Html.BeginForm("Confirmar", "Reservas", new { id = Model.Id }, FormMethod.Post, new { @class = "d-inline" }))
+            {
+                @Html.AntiForgeryToken()
+                <button class="btn btn-gold"><i class="bi bi-check2-circle me-1"></i> Confirmar</button>
+            }
+        }
+        @if (puedeFinalizar)
+        {
+            using (Html.BeginForm("Finalizar", "Reservas", new { id = Model.Id }, FormMethod.Post, new { @class = "d-inline" }))
+            {
+                @Html.AntiForgeryToken()
+                <button class="btn btn-ghost" onclick="return confirm('¿Registrar el check-out y finalizar la reserva?');"><i class="bi bi-door-open me-1"></i> Check-out</button>
+            }
+        }
+        @if (Model.EsActiva)
+        {
+            using (Html.BeginForm("Cancelar", "Reservas", new { id = Model.Id }, FormMethod.Post, new { @class = "d-inline" }))
+            {
+                @Html.AntiForgeryToken()
+                <button class="btn btn-ghost text-danger" onclick="return confirm('¿Cancelar la reserva #@Model.Id? La habitación quedará libre para esas fechas.');"><i class="bi bi-x-octagon me-1"></i> Cancelar reserva</button>
+            }
+        }
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-box-arrow-in-right"></i></div><div><div class="hm-stat-value fs-5">@Model.Entrada.ToString("ddd dd MMM yyyy", culture)</div><div class="hm-stat-label">Entrada</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-box-arrow-right"></i></div><div><div class="hm-stat-value fs-5">@Model.Salida.ToString("ddd dd MMM yyyy", culture)</div><div class="hm-stat-label">Salida</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-moon-stars"></i></div><div><div class="hm-stat-value">@Model.Noches</div><div class="hm-stat-label">Noche(s) · @Model.Huespedes huésped(es)</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="hm-stat gold compact"><div class="hm-stat-icon"><i class="bi bi-cash-coin"></i></div><div><div class="hm-stat-value fs-4">RD$ @Model.Costo.ToString("N2")</div><div class="hm-stat-label">Costo total</div></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body mb-4">
+            <div class="hm-form-section">Huésped</div>
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="hm-res-avatar m-0">@ContextoHotel.Iniciales(Model.Huesped)</span>
+                <div>
+                    <a class="hm-cell-main text-decoration-none" href="@Url.Action("Detalle", "Huespedes", new { id = Model.IdHuesped })">@Model.Huesped</a>
+                    @if (huesped != null)
+                    {
+                        <div class="hm-cell-sub">@huesped.Documento</div>
+                    }
+                </div>
+            </div>
+            @if (huesped != null)
+            {
+                <p class="small mb-1"><i class="bi bi-envelope me-2 text-secondary"></i>@huesped.Correo</p>
+                <p class="small mb-0"><i class="bi bi-telephone me-2 text-secondary"></i>@(string.IsNullOrEmpty(huesped.Telefono) ? "—" : huesped.Telefono)</p>
+            }
+        </div>
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Habitación</div>
+            <p class="mb-1"><span class="hm-code me-2">@Model.Habitacion</span> <strong>@Model.Tipo</strong></p>
+            <p class="small text-secondary mb-0 mt-2"><i class="bi bi-building me-1"></i>@Model.Hotel<br /><i class="bi bi-layers me-1"></i>@Model.Ubicacion</p>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-clock-history"></i> Historial</h2>
+                <span class="hm-badge purple">Auditoría</span>
+            </div>
+            <div class="hm-card-body">
+                @if (!historial.Any())
+                {
+                    <div class="hm-empty p-3"><i class="bi bi-clock"></i>Sin movimientos registrados.</div>
+                }
+                <ul class="hm-timeline">
+                    @foreach (var h in historial)
+                    {
+                        <li>
+                            <div class="hm-cell-main text-capitalize">@h.Accion.Replace("_", " ")</div>
+                            <div class="small">
+                                @if (!string.IsNullOrEmpty(h.EstadoAnterior))
+                                {
+                                    <span class="hm-badge @EstadoHelper.CssReserva(h.EstadoAnterior)">@h.EstadoAnterior</span> <i class="bi bi-arrow-right mx-1"></i>
+                                }
+                                <span class="hm-badge @EstadoHelper.CssReserva(h.EstadoNuevo)">@h.EstadoNuevo</span>
+                            </div>
+                            <div class="hm-cell-sub mt-1">@h.Fecha.ToString("dd/MM/yyyy hh:mm tt", culture)</div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-bell"></i> Notificaciones</h2>
+                <a class="hm-link" href="@Url.Action("Index", "Notificaciones")">Ver todas <i class="bi bi-arrow-right"></i></a>
+            </div>
+            @if (!notificaciones.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-bell-slash"></i>Sin notificaciones.</div>
+            }
+            @foreach (var n in notificaciones)
+            {
+                <div class="hm-res-item @(n.Estado == "Enviada" ? "ok" : n.Estado == "Fallida" ? "" : "info")" style="padding-left:2rem">
+                    <div class="flex-grow-1">
+                        <div class="hm-cell-main">@n.Tipo</div>
+                        <div class="hm-cell-sub">@n.Fecha.ToString("dd/MM/yyyy hh:mm tt", culture)</div>
+                        @if (!string.IsNullOrEmpty(n.DetalleError))
+                        {
+                            <div class="small text-danger mt-1">@n.DetalleError</div>
+                        }
+                    </div>
+                    <span class="hm-badge @EstadoHelper.CssNotificacion(n.Estado)">@n.Estado</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>

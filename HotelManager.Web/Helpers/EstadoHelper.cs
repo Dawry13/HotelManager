@@ -60,6 +60,19 @@ namespace HotelManager.Web.Helpers
                 case "pendiente": return "info";
                 case "modificada": return "purple";
                 case "cancelada": return "bad";
+                case "finalizada": return "gold";
+                default: return "off";
+            }
+        }
+
+        /// <summary>Clase de badge (hm-badge) para estados de notificacion.</summary>
+        public static string CssNotificacion(string estado)
+        {
+            switch ((estado ?? string.Empty).ToLower())
+            {
+                case "enviada": return "ok";
+                case "pendiente": return "info";
+                case "fallida": return "bad";
                 default: return "off";
             }
         }

@@ -1,0 +1,93 @@
+﻿@model List<HuespedViewModel>
+@{
+    ViewBag.Title = "Huéspedes";
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon pink"><i class="bi bi-people-fill"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Huéspedes</div>
+            <h1>Huéspedes</h1>
+            <p class="hm-sub">Personas registradas para realizar reservas.</p>
+        </div>
+    </div>
+    <a class="btn btn-gold" href="@Url.Action("Crear")"><i class="bi bi-person-plus me-1"></i> Registrar huésped</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="hm-stat pink compact"><div class="hm-stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div><div class="hm-stat-value">@Model.Count</div><div class="hm-stat-label">Huéspedes</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-calendar2-check"></i></div>
+            <div><div class="hm-stat-value">@Model.Count(h => h.ReservasActivas > 0)</div><div class="hm-stat-label">Con reserva activa</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat gold compact"><div class="hm-stat-icon"><i class="bi bi-cash-coin"></i></div>
+            <div><div class="hm-stat-value">RD$ @Model.Sum(h => h.TotalGastado).ToString("N0")</div><div class="hm-stat-label">Total facturado en reservas</div></div></div>
+    </div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <div class="hm-field" style="flex-grow:4">
+        <label for="buscar">Buscar</label>
+        <input type="search" class="form-control" id="buscar" name="buscar" value="@ViewBag.Buscar" placeholder="Nombre, documento, correo o teléfono" />
+    </div>
+    <button class="btn btn-ghost" type="submit"><i class="bi bi-search me-1"></i> Buscar</button>
+</form>
+
+<div class="hm-card">
+    <div class="table-responsive">
+        <table class="table hm-table table-hover">
+            <thead>
+                <tr>
+                    <th>Huésped</th>
+                    <th>Documento</th>
+                    <th>Contacto</th>
+                    <th class="text-center">Reservas</th>
+                    <th class="text-end">Total</th>
+                    <th class="text-end"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="hm-empty"><i class="bi bi-people"></i>No hay huéspedes que coincidan con la búsqueda.</td></tr>
+                }
+                @foreach (var h in Model)
+                {
+                    <tr>
+                        <td>
+                            <a class="d-flex align-items-center gap-3 text-reset text-decoration-none" href="@Url.Action("Detalle", new { id = h.IdHuesped })">
+                                <span class="hm-res-avatar m-0">@ContextoHotel.Iniciales(h.Nombre)</span>
+                                <span class="hm-cell-main">@TextoHelper.Titulo(h.Nombre)</span>
+                            </a>
+                        </td>
+                        <td><code class="text-info">@h.Documento</code></td>
+                        <td>
+                            <div class="small"><i class="bi bi-envelope me-1 text-secondary"></i>@h.Correo</div>
+                            @if (!string.IsNullOrEmpty(h.Telefono))
+                            {
+                                <div class="small"><i class="bi bi-telephone me-1 text-secondary"></i>@h.Telefono</div>
+                            }
+                        </td>
+                        <td class="text-center">
+                            @h.TotalReservas
+                            @if (h.ReservasActivas > 0)
+                            {
+                                <span class="hm-badge ok ms-1">@h.ReservasActivas activa(s)</span>
+                            }
+                        </td>
+                        <td class="text-end fw-semibold">RD$ @h.TotalGastado.ToString("N2")</td>
+                        <td class="text-end acciones">
+                            <a class="btn-icon i-view" href="@Url.Action("Detalle", new { id = h.IdHuesped })" title="Ver detalle"><i class="bi bi-eye"></i></a>
+                            <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = h.IdHuesped })" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a class="btn-icon i-off" href="@Url.Action("Disponibilidad", "Reservas", new { idHuesped = h.IdHuesped })" title="Nueva reserva"><i class="bi bi-calendar-plus"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

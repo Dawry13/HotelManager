@@ -1,0 +1,179 @@
+﻿@model ReporteGeneralDto
+@{
+    ViewBag.Title = "Reportes";
+    int? idHotel = ViewBag.IdHotel;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    var hoy = DateTime.Today;
+    var inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
+    var rangos = new[]
+    {
+        new { Texto = "Este mes", Desde = inicioMes, Hasta = inicioMes.AddMonths(1).AddDays(-1) },
+        new { Texto = "Mes anterior", Desde = inicioMes.AddMonths(-1), Hasta = inicioMes.AddDays(-1) },
+        new { Texto = "Próximos 30 días", Desde = hoy, Hasta = hoy.AddDays(29) },
+        new { Texto = "Este año", Desde = new DateTime(hoy.Year, 1, 1), Hasta = new DateTime(hoy.Year, 12, 31) }
+    };
+    var maxMes = Model.PorMes.Any() ? Math.Max(1m, Model.PorMes.Max(m => m.Ingresos)) : 1m;
+    var maxEstado = Math.Max(1, Model.PorEstado.Any() ? Model.PorEstado.Max(e => e.Cantidad) : 1);
+    var maxTipo = Model.PorTipoHabitacion.Any() ? Math.Max(1m, Model.PorTipoHabitacion.Max(t => t.Monto)) : 1m;
+    var coloresEstado = new Dictionary<string, string> {
+        { "Pendiente", "#3b82f6" }, { "Confirmada", "#10b981" }, { "Modificada", "#a855f7" }, { "Cancelada", "#ef4444" }, { "Finalizada", "#f5b400" } };
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon gold"><i class="bi bi-bar-chart-line-fill"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Reportes</div>
+            <h1>Reportes</h1>
+            <p class="hm-sub">Del @Model.Desde.ToString("dd MMM yyyy", culture) al @Model.Hasta.ToString("dd MMM yyyy", culture) · reservas por fecha de entrada.</p>
+        </div>
+    </div>
+    <div class="d-flex gap-2 hm-no-print">
+        <a class="btn btn-ghost" href="@Url.Action("ExportarCsv", new { desde = Model.Desde.ToString("yyyy-MM-dd"), hasta = Model.Hasta.ToString("yyyy-MM-dd"), idHotel })"><i class="bi bi-filetype-csv me-1"></i> Exportar CSV</a>
+        <button class="btn btn-gold" type="button" onclick="window.print()"><i class="bi bi-printer me-1"></i> Imprimir</button>
+    </div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-2 hm-no-print">
+    <div class="hm-field" style="flex-basis:160px">
+        <label for="desde">Desde</label>
+        <input type="date" class="form-control" id="desde" name="desde" value="@Model.Desde.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="hm-field" style="flex-basis:160px">
+        <label for="hasta">Hasta</label>
+        <input type="date" class="form-control" id="hasta" name="hasta" value="@Model.Hasta.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="hm-field">
+        <label for="idHotel">Hotel</label>
+        @Html.DropDownList("idHotel", (SelectList)ViewBag.Hoteles, "Todos los hoteles", new { @class = "form-select" })
+    </div>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-arrow-repeat me-1"></i> Generar</button>
+</form>
+<div class="d-flex flex-wrap gap-2 mb-4 hm-no-print">
+    @foreach (var r in rangos)
+    {
+        var activo = r.Desde == Model.Desde && r.Hasta == Model.Hasta;
+        <a class="hm-chip-link @(activo ? "active" : "")" href="@Url.Action("Index", new { desde = r.Desde.ToString("yyyy-MM-dd"), hasta = r.Hasta.ToString("yyyy-MM-dd"), idHotel })">@r.Texto</a>
+    }
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3"><div class="hm-stat gold"><div class="hm-stat-icon"><i class="bi bi-cash-stack"></i></div><div><div class="hm-stat-value fs-4">RD$ @Model.Ingresos.ToString("N0")</div><div class="hm-stat-label">Ingresos del período</div><div class="hm-cell-sub">Promedio RD$ @Model.IngresoPromedioReserva.ToString("N0") por reserva</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="hm-stat green"><div class="hm-stat-icon"><i class="bi bi-calendar2-check"></i></div><div><div class="hm-stat-value">@Model.TotalReservas</div><div class="hm-stat-label">Reservas</div><div class="hm-cell-sub">@Model.ReservasCanceladas cancelada(s)</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="hm-stat blue"><div class="hm-stat-icon"><i class="bi bi-pie-chart-fill"></i></div><div><div class="hm-stat-value">@Model.OcupacionPromedio.ToString("0.#")%</div><div class="hm-stat-label">Ocupación promedio</div><div class="hm-cell-sub">@Model.NochesVendidas noche(s) vendida(s)</div></div></div></div>
+    <div class="col-sm-6 col-xl-3"><div class="hm-stat pink"><div class="hm-stat-icon"><i class="bi bi-people-fill"></i></div><div><div class="hm-stat-value">@Model.HuespedesAtendidos</div><div class="hm-stat-label">Huéspedes atendidos</div><div class="hm-cell-sub">con reservas no canceladas</div></div></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-xl-7">
+        <div class="hm-card h-100">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-buildings"></i> Ocupación e ingresos por hotel</h2></div>
+            <div class="table-responsive">
+                <table class="table hm-table">
+                    <thead><tr><th>Hotel</th><th class="text-center">Hab.</th><th style="min-width:180px">Ocupación</th><th class="text-center">Reservas</th><th class="text-end">Ingresos</th></tr></thead>
+                    <tbody>
+                        @if (!Model.PorHotel.Any())
+                        {
+                            <tr><td colspan="5" class="hm-empty"><i class="bi bi-buildings"></i>Sin datos.</td></tr>
+                        }
+                        @foreach (var h in Model.PorHotel)
+                        {
+                            <tr>
+                                <td class="hm-cell-main">@TextoHelper.Titulo(h.Hotel)</td>
+                                <td class="text-center">@h.Habitaciones</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="hm-progress flex-grow-1"><div style="width:@(h.Ocupacion.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))%"></div></div>
+                                        <span class="small fw-semibold" style="min-width:3rem">@h.Ocupacion.ToString("0.#")%</span>
+                                    </div>
+                                    <div class="hm-cell-sub">@h.NochesOcupadas de @h.NochesDisponibles noches</div>
+                                </td>
+                                <td class="text-center">@h.Reservas</td>
+                                <td class="text-end fw-semibold">RD$ @h.Ingresos.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="hm-card h-100">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-bar-chart"></i> Ingresos por mes</h2></div>
+            <div class="hm-card-body">
+                @if (!Model.PorMes.Any())
+                {
+                    <div class="hm-empty"><i class="bi bi-bar-chart"></i>Sin ingresos en el período.</div>
+                }
+                else
+                {
+                    <div class="hm-bars" style="height:200px">
+                        @foreach (var m in Model.PorMes)
+                        {
+                            var alto = (int)Math.Max(6, m.Ingresos * 100 / maxMes);
+                            <div class="hm-bar" title="RD$ @m.Ingresos.ToString("N2") · @m.Reservas reserva(s)">
+                                <span class="small text-secondary">@((m.Ingresos / 1000m).ToString("N0"))k</span>
+                                <div class="hm-bar-fill" style="height:@(alto)%; background:linear-gradient(180deg,#fbbf24,rgba(245,180,0,.25))"></div>
+                                <small>@(new DateTime(m.Anio, m.Mes, 1).ToString("MMM yy", culture))</small>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="hm-card h-100">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-flag"></i> Reservas por estado</h2></div>
+            <div class="hm-card-body">
+                @foreach (var e in Model.PorEstado)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1"><span>@e.Nombre</span><strong>@e.Cantidad</strong></div>
+                        <div class="hm-progress"><div style="width:@(e.Cantidad * 100 / maxEstado)%; background:@coloresEstado[e.Nombre]"></div></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card h-100">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-tags"></i> Ingresos por tipo</h2></div>
+            <div class="hm-card-body">
+                @if (!Model.PorTipoHabitacion.Any())
+                {
+                    <div class="hm-empty p-3"><i class="bi bi-tags"></i>Sin datos.</div>
+                }
+                @foreach (var t in Model.PorTipoHabitacion)
+                {
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1"><span>@TextoHelper.Titulo(t.Nombre) <span class="text-secondary">· @t.Cantidad</span></span><strong>RD$ @t.Monto.ToString("N0")</strong></div>
+                        <div class="hm-progress"><div style="width:@((int)(t.Monto * 100 / maxTipo))%; background:linear-gradient(90deg,#8b5cf6,#ec4899)"></div></div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card h-100">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-trophy"></i> Huéspedes frecuentes</h2></div>
+            @if (!Model.HuespedesFrecuentes.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-people"></i>Sin datos.</div>
+            }
+            @foreach (var h in Model.HuespedesFrecuentes)
+            {
+                <a class="hm-res-item purple text-reset text-decoration-none" href="@Url.Action("Detalle", "Huespedes", new { id = h.IdHuesped })">
+                    <span class="hm-res-avatar">@ContextoHotel.Iniciales(h.Nombre)</span>
+                    <div class="flex-grow-1" style="min-width:0">
+                        <div class="hm-res-name text-truncate">@h.Nombre</div>
+                        <div class="hm-cell-sub">@h.Reservas reserva(s) · @h.Noches noche(s)</div>
+                    </div>
+                    <strong class="text-gold small text-nowrap">RD$ @h.Total.ToString("N0")</strong>
+                </a>
+            }
+        </div>
+    </div>
+</div>

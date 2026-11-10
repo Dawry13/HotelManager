@@ -1,0 +1,12 @@
+﻿@model TarifaViewModel
+@{
+    ViewBag.Title = "Nueva tarifa";
+    ViewData["Icono"] = "bi-cash-coin";
+    ViewData["Color"] = "gold";
+    ViewData["Modulo"] = "Tarifas";
+    ViewData["ModuloUrl"] = Url.Action("Index", new { idHabitacion = Model.IdHabitacion });
+    ViewData["Titulo"] = "Nueva tarifa";
+    ViewData["Subtitulo"] = "Defina un valor por noche para una temporada.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

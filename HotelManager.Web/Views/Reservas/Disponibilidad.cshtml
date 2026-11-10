@@ -1,0 +1,106 @@
+﻿@model DisponibilidadViewModel
+@{
+    ViewBag.Title = "Disponibilidad";
+    var hoyIso = DateTime.Today.ToString("yyyy-MM-dd");
+    var culture = new System.Globalization.CultureInfo("es-DO");
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon blue"><i class="bi bi-search-heart"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / <a href="@Url.Action("Index")">Reservas</a> / Disponibilidad</div>
+            <h1>Consultar disponibilidad</h1>
+            <p class="hm-sub">CU-006: habitaciones que pueden reservarse para un rango de fechas y cantidad de huéspedes.</p>
+        </div>
+    </div>
+    <a class="btn btn-ghost" href="@Url.Action("Crear", new { idHuesped = Model.IdHuesped })"><i class="bi bi-pencil-square me-1"></i> Reserva manual</a>
+</div>
+
+@if (ViewBag.NombreHuesped != null)
+{
+    <div class="alert alert-info d-flex align-items-center gap-2"><i class="bi bi-person-check"></i> Reservando para <strong>@ViewBag.NombreHuesped</strong></div>
+}
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <input type="hidden" name="idHuesped" value="@Model.IdHuesped" />
+    <div class="hm-field" style="flex-basis:170px">
+        <label for="entrada">Entrada</label>
+        <input type="date" class="form-control" id="entrada" name="entrada" min="@hoyIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="hm-field" style="flex-basis:170px">
+        <label for="salida">Salida</label>
+        <input type="date" class="form-control" id="salida" name="salida" min="@hoyIso" value="@Model.Salida.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="hm-field" style="flex-basis:120px">
+        <label for="huespedes">Huéspedes</label>
+        <input type="number" class="form-control" id="huespedes" name="huespedes" min="1" max="20" value="@Model.Huespedes" required />
+    </div>
+    <div class="hm-field">
+        <label for="idHotel">Hotel</label>
+        @Html.DropDownList("idHotel", (SelectList)ViewBag.Hoteles, "Todos los hoteles", new { @class = "form-select" })
+    </div>
+    <button class="btn btn-gold" type="submit"><i class="bi bi-search me-1"></i> Buscar habitaciones</button>
+</form>
+
+@if (Model.Error != null)
+{
+    <div class="alert alert-danger d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle-fill"></i> @Model.Error</div>
+}
+else if (Model.Consultado)
+{
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h2 class="h5 m-0">
+            @Model.Resultados.Count habitación(es) disponible(s)
+            <span class="text-secondary fs-6 fw-normal">
+                · @Model.Entrada.ToString("dd MMM", culture) – @Model.Salida.ToString("dd MMM yyyy", culture) · @Model.Noches noche(s) · @Model.Huespedes huésped(es)
+            </span>
+        </h2>
+    </div>
+
+    if (!Model.Resultados.Any())
+    {
+        <div class="hm-card hm-empty"><i class="bi bi-calendar-x"></i>No existe disponibilidad para esos criterios. Pruebe con otras fechas u otro hotel.</div>
+    }
+
+    <div class="row g-4">
+        @foreach (var h in Model.Resultados)
+        {
+            <div class="col-md-6 col-xxl-4">
+                <div class="hm-card hm-entity">
+                    <div class="hm-entity-top alt2">
+                        <span class="hm-entity-state hm-badge ok">Disponible</span>
+                        <div class="hm-entity-icon"><i class="bi bi-door-open"></i></div>
+                    </div>
+                    <div class="hm-entity-body">
+                        <h3>Habitación @h.Numero</h3>
+                        <div class="hm-cell-sub">@h.Hotel · @h.Ubicacion</div>
+                        <div class="hm-entity-metrics">
+                            <div><strong>@h.Tipo</strong><span>Tipo</span></div>
+                            <div><strong><i class="bi bi-people fs-6 me-1"></i>@h.Capacidad</strong><span>Capacidad</span></div>
+                            <div><strong>@h.TarifaPromedio.ToString("N0")</strong><span>RD$/noche</span></div>
+                        </div>
+                    </div>
+                    <div class="hm-entity-foot align-items-center justify-content-between">
+                        <div>
+                            <div class="small text-secondary">Total @Model.Noches noche(s)</div>
+                            <div class="fs-5 fw-bold text-gold">RD$ @h.CostoTotal.ToString("N2")</div>
+                        </div>
+                        <a class="btn btn-gold" href="@Url.Action("Crear", new { idHabitacion = h.IdHabitacion, entrada = Model.Entrada.ToString("yyyy-MM-dd"), salida = Model.Salida.ToString("yyyy-MM-dd"), huespedes = Model.Huespedes, idHuesped = Model.IdHuesped })">
+                            Reservar <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="hm-card hm-card-body">
+        <div class="row g-3">
+            <div class="col-md-4"><div class="hm-rule mb-0"><i class="bi bi-calendar-range"></i><div><strong>1. Fechas</strong>Indique entrada y salida (la salida debe ser posterior).</div></div></div>
+            <div class="col-md-4"><div class="hm-rule mb-0"><i class="bi bi-people"></i><div><strong>2. Huéspedes</strong>Solo se muestran habitaciones con capacidad suficiente.</div></div></div>
+            <div class="col-md-4"><div class="hm-rule mb-0"><i class="bi bi-check2-circle"></i><div><strong>3. Reservar</strong>Elija una habitación y confirme la reserva para el huésped.</div></div></div>
+        </div>
+    </div>
+}

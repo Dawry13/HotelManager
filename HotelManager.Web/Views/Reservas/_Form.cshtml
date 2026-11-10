@@ -1,0 +1,96 @@
+﻿@model ReservaFormViewModel
+@{
+    var esEdicion = Model.IdReserva > 0;
+    var habitaciones = (List<SelectListItem>)ViewBag.Habitaciones;
+    var huespedes = (List<SelectListItem>)ViewBag.Huespedes;
+    var hoyIso = DateTime.Today.ToString("yyyy-MM-dd");
+    var urlRegreso = Request.RawUrl;
+}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="hm-card hm-card-body">
+            @using (Html.BeginForm(esEdicion ? "Modificar" : "Crear", "Reservas", FormMethod.Post, new { id = "formReserva" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdReserva)
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="hm-form-section">Huésped</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.IdHuesped, new { @class = "form-label" })
+                    @if (esEdicion)
+                    {
+                        @Html.HiddenFor(m => m.IdHuesped)
+                        <input class="form-control" value="@Model.NombreHuesped" readonly />
+                        <div class="form-text">El huésped de una reserva no se puede cambiar.</div>
+                    }
+                    else
+                    {
+                        <div class="d-flex gap-2">
+                            @Html.DropDownListFor(m => m.IdHuesped, huespedes, "-- Seleccione el huésped --", new { @class = "form-select" })
+                            <a class="btn btn-ghost text-nowrap" href="@Url.Action("Crear", "Huespedes", new { returnUrl = urlRegreso })" title="Registrar un huésped nuevo">
+                                <i class="bi bi-person-plus"></i> Nuevo
+                            </a>
+                        </div>
+                    }
+                    @Html.ValidationMessageFor(m => m.IdHuesped, "", new { @class = "small" })
+                </div>
+
+                <div class="hm-form-section mt-4">Estadía</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.IdHabitacion, new { @class = "form-label" })
+                    @Html.DropDownListFor(m => m.IdHabitacion, habitaciones, "-- Seleccione la habitación --", new { @class = "form-select", data_cotizar = "" })
+                    <div class="form-text">Solo habitaciones disponibles en pisos y hoteles activos (RN-007). <a class="hm-link" href="@Url.Action("Disponibilidad")">Consultar disponibilidad por fechas</a></div>
+                    @Html.ValidationMessageFor(m => m.IdHabitacion, "", new { @class = "small" })
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        @Html.LabelFor(m => m.Entrada, new { @class = "form-label" })
+                        <input class="form-control" type="date" id="Entrada" name="Entrada" min="@hoyIso" data-cotizar
+                               value="@(Model.Entrada.HasValue ? Model.Entrada.Value.ToString("yyyy-MM-dd") : "")" />
+                        @Html.ValidationMessageFor(m => m.Entrada, "", new { @class = "small" })
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        @Html.LabelFor(m => m.Salida, new { @class = "form-label" })
+                        <input class="form-control" type="date" id="Salida" name="Salida" min="@hoyIso" data-cotizar
+                               value="@(Model.Salida.HasValue ? Model.Salida.Value.ToString("yyyy-MM-dd") : "")" />
+                        @Html.ValidationMessageFor(m => m.Salida, "", new { @class = "small" })
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        @Html.LabelFor(m => m.CantidadHuespedes, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-people"></i></span>
+                            @Html.TextBoxFor(m => m.CantidadHuespedes, new { @class = "form-control", type = "number", min = "1", max = "20" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.CantidadHuespedes, "", new { @class = "small" })
+                    </div>
+                </div>
+
+                <div class="hm-cotizacion mb-4" id="cotizacion" data-url="@Url.Action("Cotizar")">
+                    <i class="bi bi-calculator"></i>
+                    <div>
+                        <div class="small text-secondary">Costo estimado de la estadía</div>
+                        <div class="fs-4 fw-bold text-gold" id="cotizacionTotal">—</div>
+                        <div class="small text-secondary" id="cotizacionDetalle">Seleccione habitación y fechas.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-check2-circle me-1"></i> @(esEdicion ? "Guardar cambios" : "Confirmar reserva")</button>
+                    <a class="btn btn-ghost" href="@(esEdicion ? Url.Action("Detalle", new { id = Model.IdReserva }) : Url.Action("Index"))">Cancelar</a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Reglas que se validan</div>
+            <div class="hm-rule"><i class="bi bi-calendar-range"></i><div><strong>RN-008 / RN-009</strong>La salida debe ser posterior a la entrada y no se permiten fechas pasadas.</div></div>
+            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div><strong>RN-007</strong>Solo se reservan habitaciones disponibles.</div></div>
+            <div class="hm-rule"><i class="bi bi-people"></i><div><strong>RN-011</strong>Los huéspedes no pueden superar la capacidad.</div></div>
+            <div class="hm-rule"><i class="bi bi-intersect"></i><div><strong>RN-010</strong>No se permiten reservas activas solapadas en la misma habitación.</div></div>
+            <div class="hm-rule"><i class="bi bi-cash-coin"></i><div><strong>RN-013</strong>El costo se calcula por noche con la tarifa vigente.</div></div>
+            <div class="hm-rule"><i class="bi bi-bell"></i><div><strong>RN-014 / RN-015</strong>Se genera una notificación; si falla, la reserva se conserva.</div></div>
+        </div>
+    </div>
+</div>

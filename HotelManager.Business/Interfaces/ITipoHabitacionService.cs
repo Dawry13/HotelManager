@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HotelManager.Business.Dtos;
 
 namespace HotelManager.Business.Interfaces

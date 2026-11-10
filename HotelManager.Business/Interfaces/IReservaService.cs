@@ -11,6 +11,14 @@ namespace HotelManager.Business.Interfaces
         ReservaDto ObtenerPorId(int idReserva);
         IEnumerable<ReservaDto> ObtenerHistorialPorHuesped(int idHuesped);
 
+        /// <summary>Todas las reservas, de la mas reciente a la mas antigua.</summary>
+        IEnumerable<ReservaDto> Listar();
+
+        void Confirmar(int idReserva);
+
+        /// <summary>Check-out: marca la reserva como finalizada.</summary>
+        void Finalizar(int idReserva);
+
         /// <summary>Reservas activas (pendiente, confirmada o modificada) que aun no terminan.</summary>
         IEnumerable<ReservaDto> ListarActivas();
     }

@@ -1,0 +1,127 @@
+﻿@model List<HotelManager.Web.Controllers.NotificacionesController.NotificacionItem>
+@{
+    ViewBag.Title = "Notificaciones";
+    var conteos = (Dictionary<string, int>)ViewBag.Conteos;
+    Func<string, int> c = e => conteos.ContainsKey(e) ? conteos[e] : 0;
+    string estado = ViewBag.Estado;
+    string tipo = ViewBag.Tipo;
+    var urlActual = Request.RawUrl;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon pink"><i class="bi bi-bell-fill"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Notificaciones</div>
+            <h1>Notificaciones</h1>
+            <p class="hm-sub">RF-014 / RF-015: avisos de confirmación, modificación y cancelación y el resultado de su envío.</p>
+        </div>
+    </div>
+    @if (c("Pendiente") > 0)
+    {
+        using (Html.BeginForm("MarcarPendientesEnviadas", "Notificaciones", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <button class="btn btn-gold" onclick="return confirm('¿Marcar las @c("Pendiente") notificaciones pendientes como enviadas?');"><i class="bi bi-send-check me-1"></i> Marcar pendientes como enviadas</button>
+        }
+    }
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <a class="hm-stat blue compact @(estado == "Pendiente" ? "hm-stat-activo" : "")" href="@Url.Action("Index", new { estado = estado == "Pendiente" ? null : "Pendiente", tipo })">
+            <div class="hm-stat-icon"><i class="bi bi-hourglass-split"></i></div><div><div class="hm-stat-value">@c("Pendiente")</div><div class="hm-stat-label">Pendientes</div></div></a>
+    </div>
+    <div class="col-sm-4">
+        <a class="hm-stat green compact @(estado == "Enviada" ? "hm-stat-activo" : "")" href="@Url.Action("Index", new { estado = estado == "Enviada" ? null : "Enviada", tipo })">
+            <div class="hm-stat-icon"><i class="bi bi-send-check"></i></div><div><div class="hm-stat-value">@c("Enviada")</div><div class="hm-stat-label">Enviadas</div></div></a>
+    </div>
+    <div class="col-sm-4">
+        <a class="hm-stat pink compact @(estado == "Fallida" ? "hm-stat-activo" : "")" href="@Url.Action("Index", new { estado = estado == "Fallida" ? null : "Fallida", tipo })">
+            <div class="hm-stat-icon"><i class="bi bi-exclamation-triangle"></i></div><div><div class="hm-stat-value">@c("Fallida")</div><div class="hm-stat-label">Fallidas</div></div></a>
+    </div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <input type="hidden" name="estado" value="@estado" />
+    <div class="hm-field">
+        <label for="tipo">Tipo</label>
+        <select class="form-select" id="tipo" name="tipo" data-autosubmit>
+            <option value="">Todos</option>
+            @foreach (var t in new[] { "Confirmacion", "Modificacion", "Cancelacion" })
+            {
+                <option value="@t" @(tipo == t ? "selected" : "")>@t</option>
+            }
+        </select>
+    </div>
+    <a class="btn btn-ghost" href="@Url.Action("Index")"><i class="bi bi-x-lg me-1"></i> Limpiar</a>
+</form>
+
+<div class="hm-card">
+    <div class="table-responsive">
+        <table class="table hm-table table-hover">
+            <thead><tr><th>Tipo</th><th>Reserva</th><th>Destinatario</th><th>Fecha</th><th>Estado</th><th class="text-end">Registrar resultado</th></tr></thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="hm-empty"><i class="bi bi-bell-slash"></i>No hay notificaciones con esos filtros.</td></tr>
+                }
+                @foreach (var item in Model)
+                {
+                    var n = item.Notificacion;
+                    var icono = n.Tipo == "Confirmacion" ? "bi-check2-circle text-success" : n.Tipo == "Cancelacion" ? "bi-x-octagon text-danger" : "bi-pencil-square text-info";
+                    <tr>
+                        <td><i class="bi @icono me-2"></i><span class="hm-cell-main">@n.Tipo</span></td>
+                        <td>
+                            <a class="hm-code text-decoration-none" href="@Url.Action("Detalle", "Reservas", new { id = n.IdReserva })">#@n.IdReserva</a>
+                            <div class="hm-cell-sub mt-1">@item.Habitacion</div>
+                        </td>
+                        <td><div class="hm-cell-main">@item.Huesped</div><div class="hm-cell-sub"><i class="bi bi-envelope me-1"></i>@item.Correo</div></td>
+                        <td class="small">@n.Fecha.ToString("dd/MM/yyyy", culture)<div class="hm-cell-sub">@n.Fecha.ToString("hh:mm tt", culture)</div></td>
+                        <td>
+                            <span class="hm-badge @EstadoHelper.CssNotificacion(n.Estado)">@n.Estado</span>
+                            @if (!string.IsNullOrEmpty(n.DetalleError))
+                            {
+                                <div class="small text-danger mt-1" style="max-width:240px">@n.DetalleError</div>
+                            }
+                        </td>
+                        <td class="text-end">
+                            @if (n.Estado == "Pendiente")
+                            {
+                                <div class="d-flex gap-2 justify-content-end flex-wrap">
+                                    @using (Html.BeginForm("MarcarEnviada", "Notificaciones", new { id = n.IdNotificacion }, FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="returnUrl" value="@urlActual" />
+                                        <button class="btn btn-sm btn-primary" title="Marcar como enviada"><i class="bi bi-send-check"></i> Enviada</button>
+                                    }
+                                    @using (Html.BeginForm("MarcarFallida", "Notificaciones", new { id = n.IdNotificacion }, FormMethod.Post, new { @class = "d-flex gap-1" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="returnUrl" value="@urlActual" />
+                                        <input type="text" name="detalle" class="form-control form-control-sm" style="width:150px" placeholder="Motivo del fallo" maxlength="500" />
+                                        <button class="btn btn-sm btn-ghost text-danger" title="Registrar fallo"><i class="bi bi-x-circle"></i></button>
+                                    }
+                                </div>
+                            }
+                            else if (n.Estado == "Fallida")
+                            {
+                                using (Html.BeginForm("Reintentar", "Notificaciones", new { id = n.IdNotificacion }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="returnUrl" value="@urlActual" />
+                                    <button class="btn btn-sm btn-ghost"><i class="bi bi-arrow-repeat"></i> Reintentar</button>
+                                }
+                            }
+                            else
+                            {
+                                <span class="small text-secondary"><i class="bi bi-check2-all me-1"></i>Completada</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="small text-secondary mt-3"><i class="bi bi-info-circle me-1"></i>Un fallo de notificación no elimina ni invalida la reserva (RN-015).</p>

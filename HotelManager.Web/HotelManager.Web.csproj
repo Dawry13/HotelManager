@@ -105,6 +105,15 @@
     <Compile Include="Controllers\HotelesController.cs" />
     <Compile Include="Controllers\PisosController.cs" />
     <Compile Include="Controllers\TiposHabitacionController.cs" />
+    <Compile Include="Controllers\HuespedesController.cs" />
+    <Compile Include="Controllers\ReservasController.cs" />
+    <Compile Include="Controllers\TarifasController.cs" />
+    <Compile Include="Controllers\NotificacionesController.cs" />
+    <Compile Include="Controllers\ReportesController.cs" />
+    <Compile Include="Helpers\ContextoHotel.cs" />
+    <Compile Include="Models\HuespedViewModel.cs" />
+    <Compile Include="Models\ReservaViewModels.cs" />
+    <Compile Include="Models\TarifaViewModel.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -155,6 +164,24 @@
     <Content Include="Views\TiposHabitacion\Crear.cshtml" />
     <Content Include="Views\TiposHabitacion\Editar.cshtml" />
     <Content Include="Views\TiposHabitacion\_Form.cshtml" />
+    <Content Include="Views\Huespedes\Index.cshtml" />
+    <Content Include="Views\Huespedes\Crear.cshtml" />
+    <Content Include="Views\Huespedes\Editar.cshtml" />
+    <Content Include="Views\Huespedes\Detalle.cshtml" />
+    <Content Include="Views\Huespedes\_Form.cshtml" />
+    <Content Include="Views\Reservas\Index.cshtml" />
+    <Content Include="Views\Reservas\Disponibilidad.cshtml" />
+    <Content Include="Views\Reservas\Crear.cshtml" />
+    <Content Include="Views\Reservas\Modificar.cshtml" />
+    <Content Include="Views\Reservas\Detalle.cshtml" />
+    <Content Include="Views\Reservas\Historial.cshtml" />
+    <Content Include="Views\Reservas\_Form.cshtml" />
+    <Content Include="Views\Tarifas\Index.cshtml" />
+    <Content Include="Views\Tarifas\Crear.cshtml" />
+    <Content Include="Views\Tarifas\Editar.cshtml" />
+    <Content Include="Views\Tarifas\_Form.cshtml" />
+    <Content Include="Views\Notificaciones\Index.cshtml" />
+    <Content Include="Views\Reportes\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

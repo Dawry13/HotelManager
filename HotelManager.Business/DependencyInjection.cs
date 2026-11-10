@@ -66,6 +66,7 @@ namespace HotelManager.Business
             services.AddScoped<ITarifaService, TarifaService>();
             services.AddScoped<IBloqueService, BloqueService>();
             services.AddScoped<ITipoHabitacionService, TipoHabitacionService>();
+            services.AddScoped<IReporteService, ReporteService>();
 
             return services;
         }

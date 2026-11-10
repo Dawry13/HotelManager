@@ -1,0 +1,70 @@
+﻿@model HuespedViewModel
+@{
+    ViewBag.Title = TextoHelper.Titulo(Model.Nombre);
+    var reservas = (List<ReservaDto>)ViewBag.Reservas;
+    var ctx = (ContextoHotel)ViewBag.Contexto;
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-res-avatar m-0" style="width:64px;height:64px;font-size:1.4rem">@ContextoHotel.Iniciales(Model.Nombre)</div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / <a href="@Url.Action("Index")">Huéspedes</a> / Detalle</div>
+            <h1>@TextoHelper.Titulo(Model.Nombre)</h1>
+            <p class="hm-sub"><i class="bi bi-person-vcard me-1"></i>@Model.Documento</p>
+        </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-gold" href="@Url.Action("Disponibilidad", "Reservas", new { idHuesped = Model.IdHuesped })"><i class="bi bi-calendar-plus me-1"></i> Nueva reserva</a>
+        <a class="btn btn-ghost" href="@Url.Action("Editar", new { id = Model.IdHuesped })"><i class="bi bi-pencil me-1"></i> Editar</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-calendar-week"></i></div><div><div class="hm-stat-value">@Model.TotalReservas</div><div class="hm-stat-label">Reservas</div></div></div></div>
+    <div class="col-md-3 col-6"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-calendar2-check"></i></div><div><div class="hm-stat-value">@Model.ReservasActivas</div><div class="hm-stat-label">Activas</div></div></div></div>
+    <div class="col-md-6"><div class="hm-stat gold compact"><div class="hm-stat-icon"><i class="bi bi-cash-coin"></i></div><div><div class="hm-stat-value">RD$ @Model.TotalGastado.ToString("N2")</div><div class="hm-stat-label">Total en reservas (sin canceladas)</div></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body h-100">
+            <div class="hm-form-section">Contacto</div>
+            <p class="mb-2"><i class="bi bi-envelope me-2 text-secondary"></i>@Model.Correo</p>
+            <p class="mb-2"><i class="bi bi-telephone me-2 text-secondary"></i>@(string.IsNullOrEmpty(Model.Telefono) ? "—" : Model.Telefono)</p>
+            <p class="mb-0"><i class="bi bi-person-vcard me-2 text-secondary"></i>@Model.Documento</p>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-clock-history"></i> Historial de reservas</h2>
+                <span class="hm-badge purple">CU-010</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table hm-table table-hover">
+                    <thead><tr><th>#</th><th>Habitación</th><th>Estadía</th><th class="text-end">Costo</th><th>Estado</th><th></th></tr></thead>
+                    <tbody>
+                        @if (!reservas.Any())
+                        {
+                            <tr><td colspan="6" class="hm-empty"><i class="bi bi-calendar-x"></i>Este huésped aún no tiene reservas.</td></tr>
+                        }
+                        @foreach (var r in reservas)
+                        {
+                            <tr>
+                                <td class="text-secondary">#@r.Id</td>
+                                <td>
+                                    <div class="hm-cell-main">Hab. @ctx.NumeroHabitacion(r.HabitacionId)</div>
+                                    <div class="hm-cell-sub">@ctx.HotelDeHabitacion(r.HabitacionId)</div>
+                                </td>
+                                <td class="small">@r.FechaEntrada.ToString("dd/MM/yyyy") → @r.FechaSalida.ToString("dd/MM/yyyy")<div class="hm-cell-sub">@((r.FechaSalida - r.FechaEntrada).Days) noche(s)</div></td>
+                                <td class="text-end fw-semibold">RD$ @r.CostoTotal.ToString("N2")</td>
+                                <td><span class="hm-badge @EstadoHelper.CssReserva(r.Estado)">@r.Estado</span></td>
+                                <td class="text-end"><a class="btn-icon i-view" href="@Url.Action("Detalle", "Reservas", new { id = r.Id })" title="Ver reserva"><i class="bi bi-eye"></i></a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

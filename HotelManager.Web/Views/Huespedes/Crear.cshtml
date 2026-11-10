@@ -1,0 +1,12 @@
+﻿@model HuespedViewModel
+@{
+    ViewBag.Title = "Registrar huésped";
+    ViewData["Icono"] = "bi-person-plus";
+    ViewData["Color"] = "pink";
+    ViewData["Modulo"] = "Huéspedes";
+    ViewData["ModuloUrl"] = Url.Action("Index");
+    ViewData["Titulo"] = "Registrar huésped";
+    ViewData["Subtitulo"] = "CU-005: datos básicos necesarios para una reserva.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

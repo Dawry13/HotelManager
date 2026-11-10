@@ -12,9 +12,9 @@
     <div class="hm-hero-inner">
         <span class="hm-chip"><i class="bi bi-award-fill"></i> Bienvenido de vuelta</span>
         <h1>Hotel<span>Manager</span></h1>
-        <p>Gestiona tus hoteles, bloques, pisos y habitaciones de forma fácil y eficiente.</p>
-        <a class="btn btn-gold btn-lg" href="@Url.Action("Crear", "Habitaciones")">
-            <i class="bi bi-door-open me-2"></i>Nueva habitación <i class="bi bi-arrow-right ms-2"></i>
+        <p>Gestiona tus hoteles y reservas de forma fácil y eficiente.</p>
+        <a class="btn btn-gold btn-lg" href="@Url.Action("Disponibilidad", "Reservas")">
+            <i class="bi bi-calendar-plus me-2"></i>Nueva reserva <i class="bi bi-arrow-right ms-2"></i>
         </a>
     </div>
 </section>
@@ -37,20 +37,20 @@
         </a>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="hm-stat green">
+        <a class="hm-stat green" href="@Url.Action("Index", "Reservas")">
             <div class="hm-stat-icon"><i class="bi bi-calendar2-check"></i></div>
             <div><div class="hm-stat-value">@Model.ReservasActivas</div><div class="hm-stat-label">Reservas activas</div></div>
             <span class="hm-stat-extra"><i class="bi bi-box-arrow-in-right"></i> @Model.ReservasHoy entran hoy</span>
             @Html.Partial("_Onda", "#10b981")
-        </div>
+        </a>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="hm-stat pink">
+        <a class="hm-stat pink" href="@Url.Action("Index", "Huespedes")">
             <div class="hm-stat-icon"><i class="bi bi-people-fill"></i></div>
             <div><div class="hm-stat-value">@Model.Huespedes.ToString("N0")</div><div class="hm-stat-label">Huéspedes</div></div>
             <span class="hm-stat-extra"><i class="bi bi-person-check"></i> registrados</span>
             @Html.Partial("_Onda", "#ec4899")
-        </div>
+        </a>
     </div>
 </div>
 
@@ -60,7 +60,7 @@
         <div class="hm-card h-100">
             <div class="hm-card-head">
                 <h2 class="hm-card-title"><i class="bi bi-calendar-week"></i> Reservas próximas</h2>
-                <span class="hm-badge purple">@Model.ReservasActivas activas</span>
+                <a class="hm-link" href="@Url.Action("Index", "Reservas")">Ver todas <i class="bi bi-arrow-right"></i></a>
             </div>
             @if (!Model.ProximasReservas.Any())
             {
@@ -70,7 +70,7 @@
             {
                 var css = EstadoHelper.CssReserva(r.Estado);
                 var iniciales = new string((r.Huesped ?? "?").Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0]).ToArray());
-                <div class="hm-res-item @css">
+                <a class="hm-res-item @css text-reset text-decoration-none" href="@Url.Action("Detalle", "Reservas", new { id = r.Id })">
                     <div class="hm-res-avatar">@iniciales</div>
                     <div class="flex-grow-1" style="min-width:0">
                         <div class="hm-res-name text-truncate">@r.Huesped</div>
@@ -81,7 +81,7 @@
                         </div>
                     </div>
                     <span class="hm-badge @css flex-shrink-0">@r.Estado</span>
-                </div>
+                </a>
             }
         </div>
     </div>
@@ -142,10 +142,10 @@
                 <h2 class="hm-card-title"><i class="bi bi-lightning-charge-fill text-gold"></i> Acciones rápidas</h2>
             </div>
             <div class="hm-card-body">
-                <a class="hm-quick purple" href="@Url.Action("Crear", "Hoteles")"><i class="bi bi-building-add"></i> Registrar hotel <i class="bi bi-arrow-right"></i></a>
+                <a class="hm-quick purple" href="@Url.Action("Disponibilidad", "Reservas")"><i class="bi bi-calendar-plus"></i> Crear reserva <i class="bi bi-arrow-right"></i></a>
                 <a class="hm-quick blue" href="@Url.Action("Index", "Habitaciones")"><i class="bi bi-door-closed"></i> Gestionar habitaciones <i class="bi bi-arrow-right"></i></a>
-                <a class="hm-quick green" href="@Url.Action("Crear", "Pisos")"><i class="bi bi-layers"></i> Agregar piso <i class="bi bi-arrow-right"></i></a>
-                <a class="hm-quick gold" href="@Url.Action("Index", "TiposHabitacion")"><i class="bi bi-tags"></i> Tipos de habitación <i class="bi bi-arrow-right"></i></a>
+                <a class="hm-quick green" href="@Url.Action("Crear", "Huespedes")"><i class="bi bi-person-plus"></i> Registrar huésped <i class="bi bi-arrow-right"></i></a>
+                <a class="hm-quick gold" href="@Url.Action("Index", "Reportes")"><i class="bi bi-bar-chart-line"></i> Ver reportes <i class="bi bi-arrow-right"></i></a>
 
                 <div class="d-flex justify-content-between small text-secondary mt-3 px-1">
                     <span><i class="bi bi-grid-1x2 me-1"></i>@Model.Bloques bloques</span>

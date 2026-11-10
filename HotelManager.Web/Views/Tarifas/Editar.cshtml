@@ -1,0 +1,12 @@
+﻿@model TarifaViewModel
+@{
+    ViewBag.Title = "Editar tarifa";
+    ViewData["Icono"] = "bi-pencil-square";
+    ViewData["Color"] = "blue";
+    ViewData["Modulo"] = "Tarifas";
+    ViewData["ModuloUrl"] = Url.Action("Index", new { idHabitacion = Model.IdHabitacion });
+    ViewData["Titulo"] = "Editar tarifa";
+    ViewData["Subtitulo"] = "Cambie el valor o la vigencia de la temporada.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

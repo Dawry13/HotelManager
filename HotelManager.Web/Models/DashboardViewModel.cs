@@ -37,6 +37,7 @@ namespace HotelManager.Web.Models
 
     public class ReservaProximaViewModel
     {
+        public int Id { get; set; }
         public string Huesped { get; set; }
         public string Habitacion { get; set; }
         public string Hotel { get; set; }

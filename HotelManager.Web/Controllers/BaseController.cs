@@ -33,6 +33,33 @@ namespace HotelManager.Web.Controllers
                 ModelState.AddModelError(string.Empty, ex.Message);
                 return false;
             }
+            catch (System.Data.SqlClient.SqlException ex) when (EsReglaDeBaseDatos(ex))
+            {
+                ModelState.AddModelError(string.Empty, MensajeBaseDatos(ex));
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Los triggers de la base (raiserror con severidad 16) devuelven el error 50000:
+        /// son reglas de negocio y se muestran al usuario como tales.
+        /// </summary>
+        protected static bool EsReglaDeBaseDatos(System.Data.SqlClient.SqlException ex)
+        {
+            return ex.Number == 50000 || ex.Number == 2627 || ex.Number == 2601 || ex.Number == 547;
+        }
+
+        protected static string MensajeBaseDatos(System.Data.SqlClient.SqlException ex)
+        {
+            switch (ex.Number)
+            {
+                case 2627:
+                case 2601: return "Ya existe un registro con esos datos (valor duplicado).";
+                case 547: return "La operación no es válida: el registro está relacionado con otros datos o no cumple una restricción.";
+                default:
+                    var msg = ex.Errors.Count > 0 ? ex.Errors[0].Message : ex.Message;
+                    return msg.Length > 0 ? char.ToUpper(msg[0]) + msg.Substring(1) : msg;
+            }
         }
 
         /// <summary>Igual que Ejecutar, pero muestra el error como mensaje temporal (para acciones POST rapidas).</summary>
@@ -46,6 +73,10 @@ namespace HotelManager.Web.Controllers
             catch (BusinessException ex)
             {
                 Error(ex.Message);
+            }
+            catch (System.Data.SqlClient.SqlException ex) when (EsReglaDeBaseDatos(ex))
+            {
+                Error(MensajeBaseDatos(ex));
             }
         }
 

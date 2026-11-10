@@ -1,0 +1,76 @@
+﻿@model List<TarifaViewModel>
+@{
+    ViewBag.Title = "Tarifas";
+    int? idHabitacion = ViewBag.IdHabitacion;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon gold"><i class="bi bi-cash-coin"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Tarifas</div>
+            <h1>Tarifas por temporada</h1>
+            <p class="hm-sub">Valor por noche con vigencia. Si no hay tarifa vigente se usa la tarifa base de la habitación (RN-013).</p>
+        </div>
+    </div>
+    <a class="btn btn-gold" href="@Url.Action("Crear", new { idHabitacion })"><i class="bi bi-plus-lg me-1"></i> Nueva tarifa</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-check2-circle"></i></div><div><div class="hm-stat-value">@Model.Count(t => t.EstadoVigencia == "Vigente")</div><div class="hm-stat-label">Vigentes hoy</div></div></div></div>
+    <div class="col-sm-4"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-calendar-event"></i></div><div><div class="hm-stat-value">@Model.Count(t => t.EstadoVigencia == "Futura")</div><div class="hm-stat-label">Futuras</div></div></div></div>
+    <div class="col-sm-4"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-archive"></i></div><div><div class="hm-stat-value">@Model.Count(t => t.EstadoVigencia == "Vencida")</div><div class="hm-stat-label">Vencidas</div></div></div></div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <div class="hm-field">
+        <label for="idHotel">Hotel</label>
+        @Html.DropDownList("idHotel", (SelectList)ViewBag.Hoteles, "Todos los hoteles", new { @class = "form-select", data_autosubmit = "" })
+    </div>
+    @if (idHabitacion.HasValue)
+    {
+        <div class="hm-field">
+            <label>Habitación</label>
+            <div><span class="hm-badge purple">@ViewBag.HabitacionFiltro</span> <a class="hm-link ms-2" href="@Url.Action("Index")">Quitar filtro</a></div>
+        </div>
+    }
+</form>
+
+<div class="hm-card">
+    <div class="table-responsive">
+        <table class="table hm-table table-hover">
+            <thead><tr><th>Habitación</th><th>Vigencia</th><th class="text-end">Valor / noche</th><th class="text-end">Tarifa base</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="hm-empty"><i class="bi bi-cash-coin"></i>No hay tarifas registradas. Las habitaciones usan su tarifa base.</td></tr>
+                }
+                @foreach (var t in Model)
+                {
+                    var dif = t.TarifaBase == 0 ? 0 : (t.ValorNoche.Value - t.TarifaBase) * 100 / t.TarifaBase;
+                    <tr>
+                        <td><div class="d-flex align-items-center gap-3"><span class="hm-code">@t.Habitacion</span><span class="hm-cell-sub">@t.Hotel</span></div></td>
+                        <td class="small">
+                            <i class="bi bi-calendar-range me-1 text-secondary"></i>@t.VigenciaDesde.Value.ToString("dd MMM yyyy", culture)
+                            → @(t.VigenciaHasta.HasValue ? t.VigenciaHasta.Value.ToString("dd MMM yyyy", culture) : "sin fin")
+                        </td>
+                        <td class="text-end fw-semibold text-gold">RD$ @t.ValorNoche.Value.ToString("N2")</td>
+                        <td class="text-end">
+                            RD$ @t.TarifaBase.ToString("N2")
+                            <div class="small @(dif >= 0 ? "text-warning" : "text-success")">@(dif >= 0 ? "+" : "")@dif.ToString("0")%</div>
+                        </td>
+                        <td><span class="hm-badge @(t.EstadoVigencia == "Vigente" ? "ok" : t.EstadoVigencia == "Futura" ? "info" : "off")">@t.EstadoVigencia</span></td>
+                        <td class="text-end acciones">
+                            <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = t.IdTarifa })" title="Editar"><i class="bi bi-pencil"></i></a>
+                            @using (Html.BeginForm("Eliminar", "Tarifas", new { id = t.IdTarifa, idHabitacion }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button class="btn-icon i-del" title="Eliminar" onclick="return confirm('¿Eliminar esta tarifa?');"><i class="bi bi-trash"></i></button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+﻿@model ReservaFormViewModel
+@{
+    ViewBag.Title = "Nueva reserva";
+    ViewData["Icono"] = "bi-calendar-plus";
+    ViewData["Color"] = "green";
+    ViewData["Modulo"] = "Reservas";
+    ViewData["ModuloUrl"] = Url.Action("Index");
+    ViewData["Titulo"] = "Nueva reserva";
+    ViewData["Subtitulo"] = "CU-007: registre una reserva validada para un huésped.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

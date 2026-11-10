@@ -1,4 +1,4 @@
-namespace HotelManager.Business.Dtos
+﻿namespace HotelManager.Business.Dtos
 {
     public class BloqueDto
     {

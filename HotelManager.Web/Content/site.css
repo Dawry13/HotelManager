@@ -60,8 +60,13 @@ a:hover { color: #c8beff; }
     overflow-y: auto;
 }
 
-.hm-brand { text-align: center; text-decoration: none; display: block; margin-bottom: 2rem; }
-.hm-brand svg { width: 78px; height: 78px; filter: drop-shadow(0 6px 18px rgba(245, 180, 0, .35)); }
+.hm-sidebar { scrollbar-width: thin; scrollbar-color: rgba(168, 85, 247, .35) transparent; }
+.hm-sidebar::-webkit-scrollbar { width: 6px; }
+.hm-sidebar::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, .35); border-radius: 6px; }
+.hm-sidebar::-webkit-scrollbar-track { background: transparent; }
+
+.hm-brand { text-align: center; text-decoration: none; display: block; margin-bottom: 1.25rem; }
+.hm-brand svg { width: 64px; height: 64px; filter: drop-shadow(0 6px 18px rgba(245, 180, 0, .35)); }
 .hm-brand-name { font-size: 1.55rem; font-weight: 700; color: #fff; letter-spacing: -.02em; line-height: 1.1; margin-top: .35rem; }
 .hm-brand-name span, .text-gold { color: var(--hm-gold); }
 .hm-brand-tag { font-size: .72rem; color: var(--hm-muted); }
@@ -72,8 +77,8 @@ a:hover { color: #c8beff; }
     display: flex;
     align-items: center;
     gap: .85rem;
-    padding: .72rem .95rem;
-    margin-bottom: .25rem;
+    padding: .6rem .95rem;
+    margin-bottom: .15rem;
     border-radius: 14px;
     color: #c9c5ee;
     text-decoration: none;
@@ -372,6 +377,54 @@ a.hm-stat:hover { transform: translateY(-3px); color: #fff; box-shadow: 0 16px 3
 .hm-badge.bad { color: #f87171; background: rgba(239, 68, 68, .14); border-color: rgba(239, 68, 68, .35); }
 .hm-badge.info { color: #60a5fa; background: rgba(47, 107, 255, .15); border-color: rgba(47, 107, 255, .35); }
 .hm-badge.purple { color: #c4b5fd; background: rgba(124, 58, 237, .18); border-color: rgba(124, 58, 237, .4); }
+
+.hm-badge.gold { color: #fcd34d; background: rgba(245, 180, 0, .14); border-color: rgba(245, 180, 0, .4); }
+
+/* Tarjeta de indicador seleccionada como filtro */
+.hm-stat-activo { outline: 2px solid rgba(255, 255, 255, .55); outline-offset: 2px; }
+
+/* Barras de progreso */
+.hm-progress { height: 9px; border-radius: 999px; background: rgba(255, 255, 255, .07); overflow: hidden; }
+.hm-progress > div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #22d3ee, #10b981); min-width: 2px; }
+
+/* Linea de tiempo (historial) */
+.hm-timeline { list-style: none; margin: 0; padding: 0 0 0 1.1rem; border-left: 2px solid rgba(168, 85, 247, .35); }
+.hm-timeline li { position: relative; padding: 0 0 1.1rem 1rem; }
+.hm-timeline li::before {
+    content: ""; position: absolute; left: -1.55rem; top: .3rem;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--hm-purple-2); box-shadow: 0 0 0 4px rgba(168, 85, 247, .2);
+}
+.hm-timeline li:last-child { padding-bottom: 0; }
+
+/* Cotizacion de la reserva */
+.hm-cotizacion {
+    display: flex; align-items: center; gap: 1rem; padding: 1rem 1.2rem; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(245, 180, 0, .14), rgba(124, 58, 237, .1));
+    border: 1px solid rgba(245, 180, 0, .35);
+}
+.hm-cotizacion > i { font-size: 2rem; color: var(--hm-gold); }
+
+/* Atajos de rango (reportes) */
+.hm-chip-link {
+    padding: .35rem .9rem; border-radius: 999px; font-size: .82rem; text-decoration: none;
+    color: #cfc9ff; border: 1px solid var(--hm-border); background: rgba(255, 255, 255, .04);
+}
+.hm-chip-link:hover { color: #fff; background: rgba(124, 58, 237, .2); }
+.hm-chip-link.active { color: #231a00; background: var(--hm-gold); border-color: var(--hm-gold); }
+
+/* Grupos de opciones en selects */
+.form-select optgroup { background: var(--hm-surface); color: #c4b5fd; }
+
+/* Impresion de reportes */
+@media print {
+    body { background: #fff !important; color: #000; }
+    .hm-sidebar, .hm-topbar, .hm-footer, .hm-no-print, .hm-backdrop { display: none !important; }
+    .hm-content { padding: 0; }
+    .hm-card, .hm-stat { background: #fff !important; border: 1px solid #ccc !important; box-shadow: none !important; color: #000 !important; }
+    .hm-stat-label, .hm-cell-sub, .hm-table td, .hm-table th, .hm-sub { color: #222 !important; }
+    .hm-stat-icon { box-shadow: none !important; }
+}
 
 /* ---------- Tarjetas de entidad (hoteles, tipos) ---------- */
 .hm-entity { position: relative; overflow: hidden; height: 100%; display: flex; flex-direction: column; }

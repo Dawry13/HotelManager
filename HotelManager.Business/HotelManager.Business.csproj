@@ -98,6 +98,11 @@
     <Compile Include="Interfaces\ITipoHabitacionService.cs" />
     <Compile Include="Services\BloqueService.cs" />
     <Compile Include="Services\TipoHabitacionService.cs" />
+    <Compile Include="Dtos\NotificacionDto.cs" />
+    <Compile Include="Dtos\TarifaDto.cs" />
+    <Compile Include="Dtos\ReporteDtos.cs" />
+    <Compile Include="Interfaces\IReporteService.cs" />
+    <Compile Include="Services\ReporteService.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

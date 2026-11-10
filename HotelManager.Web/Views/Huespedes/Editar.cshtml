@@ -1,0 +1,12 @@
+﻿@model HuespedViewModel
+@{
+    ViewBag.Title = "Editar huésped";
+    ViewData["Icono"] = "bi-pencil-square";
+    ViewData["Color"] = "blue";
+    ViewData["Modulo"] = "Huéspedes";
+    ViewData["ModuloUrl"] = Url.Action("Detalle", new { id = Model.IdHuesped });
+    ViewData["Titulo"] = "Editar huésped";
+    ViewData["Subtitulo"] = "Actualice los datos de identificación o contacto.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

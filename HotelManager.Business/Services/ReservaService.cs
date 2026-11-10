@@ -123,6 +123,45 @@ namespace HotelManager.Business.Services
             return _reservas.GetByHuesped(idHuesped).Select(Mapear).ToList();
         }
 
+        public IEnumerable<ReservaDto> Listar()
+        {
+            return _reservas.GetAll()
+                .OrderByDescending(r => r.Entrada)
+                .ThenByDescending(r => r.IdReserva)
+                .Select(Mapear)
+                .ToList();
+        }
+
+        // Pendiente -> Confirmada
+        public void Confirmar(int idReserva)
+        {
+            var reserva = _reservas.GetById(idReserva);
+            if (reserva == null) throw new BusinessException("La reserva no existe.");
+            if (reserva.Estado != EstadoReserva.Pendiente)
+                throw new BusinessException("Solo se pueden confirmar reservas pendientes.");
+
+            reserva.Estado = EstadoReserva.Confirmada;
+            if (!_reservas.Update(reserva))
+                throw new BusinessException("No se pudo confirmar la reserva.");
+
+            NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Confirmacion);
+        }
+
+        // Check-out: una reserva activa pasa a Finalizada.
+        public void Finalizar(int idReserva)
+        {
+            var reserva = _reservas.GetById(idReserva);
+            if (reserva == null) throw new BusinessException("La reserva no existe.");
+            if (reserva.Estado != EstadoReserva.Confirmada && reserva.Estado != EstadoReserva.Modificada)
+                throw new BusinessException("Solo se pueden finalizar reservas confirmadas o modificadas.");
+            if (reserva.Entrada.Date > DateTime.Today)
+                throw new BusinessException("No se puede finalizar una reserva cuya estadía aún no ha comenzado.");
+
+            reserva.Estado = EstadoReserva.Finalizada;
+            if (!_reservas.Update(reserva))
+                throw new BusinessException("No se pudo finalizar la reserva.");
+        }
+
         public IEnumerable<ReservaDto> ListarActivas()
         {
             var hoy = DateTime.Today;

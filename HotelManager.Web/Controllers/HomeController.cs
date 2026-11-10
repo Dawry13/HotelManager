@@ -80,6 +80,7 @@ namespace HotelManager.Web.Controllers
                     var idHotel = hab != null && pisos.ContainsKey(hab.IdPiso) ? pisos[hab.IdPiso] : 0;
                     return new ReservaProximaViewModel
                     {
+                        Id = r.Id,
                         Huesped = huespedes.ContainsKey(r.HuespedId) ? huespedes[r.HuespedId] : "Huésped #" + r.HuespedId,
                         Habitacion = hab != null ? hab.Numero : r.HabitacionId.ToString(),
                         Hotel = nombresHotel.ContainsKey(idHotel) ? nombresHotel[idHotel] : "",
@@ -146,6 +147,29 @@ namespace HotelManager.Web.Controllers
                     Modulo = "Habitación", Icono = "bi-door-closed", Titulo = "Habitación " + h.Numero,
                     Detalle = pisos.ContainsKey(h.IdPiso) && nombresHotel.ContainsKey(pisos[h.IdPiso]) ? nombresHotel[pisos[h.IdPiso]] : "",
                     Url = Url.Action("Editar", "Habitaciones", new { id = h.IdHabitacion })
+                }));
+
+            var huespedes = _huespedService.Listar().ToList();
+            modelo.Resultados.AddRange(huespedes
+                .Where(h => coincide(h.Nombre) || coincide(h.Documento) || coincide(h.Correo))
+                .Select(h => new ResultadoBusqueda
+                {
+                    Modulo = "Huésped", Icono = "bi-person", Titulo = h.Nombre, Detalle = h.Documento + " · " + h.Correo,
+                    Url = Url.Action("Detalle", "Huespedes", new { id = h.IdHuesped })
+                }));
+
+            var nombresHuesped = huespedes.ToDictionary(h => h.IdHuesped, h => h.Nombre);
+            var textoId = modelo.Texto.TrimStart('#');
+            modelo.Resultados.AddRange(_reservaService.Listar()
+                .Where(r => r.Id.ToString() == textoId
+                            || (nombresHuesped.ContainsKey(r.HuespedId) && coincide(nombresHuesped[r.HuespedId])))
+                .Take(20)
+                .Select(r => new ResultadoBusqueda
+                {
+                    Modulo = "Reserva", Icono = "bi-calendar-week",
+                    Titulo = "Reserva #" + r.Id + " · " + (nombresHuesped.ContainsKey(r.HuespedId) ? nombresHuesped[r.HuespedId] : ""),
+                    Detalle = r.FechaEntrada.ToString("dd/MM/yyyy") + " → " + r.FechaSalida.ToString("dd/MM/yyyy") + " · " + r.Estado,
+                    Url = Url.Action("Detalle", "Reservas", new { id = r.Id })
                 }));
 
             modelo.Resultados.AddRange(_tipoService.Listar()
