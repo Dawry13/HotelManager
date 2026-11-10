@@ -60,8 +60,8 @@ namespace HotelManager.Business.Services
                 Estado = EstadoReserva.Confirmada
             };
 
+            // El historial (creacion) lo registra el trigger tr_reservas_historial.
             reserva.IdReserva = _reservas.Add(reserva);
-            RegistrarHistorial(reserva.IdReserva, "Creación", null, reserva.Estado);
             NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Confirmacion);               
             return Mapear(reserva);
         }
@@ -80,7 +80,6 @@ namespace HotelManager.Business.Services
             if (_reservas.ExisteSolapamiento(dto.HabitacionId, dto.FechaEntrada, dto.FechaSalida, dto.ReservaId))
                 throw new BusinessException("La habitación ya tiene una reserva activa en esas fechas.");
 
-            var estadoAnterior = reserva.Estado;
             reserva.IdHabitacion = dto.HabitacionId;
             reserva.Entrada = dto.FechaEntrada.Date;
             reserva.Salida = dto.FechaSalida.Date;
@@ -91,7 +90,6 @@ namespace HotelManager.Business.Services
             if (!_reservas.Update(reserva))
                 throw new BusinessException("No se pudo actualizar la reserva.");
 
-            RegistrarHistorial(reserva.IdReserva, "Modificación", estadoAnterior, reserva.Estado);
             NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Modificacion);
             return Mapear(reserva);
         }
@@ -104,13 +102,11 @@ namespace HotelManager.Business.Services
             if (reserva.Estado == EstadoReserva.Cancelada)
                 throw new BusinessException("La reserva ya está cancelada.");
 
-            var estadoAnterior = reserva.Estado;
             reserva.Estado = EstadoReserva.Cancelada;                                
 
             if (!_reservas.Update(reserva))
                 throw new BusinessException("No se pudo cancelar la reserva.");
 
-            RegistrarHistorial(reserva.IdReserva, "Cancelación", estadoAnterior, reserva.Estado);
             NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Cancelacion);
         }
 
@@ -125,6 +121,19 @@ namespace HotelManager.Business.Services
         public IEnumerable<ReservaDto> ObtenerHistorialPorHuesped(int idHuesped)
         {
             return _reservas.GetByHuesped(idHuesped).Select(Mapear).ToList();
+        }
+
+        public IEnumerable<ReservaDto> ListarActivas()
+        {
+            var hoy = DateTime.Today;
+            return _reservas.GetAll()
+                .Where(r => r.Estado == EstadoReserva.Pendiente
+                         || r.Estado == EstadoReserva.Confirmada
+                         || r.Estado == EstadoReserva.Modificada)
+                .Where(r => r.Salida.Date > hoy)
+                .OrderBy(r => r.Entrada)
+                .Select(Mapear)
+                .ToList();
         }
 
        
@@ -168,17 +177,8 @@ namespace HotelManager.Business.Services
             return total;
         }
 
-        private void RegistrarHistorial(int idReserva, string accion, EstadoReserva? anterior, EstadoReserva nuevo)
-        {
-            _historial.Add(new HistorialReserva
-            {
-                IdReserva = idReserva,
-                FechaCambio = DateTime.Now,
-                Accion = accion,
-                EstadoAnterior = anterior,
-                EstadoNuevo = nuevo
-            });
-        }
+        // El historial de reservas (creacion, modificacion, cancelacion) lo registra
+        // automaticamente el trigger tr_reservas_historial de la base de datos.
 
         
         private void NotificarSinFallar(int idReserva, TipoNotificacion tipo)

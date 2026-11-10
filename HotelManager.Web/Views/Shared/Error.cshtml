@@ -1,0 +1,19 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+@{
+    ViewBag.Title = "Error";
+}
+<div class="hm-card hm-card-body text-center py-5">
+    <div class="hm-page-icon pink mx-auto mb-3"><i class="bi bi-bug"></i></div>
+    <h1 class="h3">Ocurrió un error inesperado</h1>
+    <p class="text-secondary">
+        Verifique que la base de datos <strong class="text-white">HotelManagerDB</strong> exista y que la cadena de conexión
+        del archivo Web.config sea correcta.
+    </p>
+    @if (HotelManager.Web.MvcApplication.ErrorBaseDatos != null)
+    {
+        <div class="alert alert-danger text-start mx-auto" style="max-width:640px">
+            <strong>Error al preparar la base de datos:</strong> @HotelManager.Web.MvcApplication.ErrorBaseDatos
+        </div>
+    }
+    <a class="btn btn-gold" href="@Url.Action("Index", "Home")">Volver al inicio</a>
+</div>

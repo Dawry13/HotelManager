@@ -1,0 +1,12 @@
+﻿@model PisoViewModel
+@{
+    ViewBag.Title = "Nuevo piso";
+    ViewData["Icono"] = "bi-layers";
+    ViewData["Color"] = "green";
+    ViewData["Modulo"] = "Pisos";
+    ViewData["ModuloUrl"] = Url.Action("Index", new { idHotel = Model.IdHotel });
+    ViewData["Titulo"] = "Nuevo piso";
+    ViewData["Subtitulo"] = "Registre un nivel dentro de un hotel y, si aplica, de un bloque.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

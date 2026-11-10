@@ -1,0 +1,12 @@
+﻿@model HabitacionViewModel
+@{
+    ViewBag.Title = "Editar habitación";
+    ViewData["Icono"] = "bi-pencil-square";
+    ViewData["Color"] = "blue";
+    ViewData["Modulo"] = "Habitaciones";
+    ViewData["ModuloUrl"] = Url.Action("Index", new { idHotel = Model.IdHotel });
+    ViewData["Titulo"] = "Editar habitación " + Model.Numero;
+    ViewData["Subtitulo"] = "Actualice el tipo, número, capacidad o tarifa.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

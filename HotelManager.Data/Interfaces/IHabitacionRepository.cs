@@ -9,10 +9,8 @@ namespace HotelManager.Data.Interfaces
         IEnumerable<Habitacion> GetByPiso(int idPiso);
         IEnumerable<Habitacion> GetByHotel(int idHotel);
 
-        /// <summary>RN-005: el numero de habitacion debe ser unico dentro del hotel.</summary>
-        bool ExisteNumeroEnHotel(int idHotel, int numero, int? excluirIdHabitacion = null);
+        bool ExisteNumeroEnHotel(int idHotel, string numero, int? excluirIdHabitacion = null);
 
-        /// <summary>CU-006: habitaciones reservables, con capacidad suficiente y sin reservas activas solapadas.</summary>
         IEnumerable<Habitacion> GetDisponibles(DateTime entrada, DateTime salida, int huespedes, int? idHotel = null);
     }
 }

@@ -1,0 +1,158 @@
+﻿@model DashboardViewModel
+@{
+    ViewBag.Title = "Inicio";
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    // Dona de ocupacion: circunferencia de un circulo r=60
+    const double circ = 2 * Math.PI * 60;
+    var arco = circ * Model.PorcentajeOcupacion / 100.0;
+    var maxPorHotel = Model.PorHotel.Any() ? Math.Max(1, Model.PorHotel.Max(h => h.Total)) : 1;
+}
+
+<section class="hm-hero mb-4">
+    <div class="hm-hero-inner">
+        <span class="hm-chip"><i class="bi bi-award-fill"></i> Bienvenido de vuelta</span>
+        <h1>Hotel<span>Manager</span></h1>
+        <p>Gestiona tus hoteles, bloques, pisos y habitaciones de forma fácil y eficiente.</p>
+        <a class="btn btn-gold btn-lg" href="@Url.Action("Crear", "Habitaciones")">
+            <i class="bi bi-door-open me-2"></i>Nueva habitación <i class="bi bi-arrow-right ms-2"></i>
+        </a>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <a class="hm-stat purple" href="@Url.Action("Index", "Hoteles")">
+            <div class="hm-stat-icon"><i class="bi bi-buildings"></i></div>
+            <div><div class="hm-stat-value">@Model.Hoteles</div><div class="hm-stat-label">Hoteles</div></div>
+            <span class="hm-stat-extra"><i class="bi bi-check2-circle"></i> @Model.HotelesActivos activos</span>
+            @Html.Partial("_Onda", "#a855f7")
+        </a>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <a class="hm-stat blue" href="@Url.Action("Index", "Habitaciones")">
+            <div class="hm-stat-icon"><i class="bi bi-door-closed"></i></div>
+            <div><div class="hm-stat-value">@Model.Habitaciones</div><div class="hm-stat-label">Habitaciones</div></div>
+            <span class="hm-stat-extra"><i class="bi bi-check2-circle"></i> @Model.Disponibles libres</span>
+            @Html.Partial("_Onda", "#3b82f6")
+        </a>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="hm-stat green">
+            <div class="hm-stat-icon"><i class="bi bi-calendar2-check"></i></div>
+            <div><div class="hm-stat-value">@Model.ReservasActivas</div><div class="hm-stat-label">Reservas activas</div></div>
+            <span class="hm-stat-extra"><i class="bi bi-box-arrow-in-right"></i> @Model.ReservasHoy entran hoy</span>
+            @Html.Partial("_Onda", "#10b981")
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="hm-stat pink">
+            <div class="hm-stat-icon"><i class="bi bi-people-fill"></i></div>
+            <div><div class="hm-stat-value">@Model.Huespedes.ToString("N0")</div><div class="hm-stat-label">Huéspedes</div></div>
+            <span class="hm-stat-extra"><i class="bi bi-person-check"></i> registrados</span>
+            @Html.Partial("_Onda", "#ec4899")
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Reservas proximas -->
+    <div class="col-xl-5">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-calendar-week"></i> Reservas próximas</h2>
+                <span class="hm-badge purple">@Model.ReservasActivas activas</span>
+            </div>
+            @if (!Model.ProximasReservas.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-calendar-x"></i>No hay reservas activas próximas.</div>
+            }
+            @foreach (var r in Model.ProximasReservas)
+            {
+                var css = EstadoHelper.CssReserva(r.Estado);
+                var iniciales = new string((r.Huesped ?? "?").Split(' ').Where(p => p.Length > 0).Take(2).Select(p => p[0]).ToArray());
+                <div class="hm-res-item @css">
+                    <div class="hm-res-avatar">@iniciales</div>
+                    <div class="flex-grow-1" style="min-width:0">
+                        <div class="hm-res-name text-truncate">@r.Huesped</div>
+                        <div class="hm-cell-sub text-truncate">Habitación @r.Habitacion &middot; <span class="text-capitalize">@r.Hotel</span></div>
+                        <div class="hm-res-date mt-1">
+                            <i class="bi bi-calendar3 me-1 text-secondary"></i>
+                            @r.Entrada.ToString("dd", culture) – @r.Salida.ToString("dd MMM yyyy", culture)
+                        </div>
+                    </div>
+                    <span class="hm-badge @css flex-shrink-0">@r.Estado</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Disponibilidad -->
+    <div class="col-md-7 col-xl-4">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-door-open"></i> Disponibilidad de habitaciones</h2>
+            </div>
+            <div class="hm-card-body">
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+                    <div class="hm-donut">
+                        <svg viewBox="0 0 140 140" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="gDona" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#22d3ee" /><stop offset="1" stop-color="#10b981" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="14" />
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="url(#gDona)" stroke-width="14" stroke-linecap="round"
+                                    stroke-dasharray="@arco.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) @circ.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" />
+                        </svg>
+                        <div class="hm-donut-center"><strong>@Model.PorcentajeOcupacion%</strong><span>Ocupación hoy</span></div>
+                    </div>
+                    <ul class="hm-legend">
+                        <li><span class="sw" style="background:#10b981"></span> Ocupadas <b>@Model.Ocupadas</b></li>
+                        <li><span class="sw" style="background:#3b82f6"></span> Disponibles <b>@Model.Disponibles</b></li>
+                        <li><span class="sw" style="background:#f5b400"></span> Mantenimiento <b>@Model.Mantenimiento</b></li>
+                        <li><span class="sw" style="background:#ef4444"></span> Fuera de servicio <b>@Model.FueraDeServicio</b></li>
+                        <li><span class="sw" style="background:#6b6894"></span> Inactivas <b>@Model.Inactivas</b></li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <span class="small text-secondary">Habitaciones por hotel</span>
+                    <span class="small"><span class="sw d-inline-block rounded-circle me-1" style="width:9px;height:9px;background:#10b981"></span>libres hoy</span>
+                </div>
+                <div class="hm-bars">
+                    @foreach (var h in Model.PorHotel)
+                    {
+                        var alto = Math.Max(8, h.Total * 100 / maxPorHotel);
+                        var libres = h.Total == 0 ? 0 : h.Disponibles * 100 / h.Total;
+                        <a class="hm-bar text-decoration-none" href="@Url.Action("Index", "Habitaciones", new { idHotel = h.IdHotel })" title="@h.Hotel: @h.Disponibles libres de @h.Total">
+                            <div class="hm-bar-fill" style="height:@(alto)%"><div class="used" style="height:@(libres)%"></div></div>
+                            <small>@h.Hotel</small>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rapidas -->
+    <div class="col-md-5 col-xl-3">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-lightning-charge-fill text-gold"></i> Acciones rápidas</h2>
+            </div>
+            <div class="hm-card-body">
+                <a class="hm-quick purple" href="@Url.Action("Crear", "Hoteles")"><i class="bi bi-building-add"></i> Registrar hotel <i class="bi bi-arrow-right"></i></a>
+                <a class="hm-quick blue" href="@Url.Action("Index", "Habitaciones")"><i class="bi bi-door-closed"></i> Gestionar habitaciones <i class="bi bi-arrow-right"></i></a>
+                <a class="hm-quick green" href="@Url.Action("Crear", "Pisos")"><i class="bi bi-layers"></i> Agregar piso <i class="bi bi-arrow-right"></i></a>
+                <a class="hm-quick gold" href="@Url.Action("Index", "TiposHabitacion")"><i class="bi bi-tags"></i> Tipos de habitación <i class="bi bi-arrow-right"></i></a>
+
+                <div class="d-flex justify-content-between small text-secondary mt-3 px-1">
+                    <span><i class="bi bi-grid-1x2 me-1"></i>@Model.Bloques bloques</span>
+                    <span><i class="bi bi-layers me-1"></i>@Model.Pisos pisos</span>
+                    <span><i class="bi bi-tags me-1"></i>@Model.TiposHabitacion tipos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

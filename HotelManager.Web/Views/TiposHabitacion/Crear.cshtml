@@ -1,0 +1,12 @@
+﻿@model TipoHabitacionViewModel
+@{
+    ViewBag.Title = "Nuevo tipo de habitación";
+    ViewData["Icono"] = "bi-tags";
+    ViewData["Color"] = "gold";
+    ViewData["Modulo"] = "Tipos de habitación";
+    ViewData["ModuloUrl"] = Url.Action("Index");
+    ViewData["Titulo"] = "Nuevo tipo de habitación";
+    ViewData["Subtitulo"] = "Agregue un tipo al catálogo.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

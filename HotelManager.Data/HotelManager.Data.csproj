@@ -51,6 +51,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\BaseRepository.cs" />
+    <Compile Include="Base\Conexion.cs" />
+    <Compile Include="Base\InicializadorBaseDatos.cs" />
     <Compile Include="Interfaces\IBaseRepository.cs" />
     <Compile Include="Interfaces\IHabitacionRepository.cs" />
     <Compile Include="Interfaces\IHistorialReservaRepository.cs" />
@@ -68,6 +70,10 @@
     <Compile Include="Repositories\PisoRepository.cs" />
     <Compile Include="Repositories\ReservaRepository.cs" />
     <Compile Include="Repositories\TarifaRepository.cs" />
+    <Compile Include="Interfaces\IBloqueRepository.cs" />
+    <Compile Include="Interfaces\ITipoHabitacionRepository.cs" />
+    <Compile Include="Repositories\BloqueRepository.cs" />
+    <Compile Include="Repositories\TipoHabitacionRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -90,6 +96,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Scripts de la base de datos: se incrustan en la dll para que InicializadorBaseDatos los ejecute. -->
+    <EmbeddedResource Include="Database\01_HotelManagerDB.sql">
+      <LogicalName>HotelManager.Data.Database.01_HotelManagerDB.sql</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Database\02_bloques_tipos_habitacion.sql">
+      <LogicalName>HotelManager.Data.Database.02_bloques_tipos_habitacion.sql</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HotelManager.Domain\HotelManager.Domain.csproj">

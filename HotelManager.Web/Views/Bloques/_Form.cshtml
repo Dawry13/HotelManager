@@ -1,0 +1,65 @@
+﻿@model BloqueViewModel
+@{
+    var esEdicion = Model.IdBloque > 0;
+}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="hm-card hm-card-body">
+            @using (Html.BeginForm(esEdicion ? "Editar" : "Crear", "Bloques", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdBloque)
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="hm-form-section">Ubicación</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.IdHotel, new { @class = "form-label" })
+                    @if (!esEdicion)
+                    {
+                        @Html.DropDownListFor(m => m.IdHotel, (SelectList)ViewBag.Hoteles, "-- Seleccione el hotel --", new { @class = "form-select" })
+                    }
+                    else
+                    {
+                        @Html.HiddenFor(m => m.IdHotel)
+                        @Html.HiddenFor(m => m.NombreHotel)
+                        <input class="form-control text-capitalize" value="@Model.NombreHotel" readonly />
+                        <div class="form-text">El hotel de un bloque no se puede cambiar.</div>
+                    }
+                    @Html.ValidationMessageFor(m => m.IdHotel, "", new { @class = "small" })
+                </div>
+
+                <div class="hm-form-section mt-4">Identificación</div>
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        @Html.LabelFor(m => m.Codigo, new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.Codigo, new { @class = "form-control text-uppercase", maxlength = "10", placeholder = "A" })
+                        @Html.ValidationMessageFor(m => m.Codigo, "", new { @class = "small" })
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        @Html.LabelFor(m => m.Nombre, new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", maxlength = "100", placeholder = "Torre A" })
+                        @Html.ValidationMessageFor(m => m.Nombre, "", new { @class = "small" })
+                    </div>
+                </div>
+                <div class="mb-4">
+                    @Html.LabelFor(m => m.Descripcion, new { @class = "form-label" })
+                    @Html.TextAreaFor(m => m.Descripcion, 2, 0, new { @class = "form-control", maxlength = "250", placeholder = "Opcional" })
+                    @Html.ValidationMessageFor(m => m.Descripcion, "", new { @class = "small" })
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar bloque")</button>
+                    <a class="btn btn-ghost" href="@Url.Action("Index", new { idHotel = Model.IdHotel })">Cancelar</a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Reglas</div>
+            <div class="hm-rule"><i class="bi bi-buildings"></i><div><strong>Hotel activo</strong>Solo se agregan bloques a hoteles activos.</div></div>
+            <div class="hm-rule"><i class="bi bi-fingerprint"></i><div><strong>Código único</strong>El código no se repite dentro del mismo hotel.</div></div>
+            <div class="hm-rule"><i class="bi bi-trash"></i><div><strong>Eliminación</strong>Un bloque con pisos no se elimina; desactívelo.</div></div>
+        </div>
+    </div>
+</div>

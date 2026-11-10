@@ -1,0 +1,12 @@
+﻿@model HabitacionViewModel
+@{
+    ViewBag.Title = "Nueva habitación";
+    ViewData["Icono"] = "bi-door-open";
+    ViewData["Color"] = "blue";
+    ViewData["Modulo"] = "Habitaciones";
+    ViewData["ModuloUrl"] = Url.Action("Index", new { idHotel = Model.IdHotel });
+    ViewData["Titulo"] = "Nueva habitación";
+    ViewData["Subtitulo"] = "Registre una habitación en un piso activo.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

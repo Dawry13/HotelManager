@@ -10,5 +10,8 @@ namespace HotelManager.Business.Interfaces
         void Cancelar(int idReserva);
         ReservaDto ObtenerPorId(int idReserva);
         IEnumerable<ReservaDto> ObtenerHistorialPorHuesped(int idHuesped);
+
+        /// <summary>Reservas activas (pendiente, confirmada o modificada) que aun no terminan.</summary>
+        IEnumerable<ReservaDto> ListarActivas();
     }
 }

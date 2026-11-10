@@ -1,0 +1,116 @@
+﻿@model List<HabitacionViewModel>
+@{
+    ViewBag.Title = "Habitaciones";
+    var urlActual = Request.RawUrl;
+    int? idHotel = ViewBag.IdHotel;
+    Func<EstadoHabitacion, int> contar = e => Model.Count(h => h.Estado == e);
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon blue"><i class="bi bi-door-closed"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Habitaciones</div>
+            <h1>Gestión de habitaciones</h1>
+            <p class="hm-sub">Unidades reservables, su capacidad, tarifa y estado operativo.</p>
+        </div>
+    </div>
+    <a class="btn btn-gold" href="@Url.Action("Crear", new { idHotel })"><i class="bi bi-plus-lg me-1"></i> Nueva habitación</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <a class="hm-stat green compact" href="@Url.Action("Index", new { idHotel, estado = EstadoHabitacion.Disponible })">
+            <div class="hm-stat-icon"><i class="bi bi-check2-circle"></i></div>
+            <div><div class="hm-stat-value">@contar(EstadoHabitacion.Disponible)</div><div class="hm-stat-label">Disponibles</div></div>
+        </a>
+    </div>
+    <div class="col-6 col-xl-3">
+        <a class="hm-stat gold compact" href="@Url.Action("Index", new { idHotel, estado = EstadoHabitacion.Mantenimiento })">
+            <div class="hm-stat-icon"><i class="bi bi-tools"></i></div>
+            <div><div class="hm-stat-value">@contar(EstadoHabitacion.Mantenimiento)</div><div class="hm-stat-label">En mantenimiento</div></div>
+        </a>
+    </div>
+    <div class="col-6 col-xl-3">
+        <a class="hm-stat pink compact" href="@Url.Action("Index", new { idHotel, estado = EstadoHabitacion.FueraDeServicio })">
+            <div class="hm-stat-icon"><i class="bi bi-exclamation-octagon"></i></div>
+            <div><div class="hm-stat-value">@contar(EstadoHabitacion.FueraDeServicio)</div><div class="hm-stat-label">Fuera de servicio</div></div>
+        </a>
+    </div>
+    <div class="col-6 col-xl-3">
+        <a class="hm-stat purple compact" href="@Url.Action("Index", new { idHotel, estado = EstadoHabitacion.Inactiva })">
+            <div class="hm-stat-icon"><i class="bi bi-slash-circle"></i></div>
+            <div><div class="hm-stat-value">@contar(EstadoHabitacion.Inactiva)</div><div class="hm-stat-label">Inactivas</div></div>
+        </a>
+    </div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <div class="hm-field">
+        <label for="idHotel">Hotel</label>
+        @Html.DropDownList("idHotel", (SelectList)ViewBag.Hoteles, "Todos los hoteles", new { @class = "form-select", data_autosubmit = "" })
+    </div>
+    <div class="hm-field">
+        <label for="idTipo">Tipo</label>
+        @Html.DropDownList("idTipo", (SelectList)ViewBag.Tipos, "Todos los tipos", new { @class = "form-select", data_autosubmit = "" })
+    </div>
+    <div class="hm-field">
+        <label for="estado">Estado</label>
+        @Html.DropDownList("estado", (IEnumerable<SelectListItem>)ViewBag.Estados, "Todos los estados", new { @class = "form-select", data_autosubmit = "" })
+    </div>
+    <a class="btn btn-ghost" href="@Url.Action("Index")"><i class="bi bi-x-lg me-1"></i> Limpiar</a>
+</form>
+
+<div class="hm-card">
+    <div class="table-responsive">
+        <table class="table hm-table table-hover">
+            <thead>
+                <tr>
+                    <th>Habitación</th>
+                    <th>Ubicación</th>
+                    <th>Tipo</th>
+                    <th class="text-center">Capacidad</th>
+                    <th class="text-end">Tarifa/noche</th>
+                    <th>Estado operativo</th>
+                    <th class="text-end"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="7" class="hm-empty"><i class="bi bi-door-closed"></i>No hay habitaciones que coincidan con el filtro.</td></tr>
+                }
+                @foreach (var h in Model)
+                {
+                    <tr>
+                        <td><span class="hm-code">@h.Numero</span></td>
+                        <td>
+                            <div class="hm-cell-main text-capitalize">@h.NombreHotel</div>
+                            <div class="hm-cell-sub text-capitalize">@h.DescripcionPiso</div>
+                        </td>
+                        <td class="text-capitalize">@h.NombreTipo</td>
+                        <td class="text-center"><i class="bi bi-people me-1 text-secondary"></i>@h.Capacidad</td>
+                        <td class="text-end fw-semibold">RD$ @string.Format("{0:N2}", h.Tarifa)</td>
+                        <td>
+                            @* CU-004: cambiar el estado operativo desde el listado *@
+                            @using (Html.BeginForm("CambiarEstado", "Habitaciones", FormMethod.Post, new { @class = "d-flex gap-2 align-items-center" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@h.IdHabitacion" />
+                                <input type="hidden" name="returnUrl" value="@urlActual" />
+                                <span class="hm-badge @EstadoHelper.Css(h.Estado) px-2" title="@EstadoHelper.Texto(h.Estado)"></span>
+                                @Html.DropDownList("nuevoEstado", EstadoHelper.OpcionesHabitacion(h.Estado),
+                                    new { @class = "form-select form-select-sm", style = "min-width: 10.5rem", data_autosubmit = "", aria_label = "Estado de la habitación " + h.Numero })
+                            }
+                        </td>
+                        <td class="text-end acciones">
+                            <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = h.IdHabitacion })" title="Editar"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="small text-secondary mt-3">
+    <i class="bi bi-info-circle me-1"></i> Solo las habitaciones en estado <strong class="text-white">Disponible</strong> pueden reservarse (RN-007).
+</p>

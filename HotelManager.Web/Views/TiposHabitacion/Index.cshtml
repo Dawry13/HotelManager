@@ -1,0 +1,83 @@
+﻿@model List<TipoHabitacionViewModel>
+@{
+    ViewBag.Title = "Tipos de habitación";
+    var fondos = new[] { "alt3", "alt", "", "alt2" };
+    var i = 0;
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon gold"><i class="bi bi-tags"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Tipos de habitación</div>
+            <h1>Tipos de habitación</h1>
+            <p class="hm-sub">Catálogo con la capacidad máxima y la tarifa base de cada tipo.</p>
+        </div>
+    </div>
+    <a class="btn btn-gold" href="@Url.Action("Crear")"><i class="bi bi-plus-lg me-1"></i> Nuevo tipo</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="hm-stat gold compact"><div class="hm-stat-icon"><i class="bi bi-tags"></i></div>
+            <div><div class="hm-stat-value">@Model.Count</div><div class="hm-stat-label">Tipos</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-check2-circle"></i></div>
+            <div><div class="hm-stat-value">@Model.Count(t => t.Estado == "Activo")</div><div class="hm-stat-label">Activos</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-door-closed"></i></div>
+            <div><div class="hm-stat-value">@Model.Sum(t => t.TotalHabitaciones)</div><div class="hm-stat-label">Habitaciones asignadas</div></div></div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="hm-card hm-empty"><i class="bi bi-tags"></i>No hay tipos de habitación registrados.</div>
+}
+
+<div class="row g-4">
+    @foreach (var t in Model)
+    {
+        <div class="col-md-6 col-xxl-3">
+            <div class="hm-card hm-entity">
+                <div class="hm-entity-top @fondos[i++ % fondos.Length]">
+                    <span class="hm-entity-state hm-badge @EstadoHelper.CssActivo(t.Estado)">@t.Estado</span>
+                    <div class="hm-entity-icon"><i class="bi bi-door-open"></i></div>
+                </div>
+                <div class="hm-entity-body">
+                    <h3>@t.Nombre</h3>
+                    <div class="hm-cell-sub" style="min-height:2.4em">@t.Descripcion</div>
+                    <div class="hm-entity-metrics">
+                        <div><strong><i class="bi bi-people fs-6 me-1"></i>@t.CapacidadMaxima</strong><span>Capacidad</span></div>
+                        <div style="grid-column: span 2"><strong class="text-gold">RD$ @string.Format("{0:N0}", t.TarifaBase)</strong><span>Tarifa base / noche</span></div>
+                    </div>
+                    <a class="hm-link d-inline-block mt-3" href="@Url.Action("Index", "Habitaciones", new { idTipo = t.IdTipoHabitacion })">
+                        @t.TotalHabitaciones habitación(es) <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="hm-entity-foot acciones">
+                    <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = t.IdTipoHabitacion })" title="Editar"><i class="bi bi-pencil"></i></a>
+                    @using (Html.BeginForm("CambiarEstado", "TiposHabitacion", new { id = t.IdTipoHabitacion }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        if (t.Estado == "Activo")
+                        {
+                            <button class="btn-icon i-on" title="Desactivar"><i class="bi bi-toggle-on"></i></button>
+                        }
+                        else
+                        {
+                            <button class="btn-icon i-off" title="Activar"><i class="bi bi-toggle-off"></i></button>
+                        }
+                    }
+                    @using (Html.BeginForm("Eliminar", "TiposHabitacion", new { id = t.IdTipoHabitacion }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button class="btn-icon i-del" title="Eliminar"
+                                onclick="return confirm('¿Eliminar el tipo @t.Nombre? Esta acción no se puede deshacer.');"><i class="bi bi-trash"></i></button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

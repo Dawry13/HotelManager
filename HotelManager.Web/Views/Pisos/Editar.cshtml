@@ -1,0 +1,12 @@
+﻿@model PisoViewModel
+@{
+    ViewBag.Title = "Editar piso";
+    ViewData["Icono"] = "bi-pencil-square";
+    ViewData["Color"] = "blue";
+    ViewData["Modulo"] = "Pisos";
+    ViewData["ModuloUrl"] = Url.Action("Index", new { idHotel = Model.IdHotel });
+    ViewData["Titulo"] = "Editar piso";
+    ViewData["Subtitulo"] = "Cambie el número o el bloque del piso.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

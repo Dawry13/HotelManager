@@ -1,123 +1,71 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using HotelManager.Data.Base;
 using HotelManager.Data.Interfaces;
 using HotelManager.Domain.Entities;
+using HotelManager.Domain.Enums;
 
 namespace HotelManager.Data.Repositories
 {
     public class NotificacionRepository : BaseRepository<Notificacion>, INotificacionRepository
     {
-        protected override string TableName => "Notificacion";
-        protected override string KeyColumn => "IdNotificacion";
+        protected override string TableName => "notificaciones";
+        protected override string KeyColumn => "id_notificacion";
 
-        public NotificacionRepository() : base()
+        protected override Notificacion Map(IDataRecord r) => new Notificacion
         {
-        }
+            IdNotificacion = (int)r["id_notificacion"],
+            IdReserva = (int)r["id_reserva"],
+            Tipo = (TipoNotificacion)Enum.Parse(typeof(TipoNotificacion), (string)r["tipo"], true),
+            Fecha = (DateTime)r["fecha"],
+            Estado = (EstadoNotificacion)Enum.Parse(typeof(EstadoNotificacion), (string)r["estado"], true),
+            DetalleError = Texto(r, "detalle_error")
+        };
 
-        protected override Notificacion Map(IDataRecord r)
-        {
-            return new Notificacion
-            {
-                IdNotificacion = r.GetInt32(r.GetOrdinal("IdNotificacion")),
-                IdReserva = r.GetInt32(r.GetOrdinal("IdReserva")),
-                Mensaje = r.GetString(r.GetOrdinal("Mensaje")),
-                Fecha = r.GetDateTime(r.GetOrdinal("Fecha")),
-                Leida = r.GetBoolean(r.GetOrdinal("Leida"))
-            };
-        }
+        // ck_notificaciones_tipo: 'confirmacion','modificacion','cancelacion'
+        private static string TipoTexto(TipoNotificacion t) => t.ToString().ToLower();
+
+        // ck_notificaciones_estado: 'pendiente','enviada','fallida'
+        private static string EstadoTexto(EstadoNotificacion e) => e.ToString().ToLower();
+
+        public override IEnumerable<Notificacion> GetAll()
+            => Query("select * from notificaciones order by fecha desc");
 
         public IEnumerable<Notificacion> GetByReserva(int idReserva)
-        {
-            var lista = new List<Notificacion>();
+            => Query("select * from notificaciones where id_reserva = @r order by fecha desc",
+                new SqlParameter("@r", idReserva));
 
-            const string sql = @"SELECT IdNotificacion, IdReserva, Mensaje, Fecha, Leida
-                                 FROM Notificacion
-                                 WHERE IdReserva = @IdReserva
-                                 ORDER BY Fecha DESC";
+        public IEnumerable<Notificacion> GetPorEstado(EstadoNotificacion estado)
+            => Query("select * from notificaciones where estado = @e order by fecha",
+                new SqlParameter("@e", EstadoTexto(estado)));
 
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var cmd = new SqlCommand(sql, cn))
-            {
-                cmd.Parameters.AddWithValue("@IdReserva", idReserva);
-                cn.Open();
+        public override int Add(Notificacion e)
+            => Convert.ToInt32(Scalar(@"insert into notificaciones (tipo, fecha, estado, id_reserva, detalle_error)
+                                       output inserted.id_notificacion
+                                       values (@t, @f, @e, @r, @d)",
+                new SqlParameter("@t", TipoTexto(e.Tipo)),
+                new SqlParameter("@f", SqlDbType.DateTime2) { Value = e.Fecha == default(DateTime) ? DateTime.Now : e.Fecha },
+                new SqlParameter("@e", EstadoTexto(e.Estado)),
+                new SqlParameter("@r", e.IdReserva),
+                new SqlParameter("@d", SqlDbType.VarChar, 500) { Value = DbVal(e.DetalleError) }));
 
-                using (var r = cmd.ExecuteReader())
-                {
-                    while (r.Read())
-                        lista.Add(Map(r));
-                }
-            }
+        public override bool Update(Notificacion e)
+            => Execute(@"update notificaciones
+                         set tipo = @t, fecha = @f, estado = @e, id_reserva = @r, detalle_error = @d
+                         where id_notificacion = @id",
+                new SqlParameter("@t", TipoTexto(e.Tipo)),
+                new SqlParameter("@f", SqlDbType.DateTime2) { Value = e.Fecha },
+                new SqlParameter("@e", EstadoTexto(e.Estado)),
+                new SqlParameter("@r", e.IdReserva),
+                new SqlParameter("@d", SqlDbType.VarChar, 500) { Value = DbVal(e.DetalleError) },
+                new SqlParameter("@id", e.IdNotificacion)) > 0;
 
-            return lista;
-        }
-
-        public IEnumerable<Notificacion> GetPorLeida(bool leida)
-        {
-            var lista = new List<Notificacion>();
-
-            const string sql = @"SELECT IdNotificacion, IdReserva, Mensaje, Fecha, Leida
-                                 FROM Notificacion
-                                 WHERE Leida = @Leida
-                                 ORDER BY Fecha";
-
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var cmd = new SqlCommand(sql, cn))
-            {
-                cmd.Parameters.AddWithValue("@Leida", leida);
-                cn.Open();
-
-                using (var r = cmd.ExecuteReader())
-                {
-                    while (r.Read())
-                        lista.Add(Map(r));
-                }
-            }
-
-            return lista;
-        }
-
-        public override int Add(Notificacion entity)
-        {
-            const string sql = @"INSERT INTO Notificacion (IdReserva, Mensaje, Fecha, Leida)
-                                 OUTPUT INSERTED.IdNotificacion
-                                 VALUES (@IdReserva, @Mensaje, @Fecha, @Leida)";
-
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var cmd = new SqlCommand(sql, cn))
-            {
-                cmd.Parameters.AddWithValue("@IdReserva", entity.IdReserva);
-                cmd.Parameters.AddWithValue("@Mensaje", entity.Mensaje);
-                cmd.Parameters.AddWithValue("@Fecha", entity.Fecha);
-                cmd.Parameters.AddWithValue("@Leida", entity.Leida);
-                cn.Open();
-
-                return (int)cmd.ExecuteScalar();
-            }
-        }
-
-        public override bool Update(Notificacion entity)
-        {
-            const string sql = @"UPDATE Notificacion
-                                 SET IdReserva = @IdReserva,
-                                     Mensaje = @Mensaje,
-                                     Fecha = @Fecha,
-                                     Leida = @Leida
-                                 WHERE IdNotificacion = @IdNotificacion";
-
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var cmd = new SqlCommand(sql, cn))
-            {
-                cmd.Parameters.AddWithValue("@IdNotificacion", entity.IdNotificacion);
-                cmd.Parameters.AddWithValue("@IdReserva", entity.IdReserva);
-                cmd.Parameters.AddWithValue("@Mensaje", entity.Mensaje);
-                cmd.Parameters.AddWithValue("@Fecha", entity.Fecha);
-                cmd.Parameters.AddWithValue("@Leida", entity.Leida);
-                cn.Open();
-
-                return cmd.ExecuteNonQuery() > 0;
-            }
-        }
+        public bool RegistrarResultado(int idNotificacion, EstadoNotificacion estado, string detalleError)
+            => Execute(@"update notificaciones set estado = @e, detalle_error = @d where id_notificacion = @id",
+                new SqlParameter("@e", EstadoTexto(estado)),
+                new SqlParameter("@d", SqlDbType.VarChar, 500) { Value = DbVal(detalleError) },
+                new SqlParameter("@id", idNotificacion)) > 0;
     }
 }

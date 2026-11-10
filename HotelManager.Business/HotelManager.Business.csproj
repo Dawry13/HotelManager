@@ -92,6 +92,12 @@
     <Compile Include="Services\PisoService.cs" />
     <Compile Include="Services\ReservaService.cs" />
     <Compile Include="Services\TarifaService.cs" />
+    <Compile Include="Dtos\BloqueDto.cs" />
+    <Compile Include="Dtos\TipoHabitacionDto.cs" />
+    <Compile Include="Interfaces\IBloqueService.cs" />
+    <Compile Include="Interfaces\ITipoHabitacionService.cs" />
+    <Compile Include="Services\BloqueService.cs" />
+    <Compile Include="Services\TipoHabitacionService.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

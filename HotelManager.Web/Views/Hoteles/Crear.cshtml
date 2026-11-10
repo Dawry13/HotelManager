@@ -1,0 +1,11 @@
+﻿@model HotelViewModel
+@{
+    ViewBag.Title = "Nuevo hotel";
+    ViewData["Icono"] = "bi-building-add";
+    ViewData["Modulo"] = "Hoteles";
+    ViewData["ModuloUrl"] = Url.Action("Index");
+    ViewData["Titulo"] = "Nuevo hotel";
+    ViewData["Subtitulo"] = "Registre un nuevo establecimiento de la cadena.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

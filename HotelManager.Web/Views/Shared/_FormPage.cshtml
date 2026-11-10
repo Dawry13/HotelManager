@@ -1,0 +1,16 @@
+﻿@* Encabezado comun para las paginas de crear/editar.
+   ViewData: Icono, Color, Modulo, ModuloUrl, Titulo, Subtitulo *@
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon @ViewData["Color"]"><i class="bi @ViewData["Icono"]"></i></div>
+        <div>
+            <div class="hm-breadcrumb">
+                <a href="@Url.Action("Index", "Home")">Inicio</a> /
+                <a href="@ViewData["ModuloUrl"]">@ViewData["Modulo"]</a> / @ViewData["Titulo"]
+            </div>
+            <h1>@ViewData["Titulo"]</h1>
+            <p class="hm-sub">@ViewData["Subtitulo"]</p>
+        </div>
+    </div>
+    <a class="btn btn-ghost" href="@ViewData["ModuloUrl"]"><i class="bi bi-arrow-left me-1"></i> Volver</a>
+</div>

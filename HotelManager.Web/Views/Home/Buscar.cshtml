@@ -1,0 +1,41 @@
+﻿@model BusquedaViewModel
+@{
+    ViewBag.Title = "Buscar";
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon"><i class="bi bi-search"></i></div>
+        <div>
+            <h1>Resultados de búsqueda</h1>
+            <p class="hm-sub">
+                @if (string.IsNullOrEmpty(Model.Texto))
+                {
+                    @:Escriba un texto en la barra superior para buscar.
+                }
+                else
+                {
+                    @:@Model.Resultados.Count resultado(s) para "<strong class="text-white">@Model.Texto</strong>"
+                }
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="hm-card">
+    @if (!Model.Resultados.Any())
+    {
+        <div class="hm-empty"><i class="bi bi-search"></i>No se encontraron coincidencias.</div>
+    }
+    @foreach (var r in Model.Resultados)
+    {
+        <a class="hm-res-item text-decoration-none text-reset" href="@r.Url">
+            <div class="hm-page-icon" style="width:44px;height:44px;font-size:1.2rem;margin-left:.6rem"><i class="bi @r.Icono"></i></div>
+            <div class="flex-grow-1 min-w-0">
+                <div class="hm-cell-main text-capitalize text-truncate">@r.Titulo</div>
+                <div class="hm-cell-sub text-truncate text-capitalize">@r.Detalle</div>
+            </div>
+            <span class="hm-badge purple">@r.Modulo</span>
+            <i class="bi bi-chevron-right text-secondary"></i>
+        </a>
+    }
+</div>

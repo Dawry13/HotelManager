@@ -1,0 +1,97 @@
+﻿@model List<BloqueViewModel>
+@{
+    ViewBag.Title = "Bloques";
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon pink"><i class="bi bi-grid-1x2"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Bloques</div>
+            <h1>Gestión de bloques</h1>
+            <p class="hm-sub">Torres, edificios o áreas que agrupan los pisos de cada hotel.</p>
+        </div>
+    </div>
+    <a class="btn btn-gold" href="@Url.Action("Crear", new { idHotel = ViewBag.IdHotel })"><i class="bi bi-plus-lg me-1"></i> Nuevo bloque</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="hm-stat pink compact"><div class="hm-stat-icon"><i class="bi bi-grid-1x2"></i></div>
+            <div><div class="hm-stat-value">@Model.Count</div><div class="hm-stat-label">Bloques</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-check2-circle"></i></div>
+            <div><div class="hm-stat-value">@Model.Count(b => b.Estado == "Activo")</div><div class="hm-stat-label">Activos</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-layers"></i></div>
+            <div><div class="hm-stat-value">@Model.Sum(b => b.TotalPisos)</div><div class="hm-stat-label">Pisos asignados</div></div></div>
+    </div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <div class="hm-field">
+        <label for="idHotel">Hotel</label>
+        @Html.DropDownList("idHotel", (SelectList)ViewBag.Hoteles, "Todos los hoteles", new { @class = "form-select", data_autosubmit = "" })
+    </div>
+</form>
+
+<div class="hm-card">
+    <div class="table-responsive">
+        <table class="table hm-table table-hover">
+            <thead>
+                <tr>
+                    <th>Bloque</th>
+                    <th>Hotel</th>
+                    <th>Descripción</th>
+                    <th class="text-center">Pisos</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="hm-empty"><i class="bi bi-grid-1x2"></i>No hay bloques registrados.</td></tr>
+                }
+                @foreach (var b in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="hm-code">@b.Codigo</span>
+                                <span class="hm-cell-main text-capitalize">@b.Nombre</span>
+                            </div>
+                        </td>
+                        <td class="text-capitalize">@b.NombreHotel</td>
+                        <td class="hm-cell-sub">@b.Descripcion</td>
+                        <td class="text-center"><a class="hm-link" href="@Url.Action("Index", "Pisos", new { idHotel = b.IdHotel, idBloque = b.IdBloque })">@b.TotalPisos</a></td>
+                        <td><span class="hm-badge @EstadoHelper.CssActivo(b.Estado)">@b.Estado</span></td>
+                        <td class="text-end acciones">
+                            <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = b.IdBloque })" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a class="btn-icon i-view" href="@Url.Action("Crear", "Pisos", new { idHotel = b.IdHotel, idBloque = b.IdBloque })" title="Agregar piso"><i class="bi bi-layers"></i></a>
+                            @using (Html.BeginForm("CambiarEstado", "Bloques", new { id = b.IdBloque, idHotel = ViewBag.IdHotel }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                if (b.Estado == "Activo")
+                                {
+                                    <button class="btn-icon i-on" title="Desactivar"><i class="bi bi-toggle-on"></i></button>
+                                }
+                                else
+                                {
+                                    <button class="btn-icon i-off" title="Activar"><i class="bi bi-toggle-off"></i></button>
+                                }
+                            }
+                            @using (Html.BeginForm("Eliminar", "Bloques", new { id = b.IdBloque, idHotel = ViewBag.IdHotel }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button class="btn-icon i-del" title="Eliminar"
+                                        onclick="return confirm('¿Eliminar el bloque @b.Codigo? Esta acción no se puede deshacer.');"><i class="bi bi-trash"></i></button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

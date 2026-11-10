@@ -9,8 +9,7 @@ namespace HotelManager.Data.Base
 {
     public abstract class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        protected readonly string ConnectionString =
-            ConfigurationManager.ConnectionStrings["HotelManagerDB"].ConnectionString;
+        protected readonly string ConnectionString = Conexion.Cadena;
 
         protected abstract string TableName { get; }
         protected abstract string KeyColumn { get; }
@@ -71,5 +70,17 @@ namespace HotelManager.Data.Base
         }
 
         protected static object DbVal(object v) => v ?? DBNull.Value;
+
+        // En la base de datos los estados se guardan como texto: 'activo' / 'inactivo'.
+        protected static string EstadoTexto(bool activo) => activo ? "activo" : "inactivo";
+
+        protected static bool EsActivo(object valor)
+            => string.Equals(Convert.ToString(valor), "activo", StringComparison.OrdinalIgnoreCase);
+
+        protected static string Texto(IDataRecord r, string columna)
+            => r[columna] == DBNull.Value ? null : Convert.ToString(r[columna]);
+
+        protected static int? EnteroNulo(IDataRecord r, string columna)
+            => r[columna] == DBNull.Value ? (int?)null : Convert.ToInt32(r[columna]);
     }
 }

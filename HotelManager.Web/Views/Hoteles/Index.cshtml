@@ -1,0 +1,92 @@
+﻿@model List<HotelViewModel>
+@{
+    ViewBag.Title = "Hoteles";
+    var fondos = new[] { "", "alt", "alt2", "alt3" };
+    var i = 0;
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon"><i class="bi bi-buildings"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Hoteles</div>
+            <h1>Gestión de hoteles</h1>
+            <p class="hm-sub">Establecimientos de la cadena y su estructura.</p>
+        </div>
+    </div>
+    <a class="btn btn-gold" href="@Url.Action("Crear")"><i class="bi bi-plus-lg me-1"></i> Nuevo hotel</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-buildings"></i></div>
+            <div><div class="hm-stat-value">@Model.Count</div><div class="hm-stat-label">Hoteles</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-check2-circle"></i></div>
+            <div><div class="hm-stat-value">@Model.Count(h => h.Estado == "Activo")</div><div class="hm-stat-label">Activos</div></div></div>
+    </div>
+    <div class="col-sm-4">
+        <div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-door-closed"></i></div>
+            <div><div class="hm-stat-value">@Model.Sum(h => h.TotalHabitaciones)</div><div class="hm-stat-label">Habitaciones</div></div></div>
+    </div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <div class="hm-field" style="flex-grow:3">
+        <label for="buscar">Buscar</label>
+        <input type="search" class="form-control" id="buscar" name="buscar" value="@ViewBag.Buscar" placeholder="Nombre o dirección" />
+    </div>
+    <div class="hm-field">
+        <label for="estado">Estado</label>
+        <select class="form-select" id="estado" name="estado" data-autosubmit>
+            <option value="">Todos</option>
+            <option value="Activo" @(ViewBag.Estado == "Activo" ? "selected" : "")>Activos</option>
+            <option value="Inactivo" @(ViewBag.Estado == "Inactivo" ? "selected" : "")>Inactivos</option>
+        </select>
+    </div>
+    <button class="btn btn-ghost" type="submit"><i class="bi bi-funnel me-1"></i> Filtrar</button>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="hm-card hm-empty"><i class="bi bi-buildings"></i>No hay hoteles que coincidan con el filtro.</div>
+}
+
+<div class="row g-4">
+    @foreach (var h in Model)
+    {
+        <div class="col-md-6 col-xxl-4">
+            <div class="hm-card hm-entity">
+                <div class="hm-entity-top @fondos[i++ % fondos.Length]">
+                    <span class="hm-entity-state hm-badge @EstadoHelper.CssActivo(h.Estado)">@h.Estado</span>
+                    <div class="hm-entity-icon"><i class="bi bi-building"></i></div>
+                </div>
+                <div class="hm-entity-body">
+                    <h3><a class="text-reset text-decoration-none" href="@Url.Action("Detalle", new { id = h.IdHotel })">@h.Nombre</a></h3>
+                    <div class="hm-cell-sub text-capitalize"><i class="bi bi-geo-alt me-1"></i>@h.Direccion</div>
+                    <div class="hm-entity-metrics">
+                        <div><strong>@h.TotalBloques</strong><span>Bloques</span></div>
+                        <div><strong>@h.TotalPisos</strong><span>Pisos</span></div>
+                        <div><strong>@h.TotalHabitaciones</strong><span>Habitaciones</span></div>
+                    </div>
+                </div>
+                <div class="hm-entity-foot acciones">
+                    <a class="btn-icon i-view" href="@Url.Action("Detalle", new { id = h.IdHotel })" title="Ver detalle"><i class="bi bi-eye"></i></a>
+                    <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = h.IdHotel })" title="Editar"><i class="bi bi-pencil"></i></a>
+                    @using (Html.BeginForm("CambiarEstado", "Hoteles", new { id = h.IdHotel }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        if (h.Estado == "Activo")
+                        {
+                            <button class="btn-icon i-on" title="Desactivar" onclick="return confirm('¿Desactivar el hotel @h.Nombre?');"><i class="bi bi-toggle-on"></i></button>
+                        }
+                        else
+                        {
+                            <button class="btn-icon i-off" title="Activar"><i class="bi bi-toggle-off"></i></button>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

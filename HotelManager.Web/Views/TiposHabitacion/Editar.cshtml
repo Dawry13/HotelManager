@@ -1,0 +1,12 @@
+﻿@model TipoHabitacionViewModel
+@{
+    ViewBag.Title = "Editar tipo de habitación";
+    ViewData["Icono"] = "bi-pencil-square";
+    ViewData["Color"] = "blue";
+    ViewData["Modulo"] = "Tipos de habitación";
+    ViewData["ModuloUrl"] = Url.Action("Index");
+    ViewData["Titulo"] = "Editar tipo de habitación";
+    ViewData["Subtitulo"] = "Actualice la capacidad máxima o la tarifa base.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

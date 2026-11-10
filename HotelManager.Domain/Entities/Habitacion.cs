@@ -10,11 +10,12 @@ namespace HotelManager.Domain.Entities
     public class Habitacion
     {
         public int IdHabitacion { get; set; }
-        public int Numero { get; set; }
+        public string Numero { get; set; }
         public int Capacidad { get; set; }
         public decimal Tarifa { get; set; }
         public EstadoHabitacion Estado { get; set; }
         public int IdPiso { get; set; }
+        public int? IdTipoHabitacion { get; set; }
     }
 }
 

@@ -1,0 +1,12 @@
+﻿@model BloqueViewModel
+@{
+    ViewBag.Title = "Nuevo bloque";
+    ViewData["Icono"] = "bi-grid-1x2";
+    ViewData["Color"] = "pink";
+    ViewData["Modulo"] = "Bloques";
+    ViewData["ModuloUrl"] = Url.Action("Index", new { idHotel = Model.IdHotel });
+    ViewData["Titulo"] = "Nuevo bloque";
+    ViewData["Subtitulo"] = "Registre una torre, edificio o área del hotel.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

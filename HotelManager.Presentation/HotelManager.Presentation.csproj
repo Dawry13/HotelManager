@@ -36,9 +36,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Guna.UI2, Version=2.0.4.8, Culture=neutral, PublicKeyToken=8b9d14aa5142e261, processorArchitecture=MSIL">
-      <HintPath>..\packages\Guna.UI2.WinForms.2.0.4.8\lib\net472\Guna.UI2.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=10.0.0.14, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.10.0.14\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -99,13 +96,16 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Forms\" />
-    <Folder Include="Models\" />
+    <Folder Include="Vistas\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HotelManager.Business\HotelManager.Business.csproj">
       <Project>{05cc778d-fd99-4ae6-a708-d409def1157c}</Project>
       <Name>HotelManager.Business</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HotelManager.Data\HotelManager.Data.csproj">
+      <Project>{a499b708-bc3c-4224-9a4d-01c9e2e3f670}</Project>
+      <Name>HotelManager.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\HotelManager.Domain\HotelManager.Domain.csproj">
       <Project>{c78e3751-03ed-458c-8ad4-66899b65945c}</Project>

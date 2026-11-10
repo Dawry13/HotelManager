@@ -25,6 +25,16 @@ namespace HotelManager.Business
             return services;
         }
 
+        /// <summary>
+        /// Verifica la base de datos HotelManagerDB al iniciar: la adjunta si sus archivos existen
+        /// pero no esta registrada, o la crea con los scripts de HotelManager.Data/Database.
+        /// Devuelve las acciones realizadas (vacio si ya estaba lista).
+        /// </summary>
+        public static System.Collections.Generic.IList<string> InicializarBaseDatos()
+        {
+            return InicializadorBaseDatos.Inicializar();
+        }
+
        
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
@@ -36,6 +46,8 @@ namespace HotelManager.Business
             services.AddScoped<INotificacionRepository, NotificacionRepository>();
             services.AddScoped<ITarifaRepository, TarifaRepository>();
             services.AddScoped<IHistorialReservaRepository, HistorialReservaRepository>();
+            services.AddScoped<IBloqueRepository, BloqueRepository>();
+            services.AddScoped<ITipoHabitacionRepository, TipoHabitacionRepository>();
 
             return services;
         }
@@ -52,6 +64,8 @@ namespace HotelManager.Business
             services.AddScoped<IHistorialReservaService, HistorialReservaService>();
             services.AddScoped<INotificacionService, NotificacionService>();
             services.AddScoped<ITarifaService, TarifaService>();
+            services.AddScoped<IBloqueService, BloqueService>();
+            services.AddScoped<ITipoHabitacionService, TipoHabitacionService>();
 
             return services;
         }

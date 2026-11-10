@@ -10,6 +10,7 @@ namespace HotelManager.Business.Interfaces
         HabitacionDto Actualizar(HabitacionDto dto);
         void CambiarEstado(int idHabitacion, EstadoHabitacion nuevoEstado);
         HabitacionDto ObtenerPorId(int idHabitacion);
+        IEnumerable<HabitacionDto> Listar();
         IEnumerable<HabitacionDto> ListarPorHotel(int idHotel);
     }
 }

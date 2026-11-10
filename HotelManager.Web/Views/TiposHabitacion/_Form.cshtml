@@ -1,0 +1,66 @@
+﻿@model TipoHabitacionViewModel
+@{
+    var esEdicion = Model.IdTipoHabitacion > 0;
+}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="hm-card hm-card-body">
+            @using (Html.BeginForm(esEdicion ? "Editar" : "Crear", "TiposHabitacion", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdTipoHabitacion)
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="hm-form-section">Datos del tipo</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Nombre, new { @class = "form-label" })
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", maxlength = "50", placeholder = "Ej.: doble, suite" })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Nombre, "", new { @class = "small" })
+                </div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Descripcion, new { @class = "form-label" })
+                    @Html.TextAreaFor(m => m.Descripcion, 2, 0, new { @class = "form-control", maxlength = "250", placeholder = "Opcional" })
+                    @Html.ValidationMessageFor(m => m.Descripcion, "", new { @class = "small" })
+                </div>
+
+                <div class="hm-form-section mt-4">Capacidad y precio</div>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        @Html.LabelFor(m => m.CapacidadMaxima, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-people"></i></span>
+                            @Html.TextBoxFor(m => m.CapacidadMaxima, new { @class = "form-control", type = "number", min = "1", max = "20" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.CapacidadMaxima, "", new { @class = "small" })
+                    </div>
+                    <div class="col-sm-6 mb-4">
+                        @Html.LabelFor(m => m.TarifaBase, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text">RD$</span>
+                            <input class="form-control" id="TarifaBase" name="TarifaBase" type="number" min="0" step="0.01"
+                                   value="@(Model.TarifaBase.HasValue ? Model.TarifaBase.Value.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+                        </div>
+                        @Html.ValidationMessageFor(m => m.TarifaBase, "", new { @class = "small" })
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar tipo")</button>
+                    <a class="btn btn-ghost" href="@Url.Action("Index")">Cancelar</a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Cómo se usa</div>
+            <div class="hm-rule"><i class="bi bi-people"></i><div><strong>Capacidad máxima</strong>Ninguna habitación de este tipo podrá superarla.</div></div>
+            <div class="hm-rule"><i class="bi bi-cash-coin"></i><div><strong>Tarifa base</strong>Se propone como tarifa al crear una habitación de este tipo.</div></div>
+            <div class="hm-rule"><i class="bi bi-fingerprint"></i><div><strong>Nombre único</strong>No se repiten nombres en el catálogo.</div></div>
+            <div class="hm-rule"><i class="bi bi-trash"></i><div><strong>Eliminación</strong>Un tipo con habitaciones no se elimina; desactívelo.</div></div>
+        </div>
+    </div>
+</div>

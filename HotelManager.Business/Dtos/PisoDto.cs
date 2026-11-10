@@ -6,5 +6,6 @@
         public int Numero { get; set; }
         public string Estado { get; set; }
         public int IdHotel { get; set; }
+        public int? IdBloque { get; set; }
     }
 }

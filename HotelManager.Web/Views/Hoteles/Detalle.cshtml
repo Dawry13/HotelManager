@@ -1,0 +1,83 @@
+﻿@model HotelViewModel
+@{
+    ViewBag.Title = Model.Nombre;
+    var bloques = (List<BloqueDto>)ViewBag.Bloques;
+    var pisos = (List<PisoDto>)ViewBag.Pisos;
+    var bloquesPorId = (Dictionary<int, BloqueDto>)ViewBag.BloquesPorId;
+    var habPorPiso = (Dictionary<int, int>)ViewBag.HabitacionesPorPiso;
+}
+<section class="hm-hero mb-4" style="min-height:220px">
+    <div class="hm-hero-inner">
+        <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / <a href="@Url.Action("Index")">Hoteles</a> / Detalle</div>
+        <span class="hm-badge @EstadoHelper.CssActivo(Model.Estado) mt-2">@Model.Estado</span>
+        <h1 class="text-capitalize" style="font-size:2.3rem">@Model.Nombre</h1>
+        <p class="text-capitalize mb-3"><i class="bi bi-geo-alt me-1"></i>@Model.Direccion</p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-gold" href="@Url.Action("Editar", new { id = Model.IdHotel })"><i class="bi bi-pencil me-1"></i> Editar</a>
+            <a class="btn btn-ghost" href="@Url.Action("Index")"><i class="bi bi-arrow-left me-1"></i> Volver</a>
+        </div>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-4"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-grid-1x2"></i></div><div><div class="hm-stat-value">@Model.TotalBloques</div><div class="hm-stat-label">Bloques</div></div></div></div>
+    <div class="col-4"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-layers"></i></div><div><div class="hm-stat-value">@Model.TotalPisos</div><div class="hm-stat-label">Pisos</div></div></div></div>
+    <div class="col-4"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-door-closed"></i></div><div><div class="hm-stat-value">@Model.TotalHabitaciones</div><div class="hm-stat-label">Habitaciones</div></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-grid-1x2"></i> Bloques</h2>
+                <a class="btn btn-primary btn-sm" href="@Url.Action("Crear", "Bloques", new { idHotel = Model.IdHotel })"><i class="bi bi-plus-lg"></i> Bloque</a>
+            </div>
+            @if (!bloques.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-grid-1x2"></i>Sin bloques registrados.</div>
+            }
+            @foreach (var b in bloques)
+            {
+                <div class="hm-res-item purple">
+                    <span class="hm-code ms-2">@b.Codigo</span>
+                    <div class="flex-grow-1"><div class="hm-cell-main text-capitalize">@b.Nombre</div><div class="hm-cell-sub">@b.Descripcion</div></div>
+                    <span class="hm-badge @EstadoHelper.CssActivo(b.Estado)">@b.Estado</span>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="hm-card h-100">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-layers"></i> Pisos</h2>
+                <a class="btn btn-primary btn-sm" href="@Url.Action("Crear", "Pisos", new { idHotel = Model.IdHotel })"><i class="bi bi-plus-lg"></i> Piso</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table hm-table table-hover">
+                    <thead><tr><th>Piso</th><th>Bloque</th><th class="text-center">Habitaciones</th><th>Estado</th><th></th></tr></thead>
+                    <tbody>
+                        @if (!pisos.Any())
+                        {
+                            <tr><td colspan="5" class="hm-empty"><i class="bi bi-layers"></i>Sin pisos registrados.</td></tr>
+                        }
+                        @foreach (var p in pisos)
+                        {
+                            <tr>
+                                <td><span class="hm-code">@p.Numero</span></td>
+                                <td class="text-capitalize">@(p.IdBloque.HasValue && bloquesPorId.ContainsKey(p.IdBloque.Value) ? bloquesPorId[p.IdBloque.Value].Nombre : "—")</td>
+                                <td class="text-center">@(habPorPiso.ContainsKey(p.IdPiso) ? habPorPiso[p.IdPiso] : 0)</td>
+                                <td><span class="hm-badge @EstadoHelper.CssActivo(p.Estado)">@p.Estado</span></td>
+                                <td class="text-end">
+                                    @if (p.Estado == "Activo")
+                                    {
+                                        <a class="btn-icon i-view" href="@Url.Action("Crear", "Habitaciones", new { idHotel = Model.IdHotel, idPiso = p.IdPiso })" title="Agregar habitación"><i class="bi bi-door-open"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

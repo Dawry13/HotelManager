@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace HotelManager.Domain.Enums
+﻿namespace HotelManager.Domain.Enums
 {
+    // ck_notificaciones_estado: 'pendiente','enviada','fallida'
     public enum EstadoNotificacion
     {
         Pendiente = 0,
         Enviada = 1,
-        Leida = 2,
         Fallida = 3
     }
 }

@@ -35,8 +35,8 @@ namespace HotelManager.Data.Repositories
             => Convert.ToInt32(Scalar(
                 @"INSERT INTO reservas
                     (fecha_entrada, fecha_salida, cantidad_huespedes, costo_total, estado, id_habitacion, id_huesped)
-                  OUTPUT INSERTED.id_reserva
-                  VALUES (@en, @sa, @g, @c, @e, @h, @hu)",
+                  VALUES (@en, @sa, @g, @c, @e, @h, @hu);
+                  SELECT CAST(SCOPE_IDENTITY() AS int);",  // reservas tiene triggers: no se permite OUTPUT sin INTO
                 new SqlParameter("@en", e.Entrada.Date),
                 new SqlParameter("@sa", e.Salida.Date),
                 new SqlParameter("@g", e.Huespedes),

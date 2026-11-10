@@ -1,0 +1,60 @@
+﻿@model PisoViewModel
+@{
+    var esEdicion = Model.IdPiso > 0;
+}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="hm-card hm-card-body">
+            @using (Html.BeginForm(esEdicion ? "Editar" : "Crear", "Pisos", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdPiso)
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="hm-form-section">Ubicación</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.IdHotel, new { @class = "form-label" })
+                    @if (esEdicion)
+                    {
+                        @Html.HiddenFor(m => m.IdHotel)
+                        @Html.HiddenFor(m => m.NombreHotel)
+                        <input class="form-control text-capitalize" value="@Model.NombreHotel" readonly />
+                        <div class="form-text">Un piso pertenece a un único hotel (RN-001).</div>
+                    }
+                    else
+                    {
+                        @Html.DropDownListFor(m => m.IdHotel, (SelectList)ViewBag.Hoteles, "-- Seleccione el hotel --",
+                            new { @class = "form-select", data_cascade_url = Url.Action("PorHotel", "Bloques"), data_cascade_param = "idHotel", data_cascade_target = "#IdBloque" })
+                    }
+                    @Html.ValidationMessageFor(m => m.IdHotel, "", new { @class = "small" })
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-8 mb-4">
+                        @Html.LabelFor(m => m.IdBloque, new { @class = "form-label" })
+                        @Html.DropDownListFor(m => m.IdBloque, (SelectList)ViewBag.Bloques, "(Sin bloque)", new { @class = "form-select", data_placeholder = "(Sin bloque)" })
+                        <div class="form-text">Opcional. Solo bloques activos del hotel.</div>
+                    </div>
+                    <div class="col-sm-4 mb-4">
+                        @Html.LabelFor(m => m.Numero, new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.Numero, new { @class = "form-control", type = "number", min = "0", max = "200", placeholder = "1" })
+                        @Html.ValidationMessageFor(m => m.Numero, "", new { @class = "small" })
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar piso")</button>
+                    <a class="btn btn-ghost" href="@Url.Action("Index", new { idHotel = Model.IdHotel })">Cancelar</a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Reglas de negocio</div>
+            <div class="hm-rule"><i class="bi bi-diagram-3"></i><div><strong>RN-001</strong>Un piso pertenece a un único hotel.</div></div>
+            <div class="hm-rule"><i class="bi bi-123"></i><div><strong>RN-002</strong>No pueden existir dos pisos activos con el mismo número en un hotel.</div></div>
+            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div><strong>RN-006</strong>Un piso inactivo no puede recibir nuevas habitaciones.</div></div>
+        </div>
+    </div>
+</div>

@@ -7,6 +7,8 @@ namespace HotelManager.Business.Interfaces
     {
         HotelDto Crear(HotelDto dto);
         HotelDto Actualizar(HotelDto dto);
+        void Activar(int idHotel);
+        void Desactivar(int idHotel);
         HotelDto ObtenerPorId(int idHotel);
         IEnumerable<HotelDto> Listar();
     }

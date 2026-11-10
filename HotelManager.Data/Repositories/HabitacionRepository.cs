@@ -7,84 +7,117 @@ using HotelManager.Data.Interfaces;
 using HotelManager.Domain.Entities;
 using HotelManager.Domain.Enums;
 
-
 namespace HotelManager.Data.Repositories
 {
     public class HabitacionRepository : BaseRepository<Habitacion>, IHabitacionRepository
     {
-        protected override string TableName => "Habitaciones";
-        protected override string KeyColumn => "IdHabitacion";
+        protected override string TableName => "habitaciones";
+        protected override string KeyColumn => "id_habitacion";
 
         protected override Habitacion Map(IDataRecord r) => new Habitacion
         {
-            IdHabitacion = (int)r["IdHabitacion"],
-            Numero = (int)r["Numero"],
-            Capacidad = (int)r["Capacidad"],
-            Tarifa = (decimal)r["Tarifa"],
-            Estado = (EstadoHabitacion)(int)r["Estado"],
-            IdPiso = (int)r["IdPiso"]
+            IdHabitacion = (int)r["id_habitacion"],
+            Numero = (string)r["numero"],
+            Capacidad = (int)r["capacidad"],
+            Tarifa = (decimal)r["tarifa"],
+            Estado = EstadoDesdeTexto((string)r["estado"]),
+            IdPiso = (int)r["id_piso"],
+            IdTipoHabitacion = EnteroNulo(r, "id_tipo_habitacion")
         };
 
+        // ck_habitaciones_estado: 'disponible','mantenimiento','fuera_de_servicio','inactiva'
+        public static string EstadoTexto(EstadoHabitacion estado)
+        {
+            switch (estado)
+            {
+                case EstadoHabitacion.Disponible: return "disponible";
+                case EstadoHabitacion.Mantenimiento: return "mantenimiento";
+                case EstadoHabitacion.FueraDeServicio: return "fuera_de_servicio";
+                default: return "inactiva";
+            }
+        }
+
+        public static EstadoHabitacion EstadoDesdeTexto(string texto)
+        {
+            switch ((texto ?? string.Empty).Trim().ToLower())
+            {
+                case "disponible": return EstadoHabitacion.Disponible;
+                case "mantenimiento": return EstadoHabitacion.Mantenimiento;
+                case "fuera_de_servicio": return EstadoHabitacion.FueraDeServicio;
+                default: return EstadoHabitacion.Inactiva;
+            }
+        }
+
+        public override IEnumerable<Habitacion> GetAll()
+            => Query("select * from habitaciones order by id_hotel, numero");
+
+        // id_hotel se toma del piso: la fk compuesta (id_piso, id_hotel) exige que coincidan.
+        // Se usa scope_identity() porque la tabla tiene el trigger tr_habitaciones_piso_activo
+        // (SQL Server no permite OUTPUT sin INTO en tablas con triggers).
         public override int Add(Habitacion e)
-            => (int)Scalar(@"INSERT INTO Habitaciones (Numero, Capacidad, Tarifa, Estado, IdPiso)
-                             OUTPUT INSERTED.IdHabitacion
-                             VALUES (@n, @c, @t, @e, @p)",
+            => Convert.ToInt32(Scalar(@"insert into habitaciones (numero, capacidad, tarifa, estado, id_piso, id_hotel, id_tipo_habitacion)
+                             select @n, @c, @t, @e, p.id_piso, p.id_hotel, @tipo
+                             from pisos p where p.id_piso = @p;
+                             select cast(scope_identity() as int);",
                 new SqlParameter("@n", e.Numero),
                 new SqlParameter("@c", e.Capacidad),
                 new SqlParameter("@t", e.Tarifa),
-                new SqlParameter("@e", (int)e.Estado),
-                new SqlParameter("@p", e.IdPiso));
+                new SqlParameter("@e", EstadoTexto(e.Estado)),
+                new SqlParameter("@p", e.IdPiso),
+                new SqlParameter("@tipo", SqlDbType.Int) { Value = DbVal(e.IdTipoHabitacion) }));
 
         public override bool Update(Habitacion e)
-            => Execute(@"UPDATE Habitaciones
-                         SET Numero=@n, Capacidad=@c, Tarifa=@t, Estado=@e, IdPiso=@p
-                         WHERE IdHabitacion=@id",
+            => Execute(@"update h
+                         set numero = @n, capacidad = @c, tarifa = @t, estado = @e,
+                             id_piso = p.id_piso, id_hotel = p.id_hotel, id_tipo_habitacion = @tipo
+                         from habitaciones h
+                         join pisos p on p.id_piso = @p
+                         where h.id_habitacion = @id",
                 new SqlParameter("@n", e.Numero),
                 new SqlParameter("@c", e.Capacidad),
                 new SqlParameter("@t", e.Tarifa),
-                new SqlParameter("@e", (int)e.Estado),
+                new SqlParameter("@e", EstadoTexto(e.Estado)),
                 new SqlParameter("@p", e.IdPiso),
+                new SqlParameter("@tipo", SqlDbType.Int) { Value = DbVal(e.IdTipoHabitacion) },
                 new SqlParameter("@id", e.IdHabitacion)) > 0;
 
         public IEnumerable<Habitacion> GetByPiso(int idPiso)
-            => Query("SELECT * FROM Habitaciones WHERE IdPiso = @p", new SqlParameter("@p", idPiso));
+            => Query("select * from habitaciones where id_piso = @p order by numero", new SqlParameter("@p", idPiso));
 
         public IEnumerable<Habitacion> GetByHotel(int idHotel)
-            => Query(@"SELECT h.* FROM Habitaciones h
-                       INNER JOIN Pisos p ON p.IdPiso = h.IdPiso
-                       WHERE p.IdHotel = @h", new SqlParameter("@h", idHotel));
+            => Query("select * from habitaciones where id_hotel = @h order by numero", new SqlParameter("@h", idHotel));
 
-        public bool ExisteNumeroEnHotel(int idHotel, int numero, int? excluirIdHabitacion = null)
-            => (int)Scalar(@"SELECT COUNT(1) FROM Habitaciones h
-                             INNER JOIN Pisos p ON p.IdPiso = h.IdPiso
-                             WHERE p.IdHotel=@h AND h.Numero=@n
-                               AND (@x IS NULL OR h.IdHabitacion<>@x)",
+        /// <summary>RN-005: uq_habitaciones_hotel_numero.</summary>
+        public bool ExisteNumeroEnHotel(int idHotel, string numero, int? excluirIdHabitacion = null)
+            => Convert.ToInt32(Scalar(@"select count(1) from habitaciones
+                                       where id_hotel = @h and numero = @n
+                                         and (@x is null or id_habitacion <> @x)",
                 new SqlParameter("@h", idHotel),
                 new SqlParameter("@n", numero),
-                new SqlParameter("@x", DbVal(excluirIdHabitacion))) > 0;
+                new SqlParameter("@x", SqlDbType.Int) { Value = DbVal(excluirIdHabitacion) })) > 0;
 
         public IEnumerable<Habitacion> GetDisponibles(DateTime entrada, DateTime salida, int huespedes, int? idHotel = null)
-            => Query(@"SELECT h.* FROM Habitaciones h
-                       INNER JOIN Pisos p ON p.IdPiso = h.IdPiso
-                       WHERE h.Estado = @disp                 -- RN-007: solo habitaciones operativas
-                         AND p.Estado = 1
-                         AND h.Capacidad >= @g                -- RN-011
-                         AND (@hotel IS NULL OR p.IdHotel = @hotel)
-                         AND NOT EXISTS (                     -- RN-010 / RN-012
-                             SELECT 1 FROM Reservas r
-                             WHERE r.IdHabitacion = h.IdHabitacion
-                               AND r.Estado <> @cancelada
-                               AND r.Entrada < @salida AND r.Salida > @entrada)",
-                new SqlParameter("@disp", (int)EstadoHabitacion.Disponible),
-                new SqlParameter("@cancelada", (int)EstadoReserva.Cancelada),
+            => Query(@"select h.* from habitaciones h
+                       join pisos p on p.id_piso = h.id_piso
+                       join hoteles ho on ho.id_hotel = p.id_hotel
+                       where h.estado = 'disponible'          -- rn-007
+                         and p.estado = 'activo'
+                         and ho.estado = 'activo'
+                         and h.capacidad >= @g                -- rn-011
+                         and (@hotel is null or h.id_hotel = @hotel)
+                         and not exists (                     -- rn-010 / rn-012
+                             select 1 from reservas r
+                             where r.id_habitacion = h.id_habitacion
+                               and r.estado in ('pendiente','confirmada','modificada')
+                               and r.fecha_entrada < @salida and r.fecha_salida > @entrada)",
                 new SqlParameter("@g", huespedes),
-                new SqlParameter("@hotel", DbVal(idHotel)),
-                new SqlParameter("@entrada", entrada),
-                new SqlParameter("@salida", salida));
+                new SqlParameter("@hotel", SqlDbType.Int) { Value = DbVal(idHotel) },
+                new SqlParameter("@entrada", SqlDbType.Date) { Value = entrada.Date },
+                new SqlParameter("@salida", SqlDbType.Date) { Value = salida.Date });
 
         public bool CambiarEstado(int idHabitacion, EstadoHabitacion nuevoEstado)
-            => Execute("UPDATE Habitaciones SET Estado=@e WHERE IdHabitacion=@id",
-                new SqlParameter("@e", (int)nuevoEstado),
+            => Execute("update habitaciones set estado = @e where id_habitacion = @id",
+                new SqlParameter("@e", EstadoTexto(nuevoEstado)),
                 new SqlParameter("@id", idHabitacion)) > 0;
     }
 }

@@ -10,11 +10,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Business", "HotelManager.Business\HotelManager.Business.csproj", "{05CC778D-FD99-4AE6-A708-D409DEF1157C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Presentation", "HotelManager.Presentation\HotelManager.Presentation.csproj", "{ADA9FD11-7AAE-4786-B839-98528DDFD7AB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Data", "HotelManager.Data\HotelManager.Data.csproj", "{A499B708-BC3C-4224-9A4D-01C9E2E3F670}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Domain", "HotelManager.Domain\HotelManager.Domain.csproj", "{C78E3751-03ED-458C-8AD4-66899B65945C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotelManager.Web", "HotelManager.Web\HotelManager.Web.csproj", "{6B1E3C2A-7D4F-4E8B-9A21-3F5C8D0E1A47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,10 +26,6 @@ Global
 		{05CC778D-FD99-4AE6-A708-D409DEF1157C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05CC778D-FD99-4AE6-A708-D409DEF1157C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05CC778D-FD99-4AE6-A708-D409DEF1157C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ADA9FD11-7AAE-4786-B839-98528DDFD7AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ADA9FD11-7AAE-4786-B839-98528DDFD7AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ADA9FD11-7AAE-4786-B839-98528DDFD7AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ADA9FD11-7AAE-4786-B839-98528DDFD7AB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A499B708-BC3C-4224-9A4D-01C9E2E3F670}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A499B708-BC3C-4224-9A4D-01C9E2E3F670}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A499B708-BC3C-4224-9A4D-01C9E2E3F670}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -38,6 +34,10 @@ Global
 		{C78E3751-03ED-458C-8AD4-66899B65945C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C78E3751-03ED-458C-8AD4-66899B65945C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C78E3751-03ED-458C-8AD4-66899B65945C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B1E3C2A-7D4F-4E8B-9A21-3F5C8D0E1A47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B1E3C2A-7D4F-4E8B-9A21-3F5C8D0E1A47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B1E3C2A-7D4F-4E8B-9A21-3F5C8D0E1A47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B1E3C2A-7D4F-4E8B-9A21-3F5C8D0E1A47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

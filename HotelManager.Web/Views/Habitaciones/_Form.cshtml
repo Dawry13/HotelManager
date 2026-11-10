@@ -1,0 +1,119 @@
+﻿@model HabitacionViewModel
+@{
+    var esEdicion = Model.IdHabitacion > 0;
+    var tipos = (List<TipoHabitacionDto>)ViewBag.Tipos;
+    var tipoActual = tipos.FirstOrDefault(t => t.IdTipoHabitacion == Model.IdTipoHabitacion);
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="hm-card hm-card-body">
+            @using (Html.BeginForm(esEdicion ? "Editar" : "Crear", "Habitaciones", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdHabitacion)
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="hm-form-section">Ubicación</div>
+                if (esEdicion)
+                {
+                    @Html.HiddenFor(m => m.IdHotel)
+                    @Html.HiddenFor(m => m.IdPiso)
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label">Hotel</label>
+                            <input class="form-control text-capitalize" value="@Model.NombreHotel" readonly />
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label">Piso</label>
+                            <input class="form-control text-capitalize" value="@Model.DescripcionPiso" readonly />
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            @Html.LabelFor(m => m.IdHotel, new { @class = "form-label" })
+                            @Html.DropDownListFor(m => m.IdHotel, (SelectList)ViewBag.Hoteles, "-- Seleccione el hotel --",
+                                new { @class = "form-select", data_cascade_url = Url.Action("PorHotel", "Pisos"), data_cascade_param = "idHotel", data_cascade_target = "#IdPiso" })
+                            @Html.ValidationMessageFor(m => m.IdHotel, "", new { @class = "small" })
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            @Html.LabelFor(m => m.IdPiso, new { @class = "form-label" })
+                            @Html.DropDownListFor(m => m.IdPiso, (List<SelectListItem>)ViewBag.Pisos, "-- Seleccione el piso --",
+                                new { @class = "form-select", data_placeholder = "-- Seleccione el piso --" })
+                            @Html.ValidationMessageFor(m => m.IdPiso, "", new { @class = "small" })
+                        </div>
+                    </div>
+                }
+
+                <div class="hm-form-section mt-3">Características</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.IdTipoHabitacion, new { @class = "form-label" })
+                    <select class="form-select" id="IdTipoHabitacion" name="IdTipoHabitacion" data-autollenar>
+                        <option value="">-- Seleccione el tipo --</option>
+                        @foreach (var t in tipos)
+                        {
+                            <option value="@t.IdTipoHabitacion" data-capacidad="@t.CapacidadMaxima"
+                                    data-tarifa="@t.TarifaBase.ToString(inv)"
+                                    @(t.IdTipoHabitacion == Model.IdTipoHabitacion ? "selected" : "")>
+                                @TextoHelper.Titulo(t.Nombre) (máx. @t.CapacidadMaxima)@(t.Estado == "Activo" ? "" : " - inactivo")
+                            </option>
+                        }
+                    </select>
+                    @Html.ValidationMessageFor(m => m.IdTipoHabitacion, "", new { @class = "small" })
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        @Html.LabelFor(m => m.Numero, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                            @Html.TextBoxFor(m => m.Numero, new { @class = "form-control", maxlength = "10", placeholder = "101" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Numero, "", new { @class = "small" })
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        @Html.LabelFor(m => m.Capacidad, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-people"></i></span>
+                            @Html.TextBoxFor(m => m.Capacidad, new { @class = "form-control", type = "number", min = "1", max = (tipoActual != null ? tipoActual.CapacidadMaxima : 20) })
+                        </div>
+                        <div class="form-text" id="ayudaTipo">@(tipoActual != null ? "Capacidad máxima del tipo: " + tipoActual.CapacidadMaxima + " huésped(es)." : "")</div>
+                        @Html.ValidationMessageFor(m => m.Capacidad, "", new { @class = "small" })
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        @Html.LabelFor(m => m.Tarifa, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text">RD$</span>
+                            <input class="form-control" id="Tarifa" name="Tarifa" type="number" min="0.01" step="0.01"
+                                   value="@(Model.Tarifa.HasValue ? Model.Tarifa.Value.ToString("0.00", inv) : "")" />
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Tarifa, "", new { @class = "small" })
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-2">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar habitación")</button>
+                    <a class="btn btn-ghost" href="@Url.Action("Index", new { idHotel = Model.IdHotel })">Cancelar</a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body">
+            @if (esEdicion)
+            {
+                <div class="hm-form-section">Estado actual</div>
+                <p class="mb-4"><span class="hm-badge @EstadoHelper.Css(Model.Estado)">@EstadoHelper.Texto(Model.Estado)</span>
+                    <span class="d-block small text-secondary mt-2">Cámbielo desde el listado de habitaciones.</span></p>
+            }
+            <div class="hm-form-section">Reglas de negocio</div>
+            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div><strong>RN-006</strong>Solo se agregan habitaciones a pisos activos.</div></div>
+            <div class="hm-rule"><i class="bi bi-hash"></i><div><strong>RN-005</strong>El número es único dentro del hotel.</div></div>
+            <div class="hm-rule"><i class="bi bi-people"></i><div><strong>Capacidad</strong>No puede superar la capacidad máxima del tipo.</div></div>
+            <div class="hm-rule"><i class="bi bi-calendar-x"></i><div><strong>RN-007</strong>Solo las habitaciones disponibles se pueden reservar.</div></div>
+        </div>
+    </div>
+</div>

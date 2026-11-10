@@ -21,6 +21,9 @@ namespace HotelManager.Business.Services
         {
             Validar(dto);
 
+            if (_hotelRepository.ExisteNombre(dto.Nombre.Trim(), null))
+                throw new BusinessException("Ya existe un hotel con ese nombre.");
+
             var hotel = new Hotel
             {
                 Nombre = dto.Nombre.Trim(),
@@ -40,11 +43,35 @@ namespace HotelManager.Business.Services
             if (hotel == null)
                 throw new BusinessException("El hotel no existe.");
 
+            if (_hotelRepository.ExisteNombre(dto.Nombre.Trim(), hotel.IdHotel))
+                throw new BusinessException("Ya existe un hotel con ese nombre.");
+
             hotel.Nombre = dto.Nombre.Trim();
             hotel.Direccion = dto.Direccion.Trim();
 
             _hotelRepository.Update(hotel);
             return ToDto(hotel);
+        }
+
+        public void Activar(int idHotel)
+        {
+            CambiarEstado(idHotel, true);
+        }
+
+        public void Desactivar(int idHotel)
+        {
+            CambiarEstado(idHotel, false);
+        }
+
+        private void CambiarEstado(int idHotel, bool activo)
+        {
+            var hotel = _hotelRepository.GetById(idHotel);
+            if (hotel == null)
+                throw new BusinessException("El hotel no existe.");
+            if (hotel.Estado == activo) return;
+
+            hotel.Estado = activo;
+            _hotelRepository.Update(hotel);
         }
 
         public HotelDto ObtenerPorId(int idHotel)

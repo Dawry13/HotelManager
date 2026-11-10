@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using HotelManager.Business.Interfaces;
 using HotelManager.Data.Interfaces;
 using HotelManager.Domain.Entities;
@@ -6,7 +7,6 @@ using HotelManager.Domain.Enums;
 
 namespace HotelManager.Business.Services
 {
-   
     public class NotificacionService : INotificacionService
     {
         private readonly INotificacionRepository _notificaciones;
@@ -16,27 +16,33 @@ namespace HotelManager.Business.Services
             _notificaciones = notificaciones;
         }
 
-        public void Notificar(int idReserva, TipoNotificacion tipo)
+        public int Notificar(int idReserva, TipoNotificacion tipo)
         {
             var notificacion = new Notificacion
             {
                 IdReserva = idReserva,
-                Mensaje = ConstruirMensaje(idReserva, tipo),
+                Tipo = tipo,
                 Fecha = DateTime.Now,
-                Leida = false
+                Estado = EstadoNotificacion.Pendiente
             };
-            _notificaciones.Add(notificacion);
+            return _notificaciones.Add(notificacion);
         }
 
-        private static string ConstruirMensaje(int idReserva, TipoNotificacion tipo)
+        public int ContarPendientes()
         {
-            switch (tipo)
-            {
-                case TipoNotificacion.Confirmacion: return "Su reserva #" + idReserva + " fue confirmada.";
-                case TipoNotificacion.Modificacion: return "Su reserva #" + idReserva + " fue modificada.";
-                case TipoNotificacion.Cancelacion: return "Su reserva #" + idReserva + " fue cancelada.";
-                default: return "Actualización de su reserva #" + idReserva + ".";
-            }
+            return _notificaciones.GetPorEstado(EstadoNotificacion.Pendiente).Count();
+        }
+
+        // RN-015: un fallo de notificacion se registra pero no afecta la reserva.
+        public void RegistrarResultado(int idNotificacion, bool enviada, string detalleError = null)
+        {
+            var detalle = enviada ? null : detalleError;
+            if (detalle != null && detalle.Length > 500) detalle = detalle.Substring(0, 500);
+
+            _notificaciones.RegistrarResultado(
+                idNotificacion,
+                enviada ? EstadoNotificacion.Enviada : EstadoNotificacion.Fallida,
+                detalle);
         }
     }
 }

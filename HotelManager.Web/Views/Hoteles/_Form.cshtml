@@ -1,0 +1,47 @@
+﻿@model HotelViewModel
+@{
+    var esEdicion = Model.IdHotel > 0;
+}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="hm-card hm-card-body">
+            @using (Html.BeginForm(esEdicion ? "Editar" : "Crear", "Hoteles", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdHotel)
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="hm-form-section">Datos del establecimiento</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Nombre, new { @class = "form-label" })
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", maxlength = "150", autofocus = "autofocus", placeholder = "Ej.: Hotel Caribe Santo Domingo" })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Nombre, "", new { @class = "small" })
+                </div>
+                <div class="mb-4">
+                    @Html.LabelFor(m => m.Direccion, new { @class = "form-label" })
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                        @Html.TextAreaFor(m => m.Direccion, 2, 0, new { @class = "form-control", maxlength = "250", placeholder = "Calle, sector, ciudad" })
+                    </div>
+                    @Html.ValidationMessageFor(m => m.Direccion, "", new { @class = "small" })
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar hotel")</button>
+                    <a class="btn btn-ghost" href="@Url.Action("Index")">Cancelar</a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Reglas de negocio</div>
+            <div class="hm-rule"><i class="bi bi-shield-check"></i><div><strong>RF-001</strong>Cada hotel se registra con nombre y dirección.</div></div>
+            <div class="hm-rule"><i class="bi bi-fingerprint"></i><div><strong>Nombre único</strong>No pueden existir dos hoteles con el mismo nombre.</div></div>
+            <div class="hm-rule"><i class="bi bi-diagram-3"></i><div><strong>RN-001</strong>Un hotel puede contener uno o varios pisos.</div></div>
+        </div>
+    </div>
+</div>
