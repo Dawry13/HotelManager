@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Interfaces;
 using HotelManager.Domain.Enums;
 using HotelManager.Web.Helpers;
@@ -8,6 +10,8 @@ using HotelManager.Web.Models;
 
 namespace HotelManager.Web.Controllers
 {
+    // Cualquier usuario autenticado puede llegar a "/": el huesped y el servicio de notificaciones
+    // se envian a su seccion; el panel es solo para Administrador y Recepcionista.
     public class HomeController : BaseController
     {
         private readonly IHotelService _hotelService;
@@ -33,6 +37,11 @@ namespace HotelManager.Web.Controllers
 
         public ActionResult Index()
         {
+            if (User.IsInRole(Roles.Huesped)) return RedirectToAction("Index", "Portal");
+            if (User.IsInRole(Roles.ServicioNotificacion)) return RedirectToAction("Index", "Notificaciones");
+            if (!User.IsInRole(Roles.Administrador) && !User.IsInRole(Roles.Recepcionista))
+                return RedirectToAction("AccesoDenegado", "Cuenta");
+
             var hoy = DateTime.Today;
             var hoteles = _hotelService.Listar().ToList();
             var habitaciones = _habitacionService.Listar().ToList();
@@ -111,6 +120,7 @@ namespace HotelManager.Web.Controllers
         }
 
         // GET: /Home/Buscar?q=...
+        [Autorizar(Roles.Administrador, Roles.Recepcionista)]
         public ActionResult Buscar(string q)
         {
             var modelo = new BusquedaViewModel { Texto = (q ?? string.Empty).Trim() };

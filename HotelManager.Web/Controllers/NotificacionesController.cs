@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Interfaces;
 using HotelManager.Web.Helpers;
@@ -11,6 +13,7 @@ namespace HotelManager.Web.Controllers
     /// RF-014 / RF-015: seguimiento de las notificaciones de confirmacion, modificacion y cancelacion.
     /// El envio real (correo) es externo; aqui se registra su resultado (RN-014, RN-015).
     /// </summary>
+    [Autorizar(Roles.Administrador, Roles.Recepcionista, Roles.ServicioNotificacion)]
     public class NotificacionesController : BaseController
     {
         private readonly INotificacionService _notificacionService;
@@ -73,43 +76,43 @@ namespace HotelManager.Web.Controllers
             ViewBag.Conteos = todas.GroupBy(n => n.Estado).ToDictionary(g => g.Key, g => g.Count());
             ViewBag.Estado = estado;
             ViewBag.Tipo = tipo;
+            ViewBag.DescripcionEnvio = _notificacionService.DescripcionEnvio;
+            ViewBag.ModoPrueba = _notificacionService.ModoPrueba;
             return View(lista);
         }
 
-        // POST: /Notificaciones/MarcarEnviada/5
+        // POST: /Notificaciones/Enviar/5  -> envia o reenvia el correo al huesped
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult MarcarEnviada(int id, string returnUrl)
+        public ActionResult Enviar(int id, string returnUrl)
         {
-            EjecutarConMensaje(() => _notificacionService.RegistrarResultado(id, true), "Notificación marcada como enviada.");
+            EjecutarConMensaje(() => _notificacionService.Reintentar(id),
+                _notificacionService.ModoPrueba
+                    ? "Modo de prueba: el correo se guardó como archivo .eml (no se envió a internet)."
+                    : "Correo enviado al huésped.");
             return Volver(returnUrl);
         }
 
-        // POST: /Notificaciones/MarcarFallida/5  (RN-015: el fallo no afecta la reserva)
+        // POST: /Notificaciones/EnviarPendientes
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult EnviarPendientes()
+        {
+            var pendientes = _notificacionService.ContarPendientes();
+            var enviadas = 0;
+            EjecutarConMensaje(() => enviadas = _notificacionService.EnviarPendientes(), "Envío de pendientes terminado.");
+            if (enviadas < pendientes)
+                Error(enviadas + " de " + pendientes + " correo(s) enviado(s). Revise el motivo de los que fallaron.");
+            else
+                Exito(enviadas + " correo(s) enviado(s).");
+            return RedirectToAction("Index");
+        }
+
+        // POST: /Notificaciones/MarcarFallida/5  (registro manual; RN-015: el fallo no afecta la reserva)
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult MarcarFallida(int id, string detalle, string returnUrl)
         {
             EjecutarConMensaje(() => _notificacionService.RegistrarResultado(id, false, detalle),
                 "Fallo registrado. La reserva se conserva sin cambios (RN-015).");
             return Volver(returnUrl);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Reintentar(int id, string returnUrl)
-        {
-            EjecutarConMensaje(() => _notificacionService.Reintentar(id), "Notificación puesta de nuevo en cola (pendiente).");
-            return Volver(returnUrl);
-        }
-
-        // POST: /Notificaciones/MarcarPendientesEnviadas
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult MarcarPendientesEnviadas()
-        {
-            var pendientes = _notificacionService.Listar().Where(n => n.Estado == "Pendiente").Select(n => n.IdNotificacion).ToList();
-            EjecutarConMensaje(() =>
-            {
-                foreach (var id in pendientes) _notificacionService.RegistrarResultado(id, true);
-            }, pendientes.Count + " notificación(es) marcada(s) como enviada(s).");
-            return RedirectToAction("Index");
         }
 
         private ActionResult Volver(string returnUrl)

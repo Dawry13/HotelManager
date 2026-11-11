@@ -1,0 +1,59 @@
+﻿@model ReservaItemViewModel
+@{
+    ViewBag.Title = "Reserva #" + Model.Id;
+    var notificaciones = (List<NotificacionDto>)ViewBag.Notificaciones;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon green"><i class="bi bi-calendar-check"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index")">Mis reservas</a> / #@Model.Id</div>
+            <h1>Reserva #@Model.Id <span class="hm-badge @EstadoHelper.CssReserva(Model.Estado) fs-6 align-middle ms-1">@(Model.Estado == "Pendiente" ? "Por confirmar" : Model.Estado)</span></h1>
+            <p class="hm-sub">@Model.Hotel · Habitación @Model.Habitacion</p>
+        </div>
+    </div>
+    <a class="btn btn-ghost" href="@Url.Action("Index")"><i class="bi bi-arrow-left me-1"></i> Mis reservas</a>
+</div>
+
+@if (Model.Estado == "Pendiente")
+{
+    <div class="alert alert-info"><i class="bi bi-hourglass-split me-1"></i> Su solicitud fue recibida y la habitación quedó apartada. Recepción la confirmará y le llegará un correo de confirmación.</div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-box-arrow-in-right"></i></div><div><div class="hm-stat-value fs-5">@Model.Entrada.ToString("ddd dd MMM yyyy", culture)</div><div class="hm-stat-label">Entrada</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-box-arrow-right"></i></div><div><div class="hm-stat-value fs-5">@Model.Salida.ToString("ddd dd MMM yyyy", culture)</div><div class="hm-stat-label">Salida</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-moon-stars"></i></div><div><div class="hm-stat-value">@Model.Noches</div><div class="hm-stat-label">Noche(s) · @Model.Huespedes persona(s)</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="hm-stat gold compact"><div class="hm-stat-icon"><i class="bi bi-cash-coin"></i></div><div><div class="hm-stat-value fs-4">RD$ @Model.Costo.ToString("N2")</div><div class="hm-stat-label">Total</div></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="hm-card hm-card-body h-100">
+            <div class="hm-form-section">Habitación</div>
+            <p class="mb-1"><span class="hm-code me-2">@Model.Habitacion</span> <strong>@Model.Tipo</strong></p>
+            <p class="small text-secondary mb-0 mt-2"><i class="bi bi-building me-1"></i>@Model.Hotel<br /><i class="bi bi-layers me-1"></i>@Model.Ubicacion</p>
+            <div class="form-text mt-3">Para modificar o cancelar su reserva, comuníquese con la recepción del hotel.</div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="hm-card h-100">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-envelope"></i> Correos de esta reserva</h2></div>
+            @if (!notificaciones.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-bell-slash"></i>Aún no se han enviado correos para esta reserva.</div>
+            }
+            @foreach (var n in notificaciones)
+            {
+                <div class="hm-res-item @(n.Estado == "Enviada" ? "ok" : "info")" style="padding-left:2rem">
+                    <div class="flex-grow-1">
+                        <div class="hm-cell-main">@n.Tipo</div>
+                        <div class="hm-cell-sub">@n.Fecha.ToString("dd/MM/yyyy hh:mm tt", culture)</div>
+                    </div>
+                    <span class="hm-badge @EstadoHelper.CssNotificacion(n.Estado)">@(n.Estado == "Enviada" ? "Enviada a su correo" : n.Estado)</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>

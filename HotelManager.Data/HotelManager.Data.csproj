@@ -74,6 +74,8 @@
     <Compile Include="Interfaces\ITipoHabitacionRepository.cs" />
     <Compile Include="Repositories\BloqueRepository.cs" />
     <Compile Include="Repositories\TipoHabitacionRepository.cs" />
+    <Compile Include="Interfaces\IUsuarioRepository.cs" />
+    <Compile Include="Repositories\UsuarioRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -104,6 +106,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Database\02_bloques_tipos_habitacion.sql">
       <LogicalName>HotelManager.Data.Database.02_bloques_tipos_habitacion.sql</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Database\03_usuarios_roles.sql">
+      <LogicalName>HotelManager.Data.Database.03_usuarios_roles.sql</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

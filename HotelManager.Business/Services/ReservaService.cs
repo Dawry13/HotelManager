@@ -39,7 +39,22 @@ namespace HotelManager.Business.Services
        
         public ReservaDto Crear(CrearReservaDto dto)
         {
-            ValidarFechas(dto.FechaEntrada, dto.FechaSalida);                         
+            return Registrar(dto, EstadoReserva.Confirmada);
+        }
+
+        /// <summary>
+        /// ACT-003: el huesped solicita una reserva. Se valida igual que una reserva normal y
+        /// se reserva la habitacion, pero queda Pendiente hasta que recepcion la confirma
+        /// (al confirmarla se envia el correo de confirmacion).
+        /// </summary>
+        public ReservaDto Solicitar(CrearReservaDto dto)
+        {
+            return Registrar(dto, EstadoReserva.Pendiente);
+        }
+
+        private ReservaDto Registrar(CrearReservaDto dto, EstadoReserva estado)
+        {
+            ValidarFechas(dto.FechaEntrada, dto.FechaSalida);
 
             if (_huespedes.GetById(dto.HuespedId) == null)
                 throw new BusinessException("El huésped no está registrado.");
@@ -57,12 +72,13 @@ namespace HotelManager.Business.Services
                 Salida = dto.FechaSalida.Date,
                 Huespedes = dto.CantidadHuespedes,
                 CostoTotal = CalcularCosto(habitacion, dto.FechaEntrada, dto.FechaSalida),        
-                Estado = EstadoReserva.Confirmada
+                Estado = estado
             };
 
             // El historial (creacion) lo registra el trigger tr_reservas_historial.
             reserva.IdReserva = _reservas.Add(reserva);
-            NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Confirmacion);               
+            if (estado == EstadoReserva.Confirmada)
+                NotificarSinFallar(reserva.IdReserva, TipoNotificacion.Confirmacion);
             return Mapear(reserva);
         }
 

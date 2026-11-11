@@ -4,3 +4,8 @@
 **/obj/
 *.user
 *.suo
+
+# Credenciales SMTP locales (no subir)
+HotelManager.Web/Correo.config
+# Correos generados en modo de prueba
+HotelManager.Web/App_Data/Correos/

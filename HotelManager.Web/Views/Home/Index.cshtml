@@ -1,6 +1,7 @@
 ﻿@model DashboardViewModel
 @{
     ViewBag.Title = "Inicio";
+    var esAdmin = User.IsInRole("Administrador");
     var culture = new System.Globalization.CultureInfo("es-DO");
     // Dona de ocupacion: circunferencia de un circulo r=60
     const double circ = 2 * Math.PI * 60;
@@ -21,7 +22,7 @@
 
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
-        <a class="hm-stat purple" href="@Url.Action("Index", "Hoteles")">
+        <a class="hm-stat purple" href="@(esAdmin ? Url.Action("Index", "Hoteles") : Url.Action("Disponibilidad", "Reservas"))">
             <div class="hm-stat-icon"><i class="bi bi-buildings"></i></div>
             <div><div class="hm-stat-value">@Model.Hoteles</div><div class="hm-stat-label">Hoteles</div></div>
             <span class="hm-stat-extra"><i class="bi bi-check2-circle"></i> @Model.HotelesActivos activos</span>
@@ -29,7 +30,7 @@
         </a>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <a class="hm-stat blue" href="@Url.Action("Index", "Habitaciones")">
+        <a class="hm-stat blue" href="@(esAdmin ? Url.Action("Index", "Habitaciones") : Url.Action("Disponibilidad", "Reservas"))">
             <div class="hm-stat-icon"><i class="bi bi-door-closed"></i></div>
             <div><div class="hm-stat-value">@Model.Habitaciones</div><div class="hm-stat-label">Habitaciones</div></div>
             <span class="hm-stat-extra"><i class="bi bi-check2-circle"></i> @Model.Disponibles libres</span>
@@ -125,7 +126,7 @@
                     {
                         var alto = Math.Max(8, h.Total * 100 / maxPorHotel);
                         var libres = h.Total == 0 ? 0 : h.Disponibles * 100 / h.Total;
-                        <a class="hm-bar text-decoration-none" href="@Url.Action("Index", "Habitaciones", new { idHotel = h.IdHotel })" title="@h.Hotel: @h.Disponibles libres de @h.Total">
+                        <a class="hm-bar text-decoration-none" href="@(esAdmin ? Url.Action("Index", "Habitaciones", new { idHotel = h.IdHotel }) : Url.Action("Disponibilidad", "Reservas", new { idHotel = h.IdHotel }))" title="@h.Hotel: @h.Disponibles libres de @h.Total">
                             <div class="hm-bar-fill" style="height:@(alto)%"><div class="used" style="height:@(libres)%"></div></div>
                             <small>@h.Hotel</small>
                         </a>
@@ -143,9 +144,23 @@
             </div>
             <div class="hm-card-body">
                 <a class="hm-quick purple" href="@Url.Action("Disponibilidad", "Reservas")"><i class="bi bi-calendar-plus"></i> Crear reserva <i class="bi bi-arrow-right"></i></a>
-                <a class="hm-quick blue" href="@Url.Action("Index", "Habitaciones")"><i class="bi bi-door-closed"></i> Gestionar habitaciones <i class="bi bi-arrow-right"></i></a>
+                @if (esAdmin)
+                {
+                    <a class="hm-quick blue" href="@Url.Action("Index", "Habitaciones")"><i class="bi bi-door-closed"></i> Gestionar habitaciones <i class="bi bi-arrow-right"></i></a>
+                }
+                else
+                {
+                    <a class="hm-quick blue" href="@Url.Action("Index", "Reservas", new { estado = "Pendiente" })"><i class="bi bi-hourglass-split"></i> Solicitudes por confirmar <i class="bi bi-arrow-right"></i></a>
+                }
                 <a class="hm-quick green" href="@Url.Action("Crear", "Huespedes")"><i class="bi bi-person-plus"></i> Registrar huésped <i class="bi bi-arrow-right"></i></a>
-                <a class="hm-quick gold" href="@Url.Action("Index", "Reportes")"><i class="bi bi-bar-chart-line"></i> Ver reportes <i class="bi bi-arrow-right"></i></a>
+                @if (esAdmin)
+                {
+                    <a class="hm-quick gold" href="@Url.Action("Index", "Reportes")"><i class="bi bi-bar-chart-line"></i> Ver reportes <i class="bi bi-arrow-right"></i></a>
+                }
+                else
+                {
+                    <a class="hm-quick gold" href="@Url.Action("Index", "Reservas")"><i class="bi bi-calendar-week"></i> Ver reservas <i class="bi bi-arrow-right"></i></a>
+                }
 
                 <div class="d-flex justify-content-between small text-secondary mt-3 px-1">
                     <span><i class="bi bi-grid-1x2 me-1"></i>@Model.Bloques bloques</span>

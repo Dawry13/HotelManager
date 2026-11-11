@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -9,6 +11,7 @@ using HotelManager.Web.Models;
 namespace HotelManager.Web.Controllers
 {
     /// <summary>CU-001 Gestionar hoteles (RF-001).</summary>
+    [Autorizar(Roles.Administrador)]
     public class HotelesController : BaseController
     {
         private readonly IHotelService _hotelService;

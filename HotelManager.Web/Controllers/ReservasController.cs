@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -15,6 +17,7 @@ namespace HotelManager.Web.Controllers
     /// CU-006 Consultar disponibilidad, CU-007 Crear reserva, CU-008 Modificar reserva,
     /// CU-009 Cancelar reserva y CU-010 Consultar historial.
     /// </summary>
+    [Autorizar(Roles.Administrador, Roles.Recepcionista)]
     public class ReservasController : BaseController
     {
         private readonly IReservaService _reservaService;
@@ -206,6 +209,7 @@ namespace HotelManager.Web.Controllers
             ViewBag.Huesped = ctx.Huespedes.ContainsKey(reserva.HuespedId) ? ctx.Huespedes[reserva.HuespedId] : null;
             ViewBag.Historial = _historialService.ConsultarPorReserva(id).ToList();
             ViewBag.Notificaciones = _notificacionService.ListarPorReserva(id).ToList();
+            ViewBag.ModoPrueba = _notificacionService.ModoPrueba;
             return View(ToItem(reserva, ctx));
         }
 
@@ -283,6 +287,7 @@ namespace HotelManager.Web.Controllers
         }
 
         // GET: /Reservas/Historial  (CU-010)
+        [Autorizar(Roles.Administrador)]   // CU-010: actor principal Administrador
         public ActionResult Historial(DateTime? desde, DateTime? hasta, string accion)
         {
             var ctx = Contexto();

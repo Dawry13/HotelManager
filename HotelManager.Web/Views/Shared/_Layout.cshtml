@@ -3,6 +3,14 @@
     var accion = (string)ViewContext.RouteData.Values["action"];
     Func<string, string> activo = c => string.Equals(c, controlador, StringComparison.OrdinalIgnoreCase) ? "active" : "";
     int pendientes = ViewBag.NotificacionesPendientes ?? 0;
+
+    // Menu segun el rol (RNF-001). Los nombres vienen de HotelManager.Business.Seguridad.Roles.
+    var esAdmin = User.IsInRole("Administrador");
+    var esRecepcion = User.IsInRole("Recepcionista");
+    var esHuesped = User.IsInRole("Huesped");
+    var esServicio = User.IsInRole("ServicioNotificacion");
+    var gestion = esAdmin || esRecepcion;
+    var verNotificaciones = gestion || esServicio;
 }
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
@@ -47,30 +55,50 @@
             </a>
 
             <ul class="hm-nav">
-                <li><a class="@activo("Home")" href="@Url.Action("Index", "Home")"><i class="bi bi-house-door-fill"></i> Inicio</a></li>
-                <li class="hm-nav-label">Operación</li>
-                <li><a class="@(controlador == "Reservas" && accion != "Disponibilidad" && accion != "Historial" ? "active" : "")" href="@Url.Action("Index", "Reservas")"><i class="bi bi-calendar-week"></i> Reservas</a></li>
-                <li><a class="@(controlador == "Reservas" && accion == "Disponibilidad" ? "active" : "")" href="@Url.Action("Disponibilidad", "Reservas")"><i class="bi bi-search-heart"></i> Disponibilidad</a></li>
-                <li><a class="@activo("Huespedes")" href="@Url.Action("Index", "Huespedes")"><i class="bi bi-people"></i> Huéspedes</a></li>
-                <li class="hm-nav-label">Estructura hotelera</li>
-                <li><a class="@activo("Hoteles")" href="@Url.Action("Index", "Hoteles")"><i class="bi bi-buildings"></i> Hoteles</a></li>
-                <li><a class="@activo("Bloques")" href="@Url.Action("Index", "Bloques")"><i class="bi bi-grid-1x2"></i> Bloques</a></li>
-                <li><a class="@activo("Pisos")" href="@Url.Action("Index", "Pisos")"><i class="bi bi-layers"></i> Pisos</a></li>
-                <li><a class="@activo("Habitaciones")" href="@Url.Action("Index", "Habitaciones")"><i class="bi bi-door-closed"></i> Habitaciones</a></li>
-                <li class="hm-nav-label">Catálogos</li>
-                <li><a class="@activo("TiposHabitacion")" href="@Url.Action("Index", "TiposHabitacion")"><i class="bi bi-tags"></i> Tipos de habitación</a></li>
-                <li><a class="@activo("Tarifas")" href="@Url.Action("Index", "Tarifas")"><i class="bi bi-cash-coin"></i> Tarifas</a></li>
-                <li class="hm-nav-label">Seguimiento</li>
-                <li>
-                    <a class="@activo("Notificaciones")" href="@Url.Action("Index", "Notificaciones")"><i class="bi bi-bell"></i> Notificaciones
-                        @if (pendientes > 0)
-                        {
-                            <span class="hm-badge info ms-auto px-2 py-0">@pendientes</span>
-                        }
-                    </a>
-                </li>
-                <li><a class="@(controlador == "Reservas" && accion == "Historial" ? "active" : "")" href="@Url.Action("Historial", "Reservas")"><i class="bi bi-clock-history"></i> Historial</a></li>
-                <li><a class="@activo("Reportes")" href="@Url.Action("Index", "Reportes")"><i class="bi bi-bar-chart-line"></i> Reportes</a></li>
+                @if (gestion)
+                {
+                    <li><a class="@activo("Home")" href="@Url.Action("Index", "Home")"><i class="bi bi-house-door-fill"></i> Inicio</a></li>
+                    <li class="hm-nav-label">Operación</li>
+                    <li><a class="@(controlador == "Reservas" && accion != "Disponibilidad" && accion != "Historial" ? "active" : "")" href="@Url.Action("Index", "Reservas")"><i class="bi bi-calendar-week"></i> Reservas</a></li>
+                    <li><a class="@(controlador == "Reservas" && accion == "Disponibilidad" ? "active" : "")" href="@Url.Action("Disponibilidad", "Reservas")"><i class="bi bi-search-heart"></i> Disponibilidad</a></li>
+                    <li><a class="@activo("Huespedes")" href="@Url.Action("Index", "Huespedes")"><i class="bi bi-people"></i> Huéspedes</a></li>
+                }
+                @if (esAdmin)
+                {
+                    <li class="hm-nav-label">Estructura hotelera</li>
+                    <li><a class="@activo("Hoteles")" href="@Url.Action("Index", "Hoteles")"><i class="bi bi-buildings"></i> Hoteles</a></li>
+                    <li><a class="@activo("Bloques")" href="@Url.Action("Index", "Bloques")"><i class="bi bi-grid-1x2"></i> Bloques</a></li>
+                    <li><a class="@activo("Pisos")" href="@Url.Action("Index", "Pisos")"><i class="bi bi-layers"></i> Pisos</a></li>
+                    <li><a class="@activo("Habitaciones")" href="@Url.Action("Index", "Habitaciones")"><i class="bi bi-door-closed"></i> Habitaciones</a></li>
+                    <li class="hm-nav-label">Catálogos</li>
+                    <li><a class="@activo("TiposHabitacion")" href="@Url.Action("Index", "TiposHabitacion")"><i class="bi bi-tags"></i> Tipos de habitación</a></li>
+                    <li><a class="@activo("Tarifas")" href="@Url.Action("Index", "Tarifas")"><i class="bi bi-cash-coin"></i> Tarifas</a></li>
+                }
+                @if (esHuesped)
+                {
+                    <li class="hm-nav-label">Mi cuenta</li>
+                    <li><a class="@(controlador == "Portal" && accion != "Solicitar" ? "active" : "")" href="@Url.Action("Index", "Portal")"><i class="bi bi-calendar-heart"></i> Mis reservas</a></li>
+                    <li><a class="@(controlador == "Portal" && accion == "Solicitar" ? "active" : "")" href="@Url.Action("Solicitar", "Portal")"><i class="bi bi-calendar-plus"></i> Solicitar reserva</a></li>
+                }
+                @if (verNotificaciones)
+                {
+                    <li class="hm-nav-label">Seguimiento</li>
+                    <li>
+                        <a class="@activo("Notificaciones")" href="@Url.Action("Index", "Notificaciones")"><i class="bi bi-bell"></i> Notificaciones
+                            @if (pendientes > 0)
+                            {
+                                <span class="hm-badge info ms-auto px-2 py-0">@pendientes</span>
+                            }
+                        </a>
+                    </li>
+                }
+                @if (esAdmin)
+                {
+                    <li><a class="@(controlador == "Reservas" && accion == "Historial" ? "active" : "")" href="@Url.Action("Historial", "Reservas")"><i class="bi bi-clock-history"></i> Historial</a></li>
+                    <li><a class="@activo("Reportes")" href="@Url.Action("Index", "Reportes")"><i class="bi bi-bar-chart-line"></i> Reportes</a></li>
+                    <li class="hm-nav-label">Seguridad</li>
+                    <li><a class="@activo("Usuarios")" href="@Url.Action("Index", "Usuarios")"><i class="bi bi-person-gear"></i> Usuarios y roles</a></li>
+                }
             </ul>
 
             <div class="hm-sidebar-quote">Grandes experiencias, comienzan con una buena reserva.</div>
@@ -80,23 +108,44 @@
         <div class="hm-main">
             <header class="hm-topbar">
                 <button class="hm-menu-btn" type="button" id="menuBtn" aria-label="Abrir menú"><i class="bi bi-list"></i></button>
-                <form class="hm-search" method="get" action="@Url.Action("Buscar", "Home")" role="search">
-                    <i class="bi bi-search"></i>
-                    <input type="search" name="q" value="@Request.QueryString["q"]" placeholder="Buscar reservas, huéspedes o habitaciones..." aria-label="Buscar" />
-                </form>
-                <a class="hm-bell" href="@Url.Action("Index", "Notificaciones", new { estado = "Pendiente" })" title="@pendientes notificación(es) pendiente(s)">
-                    <i class="bi bi-bell"></i>
-                    @if (pendientes > 0)
-                    {
-                        <span class="hm-dot">@(pendientes > 99 ? "99+" : pendientes.ToString())</span>
-                    }
-                </a>
-                <div class="hm-user">
-                    <div class="hm-avatar">@ViewBag.UsuarioIniciales</div>
-                    <div class="hm-user-text">
-                        <div class="hm-user-name">@ViewBag.UsuarioNombre</div>
-                        <div class="hm-user-role">@ViewBag.UsuarioRol</div>
-                    </div>
+                @if (gestion)
+                {
+                    <form class="hm-search" method="get" action="@Url.Action("Buscar", "Home")" role="search">
+                        <i class="bi bi-search"></i>
+                        <input type="search" name="q" value="@Request.QueryString["q"]" placeholder="Buscar reservas, huéspedes o habitaciones..." aria-label="Buscar" />
+                    </form>
+                }
+                @if (verNotificaciones)
+                {
+                    <a class="hm-bell" href="@Url.Action("Index", "Notificaciones", new { estado = "Pendiente" })" title="@pendientes notificación(es) pendiente(s)">
+                        <i class="bi bi-bell"></i>
+                        @if (pendientes > 0)
+                        {
+                            <span class="hm-dot">@(pendientes > 99 ? "99+" : pendientes.ToString())</span>
+                        }
+                    </a>
+                }
+                <div class="hm-user dropdown @(verNotificaciones ? "" : "ms-auto")">
+                    <button class="hm-user-menu" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="hm-avatar">@ViewBag.UsuarioIniciales</div>
+                        <div class="hm-user-text text-start">
+                            <div class="hm-user-name">@ViewBag.UsuarioNombre</div>
+                            <div class="hm-user-role">@ViewBag.UsuarioRol</div>
+                        </div>
+                        <i class="bi bi-chevron-down small text-secondary"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-2">
+                        <li><span class="dropdown-item-text small text-secondary"><i class="bi bi-person me-1"></i>@User.Identity.Name</span></li>
+                        <li><a class="dropdown-item" href="@Url.Action("CambiarClave", "Cuenta")"><i class="bi bi-key me-2"></i>Cambiar contraseña</a></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            @using (Html.BeginForm("Salir", "Cuenta", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</button>
+                            }
+                        </li>
+                    </ul>
                 </div>
             </header>
 

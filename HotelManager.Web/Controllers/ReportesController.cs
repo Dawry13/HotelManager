@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -10,6 +12,7 @@ using HotelManager.Web.Helpers;
 namespace HotelManager.Web.Controllers
 {
     /// <summary>Reportes de ocupacion, ingresos y reservas por periodo.</summary>
+    [Autorizar(Roles.Administrador)]
     public class ReportesController : BaseController
     {
         private readonly IReporteService _reporteService;

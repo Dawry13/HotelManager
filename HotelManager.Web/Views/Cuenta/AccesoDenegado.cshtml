@@ -1,0 +1,11 @@
+﻿@{
+    ViewBag.Title = "Acceso denegado";
+    var autenticado = User.Identity.IsAuthenticated;
+    Layout = autenticado ? "~/Views/Shared/_Layout.cshtml" : "~/Views/Shared/_LayoutPublico.cshtml";
+}
+<div class="hm-card hm-card-body text-center py-5 mx-auto" style="max-width:560px">
+    <div class="hm-page-icon pink mx-auto mb-3"><i class="bi bi-shield-lock"></i></div>
+    <h1 class="h3">Acceso denegado</h1>
+    <p class="text-secondary">Su rol no tiene permiso para esta sección (RNF-001: solo roles autorizados pueden ejecutar cada operación).</p>
+    <a class="btn btn-gold" href="@Url.Action(autenticado ? "Index" : "Login", autenticado ? "Home" : "Cuenta")">Volver al inicio</a>
+</div>

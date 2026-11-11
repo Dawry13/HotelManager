@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -9,6 +11,7 @@ using HotelManager.Web.Models;
 namespace HotelManager.Web.Controllers
 {
     /// <summary>Tarifas por vigencia (temporadas) de cada habitacion. Apoyan el calculo del costo (RN-013).</summary>
+    [Autorizar(Roles.Administrador)]
     public class TarifasController : BaseController
     {
         private readonly ITarifaService _tarifaService;

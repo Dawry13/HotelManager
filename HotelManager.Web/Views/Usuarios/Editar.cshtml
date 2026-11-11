@@ -1,0 +1,12 @@
+﻿@model UsuarioViewModel
+@{
+    ViewBag.Title = "Editar usuario";
+    ViewData["Icono"] = "bi-person-gear";
+    ViewData["Color"] = "blue";
+    ViewData["Modulo"] = "Usuarios";
+    ViewData["ModuloUrl"] = Url.Action("Index");
+    ViewData["Titulo"] = "Editar usuario " + Model.NombreUsuario;
+    ViewData["Subtitulo"] = "Cambie los datos, el rol o restablezca la contraseña.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

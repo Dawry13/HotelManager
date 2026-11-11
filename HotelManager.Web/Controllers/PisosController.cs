@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -9,6 +11,7 @@ using HotelManager.Web.Models;
 namespace HotelManager.Web.Controllers
 {
     /// <summary>CU-002 Gestionar pisos (RF-002) - RN-001, RN-002.</summary>
+    [Autorizar(Roles.Administrador)]
     public class PisosController : BaseController
     {
         private readonly IPisoService _pisoService;

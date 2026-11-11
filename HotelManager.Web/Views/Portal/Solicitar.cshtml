@@ -1,0 +1,85 @@
+﻿@model DisponibilidadViewModel
+@{
+    ViewBag.Title = "Solicitar reserva";
+    var minIso = DateTime.Today.ToString("yyyy-MM-dd");
+    var culture = new System.Globalization.CultureInfo("es-DO");
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon blue"><i class="bi bi-calendar-plus"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index")">Mis reservas</a> / Solicitar reserva</div>
+            <h1>Solicitar reserva</h1>
+            <p class="hm-sub">Busque habitaciones disponibles y envíe su solicitud. Recepción la confirmará y le llegará un correo.</p>
+        </div>
+    </div>
+</div>
+
+<form method="get" class="hm-card hm-filters mb-4">
+    <div class="hm-field" style="flex-basis:170px">
+        <label for="entrada">Entrada</label>
+        <input type="date" class="form-control" id="entrada" name="entrada" min="@minIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="hm-field" style="flex-basis:170px">
+        <label for="salida">Salida</label>
+        <input type="date" class="form-control" id="salida" name="salida" min="@minIso" value="@Model.Salida.ToString("yyyy-MM-dd")" required />
+    </div>
+    <div class="hm-field" style="flex-basis:120px">
+        <label for="huespedes">Personas</label>
+        <input type="number" class="form-control" id="huespedes" name="huespedes" min="1" max="20" value="@Model.Huespedes" required />
+    </div>
+    <div class="hm-field">
+        <label for="idHotel">Hotel</label>
+        @Html.DropDownList("idHotel", (SelectList)ViewBag.Hoteles, "Todos los hoteles", new { @class = "form-select" })
+    </div>
+    <button class="btn btn-gold" type="submit"><i class="bi bi-search me-1"></i> Buscar</button>
+</form>
+
+@if (Model.Error != null)
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.Error</div>
+}
+else if (Model.Consultado)
+{
+    <h2 class="h5 mb-3">@Model.Resultados.Count habitación(es) disponible(s) <span class="text-secondary fs-6 fw-normal">· @Model.Entrada.ToString("dd MMM", culture) – @Model.Salida.ToString("dd MMM yyyy", culture) · @Model.Noches noche(s)</span></h2>
+    if (!Model.Resultados.Any())
+    {
+        <div class="hm-card hm-empty"><i class="bi bi-calendar-x"></i>No hay disponibilidad para esas fechas. Pruebe con otras fechas u otro hotel.</div>
+    }
+    <div class="row g-4">
+        @foreach (var h in Model.Resultados)
+        {
+            <div class="col-md-6 col-xxl-4">
+                <div class="hm-card hm-entity">
+                    <div class="hm-entity-top alt2">
+                        <span class="hm-entity-state hm-badge ok">Disponible</span>
+                        <div class="hm-entity-icon"><i class="bi bi-door-open"></i></div>
+                    </div>
+                    <div class="hm-entity-body">
+                        <h3>@h.Tipo · Hab. @h.Numero</h3>
+                        <div class="hm-cell-sub">@h.Hotel · @h.Ubicacion</div>
+                        <div class="hm-entity-metrics">
+                            <div><strong><i class="bi bi-people fs-6 me-1"></i>@h.Capacidad</strong><span>Capacidad</span></div>
+                            <div style="grid-column: span 2"><strong>RD$ @h.TarifaPromedio.ToString("N0")</strong><span>por noche (promedio)</span></div>
+                        </div>
+                    </div>
+                    @using (Html.BeginForm("Solicitar", "Portal", FormMethod.Post, new { @class = "hm-entity-foot align-items-center justify-content-between" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="idHabitacion" value="@h.IdHabitacion" />
+                        <input type="hidden" name="entrada" value="@Model.Entrada.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="salida" value="@Model.Salida.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="huespedes" value="@Model.Huespedes" />
+                        <div>
+                            <div class="small text-secondary">Total @Model.Noches noche(s)</div>
+                            <div class="fs-5 fw-bold text-gold">RD$ @h.CostoTotal.ToString("N2")</div>
+                        </div>
+                        <button class="btn btn-gold" onclick="return confirm('¿Solicitar la habitación @h.Numero del @Model.Entrada.ToString("dd/MM") al @Model.Salida.ToString("dd/MM") por RD$ @h.CostoTotal.ToString("N2")?');">
+                            Solicitar <i class="bi bi-send ms-1"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

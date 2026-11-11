@@ -59,6 +59,8 @@
     <Compile Include="Entities\Tarifa.cs" />
     <Compile Include="Entities\Bloque.cs" />
     <Compile Include="Entities\TipoHabitacion.cs" />
+    <Compile Include="Entities\Usuario.cs" />
+    <Compile Include="Enums\RolUsuario.cs" />
     <Compile Include="Enums\EstadoHabitacion.cs" />
     <Compile Include="Enums\EstadoHotel.cs" />
     <Compile Include="Enums\EstadoNotificacion.cs" />

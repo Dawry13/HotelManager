@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -8,6 +10,7 @@ using HotelManager.Web.Models;
 namespace HotelManager.Web.Controllers
 {
     /// <summary>Gestion de bloques (torres / edificios) de cada hotel.</summary>
+    [Autorizar(Roles.Administrador)]
     public class BloquesController : BaseController
     {
         private readonly IBloqueService _bloqueService;

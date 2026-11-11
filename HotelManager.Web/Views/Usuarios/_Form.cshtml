@@ -1,0 +1,109 @@
+﻿@model UsuarioViewModel
+@{
+    var esEdicion = Model.IdUsuario > 0;
+    bool esActual = ViewBag.EsUsuarioActual ?? false;
+}
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="hm-card hm-card-body">
+            @using (Html.BeginForm(esEdicion ? "Editar" : "Crear", "Usuarios", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.IdUsuario)
+                @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                <div class="hm-form-section">Cuenta</div>
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        @Html.LabelFor(m => m.NombreUsuario, new { @class = "form-label" })
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            @Html.TextBoxFor(m => m.NombreUsuario, new { @class = "form-control", maxlength = "50", autocapitalize = "none", placeholder = "ej.: recepcion2" })
+                        </div>
+                        @Html.ValidationMessageFor(m => m.NombreUsuario, "", new { @class = "small" })
+                    </div>
+                    <div class="col-md-7 mb-3">
+                        @Html.LabelFor(m => m.Nombre, new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.Nombre, new { @class = "form-control", maxlength = "150" })
+                        @Html.ValidationMessageFor(m => m.Nombre, "", new { @class = "small" })
+                    </div>
+                </div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Correo, new { @class = "form-label" })
+                    @Html.TextBoxFor(m => m.Correo, new { @class = "form-control", type = "email", maxlength = "150" })
+                    @Html.ValidationMessageFor(m => m.Correo, "", new { @class = "small" })
+                </div>
+
+                <div class="hm-form-section mt-4">Rol y permisos</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        @Html.LabelFor(m => m.Rol, new { @class = "form-label" })
+                        @if (esActual)
+                        {
+                            @Html.HiddenFor(m => m.Rol)
+                            <input class="form-control" value="@HotelManager.Business.Seguridad.Roles.Descripcion(Model.Rol.Value)" readonly />
+                            <div class="form-text">No puede cambiar su propio rol.</div>
+                        }
+                        else
+                        {
+                            @Html.DropDownListFor(m => m.Rol, (List<SelectListItem>)ViewBag.Roles, new { @class = "form-select", id = "selRol" })
+                        }
+                        @Html.ValidationMessageFor(m => m.Rol, "", new { @class = "small" })
+                    </div>
+                    <div class="col-md-6 mb-3" id="campoHuesped">
+                        @Html.LabelFor(m => m.IdHuesped, new { @class = "form-label" })
+                        @Html.DropDownListFor(m => m.IdHuesped, (List<SelectListItem>)ViewBag.Huespedes, "-- Seleccione el huésped --", new { @class = "form-select" })
+                        <div class="form-text">El huésped solo verá sus propias reservas.</div>
+                    </div>
+                </div>
+
+                if (!esEdicion)
+                {
+                    <div class="mb-4">
+                        @Html.LabelFor(m => m.ClaveTemporal, new { @class = "form-label" })
+                        @Html.PasswordFor(m => m.ClaveTemporal, new { @class = "form-control", autocomplete = "new-password" })
+                        <div class="form-text">Mínimo 8 caracteres con letras y números. El usuario la cambiará en su primer ingreso.</div>
+                        @Html.ValidationMessageFor(m => m.ClaveTemporal, "", new { @class = "small" })
+                    </div>
+                }
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Crear usuario")</button>
+                    <a class="btn btn-ghost" href="@Url.Action("Index")">Cancelar</a>
+                </div>
+            }
+        </div>
+
+        @if (esEdicion)
+        {
+            <div class="hm-card hm-card-body mt-4">
+                <div class="hm-form-section">Restablecer contraseña</div>
+                @using (Html.BeginForm("RestablecerClave", "Usuarios", new { id = Model.IdUsuario }, FormMethod.Post, new { @class = "d-flex gap-2 flex-wrap align-items-start" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="password" name="claveTemporal" class="form-control" style="max-width:280px" placeholder="Nueva contraseña temporal" autocomplete="new-password" required minlength="8" />
+                    <button class="btn btn-ghost" onclick="return confirm('¿Restablecer la contraseña? El usuario deberá cambiarla al iniciar sesión.');"><i class="bi bi-key me-1"></i> Restablecer</button>
+                }
+                <div class="form-text mt-2">Úselo si el usuario olvidó su contraseña. Se le pedirá cambiarla al entrar.</div>
+            </div>
+        }
+    </div>
+    <div class="col-lg-4">
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Permisos por rol</div>
+            <div class="hm-rule"><i class="bi bi-shield-lock"></i><div><strong>Administrador (ACT-001)</strong>Estructura hotelera, tipos, tarifas, historial, reportes, usuarios, reservas y huéspedes.</div></div>
+            <div class="hm-rule"><i class="bi bi-person-badge"></i><div><strong>Recepcionista (ACT-002)</strong>Disponibilidad, huéspedes y reservas (crear, modificar, cancelar, confirmar, check-out).</div></div>
+            <div class="hm-rule"><i class="bi bi-person-heart"></i><div><strong>Huésped (ACT-003)</strong>Solicita reservas y consulta sus reservas y notificaciones.</div></div>
+            <div class="hm-rule"><i class="bi bi-send"></i><div><strong>Servicio de notificaciones (ACT-004)</strong>Envía y registra confirmaciones, modificaciones y cancelaciones.</div></div>
+        </div>
+    </div>
+</div>
+<script>
+    (function () {
+        var sel = document.getElementById('selRol'), campo = document.getElementById('campoHuesped');
+        if (!campo) return;
+        function actualizar() { campo.style.display = (!sel || sel.value === 'Huesped') ? '' : 'none'; }
+        if (sel) { sel.addEventListener('change', actualizar); actualizar(); }
+        else { campo.style.display = '@(Model.Rol == RolUsuario.Huesped ? "" : "none")'; }
+    })();
+</script>

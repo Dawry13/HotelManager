@@ -426,6 +426,33 @@ a.hm-stat:hover { transform: translateY(-3px); color: #fff; box-shadow: 0 16px 3
     .hm-stat-icon { box-shadow: none !important; }
 }
 
+/* ---------- Pantallas publicas (login / registro) ---------- */
+.hm-publico { display: flex; min-height: 100vh; }
+.hm-publico-hero {
+    flex: 1.15; position: relative; display: flex; align-items: center; padding: 3rem;
+    background: #0d0b25 url("img/hero-hotel.svg") center / cover no-repeat;
+}
+.hm-publico-hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(11, 10, 31, .96) 0%, rgba(11, 10, 31, .82) 45%, rgba(11, 10, 31, .35) 100%);
+}
+.hm-publico-hero-inner { position: relative; max-width: 520px; }
+.hm-publico-lista li { display: flex; gap: .75rem; margin-bottom: .8rem; color: #e1ddff; }
+.hm-publico-lista i { color: var(--hm-gold); font-size: 1.2rem; }
+.hm-publico-form { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+@media (max-width: 991.98px) {
+    .hm-publico { flex-direction: column; }
+    .hm-publico-hero { flex: none; padding: 2rem 1.25rem; }
+    .hm-publico-hero h2, .hm-publico-hero p, .hm-publico-lista { display: none; }
+}
+
+/* Menu de usuario en la barra superior */
+.hm-user-menu { background: none; border: 0; color: inherit; padding: 0; display: flex; align-items: center; gap: .75rem; }
+.hm-user-menu:hover .hm-user-name { color: var(--hm-gold); }
+.dropdown-menu { background: var(--hm-surface-2); border: 1px solid var(--hm-border); border-radius: 14px; }
+.dropdown-item { color: var(--hm-text); border-radius: 8px; }
+.dropdown-item:hover { background: rgba(124, 58, 237, .25); color: #fff; }
+
 /* ---------- Tarjetas de entidad (hoteles, tipos) ---------- */
 .hm-entity { position: relative; overflow: hidden; height: 100%; display: flex; flex-direction: column; }
 .hm-entity-top {

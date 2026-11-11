@@ -119,6 +119,12 @@
     </Compile>
     <Compile Include="Helpers\EstadoHelper.cs" />
     <Compile Include="Infrastructure\LayoutDataFilter.cs" />
+    <Compile Include="Infrastructure\Autenticacion.cs" />
+    <Compile Include="Infrastructure\AutorizarAttribute.cs" />
+    <Compile Include="Controllers\CuentaController.cs" />
+    <Compile Include="Controllers\UsuariosController.cs" />
+    <Compile Include="Controllers\PortalController.cs" />
+    <Compile Include="Models\CuentaViewModels.cs" />
     <Compile Include="Infrastructure\ServiceProviderDependencyResolver.cs" />
     <Compile Include="Models\BloqueViewModel.cs" />
     <Compile Include="Models\DashboardViewModel.cs" />
@@ -182,9 +188,22 @@
     <Content Include="Views\Tarifas\_Form.cshtml" />
     <Content Include="Views\Notificaciones\Index.cshtml" />
     <Content Include="Views\Reportes\Index.cshtml" />
+    <Content Include="Views\Shared\_LayoutPublico.cshtml" />
+    <Content Include="Views\Cuenta\Login.cshtml" />
+    <Content Include="Views\Cuenta\Registro.cshtml" />
+    <Content Include="Views\Cuenta\CambiarClave.cshtml" />
+    <Content Include="Views\Cuenta\AccesoDenegado.cshtml" />
+    <Content Include="Views\Usuarios\Index.cshtml" />
+    <Content Include="Views\Usuarios\Crear.cshtml" />
+    <Content Include="Views\Usuarios\Editar.cshtml" />
+    <Content Include="Views\Usuarios\_Form.cshtml" />
+    <Content Include="Views\Portal\Index.cshtml" />
+    <Content Include="Views\Portal\Solicitar.cshtml" />
+    <Content Include="Views\Portal\Detalle.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Correo.ejemplo.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HotelManager.Business\HotelManager.Business.csproj">

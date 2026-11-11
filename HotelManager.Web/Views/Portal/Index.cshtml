@@ -1,0 +1,101 @@
+﻿@model List<ReservaItemViewModel>
+@{
+    ViewBag.Title = "Mis reservas";
+    var huesped = (HuespedDto)ViewBag.Huesped;
+    var notificaciones = (List<NotificacionDto>)ViewBag.Notificaciones;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    var proximas = Model.Where(r => r.EsActiva).OrderBy(r => r.Entrada).ToList();
+    var anteriores = Model.Where(r => !r.EsActiva).ToList();
+}
+<section class="hm-hero mb-4" style="min-height:230px">
+    <div class="hm-hero-inner">
+        <span class="hm-chip"><i class="bi bi-person-heart"></i> Portal del huésped</span>
+        <h1 style="font-size:2.4rem">Hola, <span>@TextoHelper.Titulo(huesped.Nombre)</span></h1>
+        <p>Solicite su próxima estadía y consulte el estado de sus reservas.</p>
+        <a class="btn btn-gold btn-lg" href="@Url.Action("Solicitar")"><i class="bi bi-calendar-plus me-2"></i>Solicitar reserva <i class="bi bi-arrow-right ms-2"></i></a>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-hourglass-split"></i></div><div><div class="hm-stat-value">@Model.Count(r => r.Estado == "Pendiente")</div><div class="hm-stat-label">Solicitudes pendientes</div></div></div></div>
+    <div class="col-sm-4"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-calendar2-check"></i></div><div><div class="hm-stat-value">@Model.Count(r => r.Estado == "Confirmada" || r.Estado == "Modificada")</div><div class="hm-stat-label">Confirmadas</div></div></div></div>
+    <div class="col-sm-4"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-clock-history"></i></div><div><div class="hm-stat-value">@anteriores.Count</div><div class="hm-stat-label">Finalizadas o canceladas</div></div></div></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="hm-card mb-4">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-calendar-week"></i> Próximas estadías</h2></div>
+            @if (!proximas.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-calendar-plus"></i>No tiene reservas activas. <a class="hm-link" href="@Url.Action("Solicitar")">Solicite una</a>.</div>
+            }
+            @foreach (var r in proximas)
+            {
+                <a class="hm-res-item @EstadoHelper.CssReserva(r.Estado) text-reset text-decoration-none" href="@Url.Action("Detalle", new { id = r.Id })">
+                    <span class="hm-code ms-2">#@r.Id</span>
+                    <div class="flex-grow-1" style="min-width:0">
+                        <div class="hm-res-name">@r.Hotel</div>
+                        <div class="hm-cell-sub">Habitación @r.Habitacion · @r.Tipo · @r.Huespedes huésped(es)</div>
+                        <div class="hm-res-date mt-1"><i class="bi bi-calendar3 me-1 text-secondary"></i>@r.Entrada.ToString("dd MMM", culture) – @r.Salida.ToString("dd MMM yyyy", culture) · @r.Noches noche(s)</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="hm-badge @EstadoHelper.CssReserva(r.Estado)">@(r.Estado == "Pendiente" ? "Por confirmar" : r.Estado)</span>
+                        <div class="fw-semibold text-gold mt-1">RD$ @r.Costo.ToString("N2")</div>
+                    </div>
+                </a>
+            }
+        </div>
+
+        @if (anteriores.Any())
+        {
+            <div class="hm-card">
+                <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-clock-history"></i> Historial</h2></div>
+                <div class="table-responsive">
+                    <table class="table hm-table table-hover">
+                        <thead><tr><th>#</th><th>Hotel</th><th>Estadía</th><th class="text-end">Costo</th><th>Estado</th></tr></thead>
+                        <tbody>
+                            @foreach (var r in anteriores)
+                            {
+                                <tr style="cursor:pointer" onclick="location.href='@Url.Action("Detalle", new { id = r.Id })'">
+                                    <td class="text-secondary">#@r.Id</td>
+                                    <td>@r.Hotel<div class="hm-cell-sub">Hab. @r.Habitacion</div></td>
+                                    <td class="small">@r.Entrada.ToString("dd/MM/yyyy") → @r.Salida.ToString("dd/MM/yyyy")</td>
+                                    <td class="text-end">RD$ @r.Costo.ToString("N2")</td>
+                                    <td><span class="hm-badge @EstadoHelper.CssReserva(r.Estado)">@r.Estado</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-xl-4">
+        <div class="hm-card mb-4">
+            <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-envelope"></i> Mis notificaciones</h2></div>
+            @if (!notificaciones.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-bell-slash"></i>Aún no hay notificaciones.</div>
+            }
+            @foreach (var n in notificaciones)
+            {
+                <a class="hm-res-item @(n.Estado == "Enviada" ? "ok" : n.Estado == "Fallida" ? "" : "info") text-reset text-decoration-none" style="padding-left:2rem" href="@Url.Action("Detalle", new { id = n.IdReserva })">
+                    <div class="flex-grow-1">
+                        <div class="hm-cell-main">@n.Tipo · reserva #@n.IdReserva</div>
+                        <div class="hm-cell-sub">@n.Fecha.ToString("dd/MM/yyyy hh:mm tt", culture)</div>
+                    </div>
+                    <span class="hm-badge @EstadoHelper.CssNotificacion(n.Estado)">@(n.Estado == "Enviada" ? "Enviada a su correo" : n.Estado)</span>
+                </a>
+            }
+        </div>
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Mis datos</div>
+            <p class="mb-1"><i class="bi bi-person-vcard me-2 text-secondary"></i>@huesped.Documento</p>
+            <p class="mb-1"><i class="bi bi-envelope me-2 text-secondary"></i>@huesped.Correo</p>
+            <p class="mb-0"><i class="bi bi-telephone me-2 text-secondary"></i>@(string.IsNullOrEmpty(huesped.Telefono) ? "—" : huesped.Telefono)</p>
+            <div class="form-text mt-2">Para corregir sus datos, comuníquese con recepción.</div>
+        </div>
+    </div>
+</div>

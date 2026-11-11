@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using HotelManager.Web.Infrastructure;
+using HotelManager.Business.Seguridad;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -14,6 +16,7 @@ namespace HotelManager.Web.Controllers
     /// CU-003 Gestionar habitaciones y CU-004 Actualizar estado de habitacion
     /// (RF-003, RF-004) - RN-004, RN-005, RN-006, RN-007.
     /// </summary>
+    [Autorizar(Roles.Administrador)]
     public class HabitacionesController : BaseController
     {
         private readonly IHabitacionService _habitacionService;

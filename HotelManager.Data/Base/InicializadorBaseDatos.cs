@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
@@ -12,6 +12,7 @@ namespace HotelManager.Data.Base
     {
         public const string ScriptEstructura = "HotelManager.Data.Database.01_HotelManagerDB.sql";
         public const string ScriptExtension = "HotelManager.Data.Database.02_bloques_tipos_habitacion.sql";
+        public const string ScriptUsuarios = "HotelManager.Data.Database.03_usuarios_roles.sql";
 
         private static readonly object Bloqueo = new object();
         private static readonly Regex SeparadorGo =
@@ -61,6 +62,12 @@ namespace HotelManager.Data.Base
                     {
                         EjecutarScript(db, LeerScript(ScriptExtension), omitirCreacion: true);
                         acciones.Add("Extension aplicada con 02_bloques_tipos_habitacion.sql");
+                    }
+
+                    if (!ExisteTabla(db, "usuarios"))
+                    {
+                        EjecutarScript(db, LeerScript(ScriptUsuarios), omitirCreacion: true);
+                        acciones.Add("Tabla de usuarios creada con 03_usuarios_roles.sql");
                     }
                 }
 

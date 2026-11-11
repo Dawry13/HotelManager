@@ -31,6 +31,8 @@ namespace HotelManager.Web
             AreaRegistration.RegisterAllAreas();
             GlobalFilters.Filters.Add(new HandleErrorAttribute());
             GlobalFilters.Filters.Add(new LayoutDataFilter());
+            // RNF-001: toda la aplicacion exige iniciar sesion (salvo acciones con [AllowAnonymous]).
+            GlobalFilters.Filters.Add(new AutorizarAttribute());
             RouteConfig.RegisterRoutes(RouteTable.Routes);
 
             // Inyeccion de dependencias: repositorios + servicios de negocio + controladores.
@@ -42,8 +44,29 @@ namespace HotelManager.Web
             foreach (var controller in controllers)
                 services.AddTransient(controller);
 
-            DependencyResolver.SetResolver(
-                new ServiceProviderDependencyResolver(services.BuildServiceProvider()));
+            var proveedor = services.BuildServiceProvider();
+            DependencyResolver.SetResolver(new ServiceProviderDependencyResolver(proveedor));
+
+            // Cuentas iniciales (admin, recepcion, notificaciones, huesped) si aun no hay usuarios.
+            if (ErrorBaseDatos == null)
+            {
+                try
+                {
+                    using (var scope = proveedor.CreateScope())
+                        foreach (var creado in scope.ServiceProvider.GetRequiredService<Business.Interfaces.IUsuarioService>().CrearUsuariosIniciales())
+                            System.Diagnostics.Trace.TraceInformation("Usuario inicial creado: " + creado);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceError("No se pudieron crear los usuarios iniciales: " + ex);
+                }
+            }
+        }
+
+        // Carga el usuario de la cookie de sesion en cada peticion.
+        protected void Application_PostAuthenticateRequest(object sender, EventArgs e)
+        {
+            Autenticacion.CargarUsuario(HttpContext.Current);
         }
 
         protected void Application_EndRequest(object sender, EventArgs e)

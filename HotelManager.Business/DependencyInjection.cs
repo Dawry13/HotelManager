@@ -48,6 +48,7 @@ namespace HotelManager.Business
             services.AddScoped<IHistorialReservaRepository, HistorialReservaRepository>();
             services.AddScoped<IBloqueRepository, BloqueRepository>();
             services.AddScoped<ITipoHabitacionRepository, TipoHabitacionRepository>();
+            services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
             return services;
         }
@@ -67,6 +68,10 @@ namespace HotelManager.Business
             services.AddScoped<IBloqueService, BloqueService>();
             services.AddScoped<ITipoHabitacionService, TipoHabitacionService>();
             services.AddScoped<IReporteService, ReporteService>();
+            services.AddScoped<IUsuarioService, UsuarioService>();
+
+            // Correo: la configuracion se lee una vez de Web.config / Correo.config.
+            services.AddSingleton<Correo.IEnviadorCorreo>(sp => new Correo.EnviadorCorreoSmtp());
 
             return services;
         }

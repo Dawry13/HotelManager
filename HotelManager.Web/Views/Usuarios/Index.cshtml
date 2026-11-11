@@ -1,0 +1,102 @@
+﻿@model List<UsuarioDto>
+@{
+    ViewBag.Title = "Usuarios";
+    var conteos = (Dictionary<RolUsuario, int>)ViewBag.Conteos;
+    Func<RolUsuario, int> c = r => conteos.ContainsKey(r) ? conteos[r] : 0;
+    RolUsuario? rol = ViewBag.Rol;
+    int idActual = ViewBag.IdUsuarioActual;
+    var huespedes = (Dictionary<int, string>)ViewBag.Huespedes;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    var tarjetas = new[]
+    {
+        new { Rol = RolUsuario.Administrador, Css = "purple", Icono = "bi-shield-lock", Texto = "Administradores" },
+        new { Rol = RolUsuario.Recepcionista, Css = "blue", Icono = "bi-person-badge", Texto = "Recepcionistas" },
+        new { Rol = RolUsuario.Huesped, Css = "pink", Icono = "bi-person-heart", Texto = "Huéspedes" },
+        new { Rol = RolUsuario.ServicioNotificacion, Css = "gold", Icono = "bi-send", Texto = "Servicio de notificaciones" }
+    };
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon"><i class="bi bi-person-gear"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Usuarios</div>
+            <h1>Usuarios y roles</h1>
+            <p class="hm-sub">RNF-001: cada actor solo puede ejecutar las operaciones de su rol.</p>
+        </div>
+    </div>
+    <a class="btn btn-gold" href="@Url.Action("Crear")"><i class="bi bi-person-plus me-1"></i> Nuevo usuario</a>
+</div>
+
+<div class="row g-3 mb-4">
+    @foreach (var t in tarjetas)
+    {
+        <div class="col-6 col-xl-3">
+            <a class="hm-stat @t.Css compact @(rol == t.Rol ? "hm-stat-activo" : "")" href="@Url.Action("Index", new { rol = rol == t.Rol ? (RolUsuario?)null : t.Rol })">
+                <div class="hm-stat-icon"><i class="bi @t.Icono"></i></div>
+                <div><div class="hm-stat-value">@c(t.Rol)</div><div class="hm-stat-label">@t.Texto</div></div>
+            </a>
+        </div>
+    }
+</div>
+
+<div class="hm-card">
+    <div class="table-responsive">
+        <table class="table hm-table table-hover">
+            <thead><tr><th>Usuario</th><th>Rol</th><th>Correo</th><th>Último acceso</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="hm-empty"><i class="bi bi-people"></i>No hay usuarios con ese rol.</td></tr>
+                }
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="hm-res-avatar m-0" style="width:38px;height:38px;font-size:.8rem">@ContextoHotel.Iniciales(u.Nombre)</span>
+                                <div>
+                                    <div class="hm-cell-main">@TextoHelper.Titulo(u.Nombre) @(u.IdUsuario == idActual ? "(usted)" : "")</div>
+                                    <div class="hm-cell-sub"><i class="bi bi-person me-1"></i>@u.NombreUsuario</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="hm-badge @(u.Rol == RolUsuario.Administrador ? "purple" : u.Rol == RolUsuario.Recepcionista ? "info" : u.Rol == RolUsuario.Huesped ? "bad" : "gold")">@u.RolDescripcion</span>
+                            @if (u.IdHuesped.HasValue && huespedes.ContainsKey(u.IdHuesped.Value))
+                            {
+                                <div class="hm-cell-sub mt-1"><a class="hm-link" href="@Url.Action("Detalle", "Huespedes", new { id = u.IdHuesped })">@huespedes[u.IdHuesped.Value]</a></div>
+                            }
+                        </td>
+                        <td class="small">@(string.IsNullOrEmpty(u.Correo) ? "—" : u.Correo)</td>
+                        <td class="small">
+                            @(u.UltimoAcceso.HasValue ? u.UltimoAcceso.Value.ToString("dd/MM/yyyy hh:mm tt", culture) : "Nunca")
+                            @if (u.DebeCambiarClave)
+                            {
+                                <div class="text-warning small"><i class="bi bi-key me-1"></i>Clave temporal</div>
+                            }
+                        </td>
+                        <td><span class="hm-badge @(u.Activo ? "ok" : "off")">@(u.Activo ? "Activo" : "Inactivo")</span></td>
+                        <td class="text-end acciones">
+                            <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = u.IdUsuario })" title="Editar"><i class="bi bi-pencil"></i></a>
+                            @if (u.IdUsuario != idActual)
+                            {
+                                using (Html.BeginForm("CambiarEstado", "Usuarios", new { id = u.IdUsuario }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    if (u.Activo)
+                                    {
+                                        <button class="btn-icon i-on" title="Desactivar" onclick="return confirm('¿Desactivar la cuenta @u.NombreUsuario? No podrá iniciar sesión.');"><i class="bi bi-toggle-on"></i></button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn-icon i-off" title="Activar"><i class="bi bi-toggle-off"></i></button>
+                                    }
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

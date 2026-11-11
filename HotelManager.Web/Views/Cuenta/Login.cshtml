@@ -1,0 +1,40 @@
+﻿@model LoginViewModel
+@{
+    ViewBag.Title = "Iniciar sesión";
+    Layout = "~/Views/Shared/_LayoutPublico.cshtml";
+}
+<div class="hm-card hm-card-body p-4">
+    <h1 class="h3 fw-bold mb-1">Iniciar sesión</h1>
+    <p class="text-secondary mb-4">Ingrese con su usuario y contraseña.</p>
+
+    @using (Html.BeginForm("Login", "Cuenta", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.ReturnUrl)
+        @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+        <div class="mb-3">
+            @Html.LabelFor(m => m.Usuario, new { @class = "form-label" })
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                @Html.TextBoxFor(m => m.Usuario, new { @class = "form-control", autofocus = "autofocus", autocomplete = "username", autocapitalize = "none" })
+            </div>
+            @Html.ValidationMessageFor(m => m.Usuario, "", new { @class = "small" })
+        </div>
+        <div class="mb-4">
+            @Html.LabelFor(m => m.Clave, new { @class = "form-label" })
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                @Html.PasswordFor(m => m.Clave, new { @class = "form-control", autocomplete = "current-password" })
+            </div>
+            @Html.ValidationMessageFor(m => m.Clave, "", new { @class = "small" })
+        </div>
+        <button type="submit" class="btn btn-gold w-100 py-2"><i class="bi bi-box-arrow-in-right me-1"></i> Entrar</button>
+    }
+
+    <hr class="my-4" />
+    <p class="text-center mb-0 small text-secondary">
+        ¿Es huésped y aún no tiene cuenta?
+        <a class="hm-link" href="@Url.Action("Registro")">Regístrese para solicitar reservas</a>
+    </p>
+</div>

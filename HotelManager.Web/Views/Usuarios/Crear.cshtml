@@ -1,0 +1,11 @@
+﻿@model UsuarioViewModel
+@{
+    ViewBag.Title = "Nuevo usuario";
+    ViewData["Icono"] = "bi-person-plus";
+    ViewData["Modulo"] = "Usuarios";
+    ViewData["ModuloUrl"] = Url.Action("Index");
+    ViewData["Titulo"] = "Nuevo usuario";
+    ViewData["Subtitulo"] = "Cree una cuenta y asigne el rol del actor.";
+}
+@Html.Partial("_FormPage")
+@Html.Partial("_Form", Model)

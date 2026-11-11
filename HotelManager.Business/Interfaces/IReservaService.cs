@@ -6,6 +6,9 @@ namespace HotelManager.Business.Interfaces
     public interface IReservaService
     {
         ReservaDto Crear(CrearReservaDto dto);
+
+        /// <summary>ACT-003: solicitud de reserva del huesped (queda Pendiente hasta que recepcion la confirma).</summary>
+        ReservaDto Solicitar(CrearReservaDto dto);
         ReservaDto Modificar(ModificarReservaDto dto);
         void Cancelar(int idReserva);
         ReservaDto ObtenerPorId(int idReserva);
