@@ -19,11 +19,6 @@ namespace HotelManager.Web.Models
         [Display(Name = "Capacidad máxima")]
         public int? CapacidadMaxima { get; set; }
 
-        [Required(ErrorMessage = "La tarifa base es obligatoria.")]
-        [Range(typeof(decimal), "0", "1000000", ErrorMessage = "La tarifa base no puede ser negativa.")]
-        [Display(Name = "Tarifa base")]
-        public decimal? TarifaBase { get; set; }
-
         public string Estado { get; set; }
         public int TotalHabitaciones { get; set; }
     }

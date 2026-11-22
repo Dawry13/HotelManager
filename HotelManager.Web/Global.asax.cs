@@ -1,66 +1,20 @@
 ﻿using System;
-using System.Linq;
 using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
-using HotelManager.Business;
 using HotelManager.Web.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace HotelManager.Web
 {
+    /// <summary>
+    /// IIS llama a Application_Start al arrancar; toda la configuracion esta en Program.cs.
+    /// </summary>
     public class MvcApplication : HttpApplication
     {
         /// <summary>Mensaje del ultimo error al preparar la base de datos (null si todo fue bien).</summary>
-        public static string ErrorBaseDatos { get; private set; }
+        public static string ErrorBaseDatos { get { return Program.ErrorBaseDatos; } }
 
         protected void Application_Start()
         {
-            // Crea o adjunta HotelManagerDB si hace falta (capa Data).
-            try
-            {
-                foreach (var accion in DependencyInjection.InicializarBaseDatos())
-                    System.Diagnostics.Trace.TraceInformation("HotelManagerDB: " + accion);
-            }
-            catch (Exception ex)
-            {
-                ErrorBaseDatos = ex.Message;
-                System.Diagnostics.Trace.TraceError("No se pudo preparar HotelManagerDB: " + ex);
-            }
-
-            AreaRegistration.RegisterAllAreas();
-            GlobalFilters.Filters.Add(new HandleErrorAttribute());
-            GlobalFilters.Filters.Add(new LayoutDataFilter());
-            // RNF-001: toda la aplicacion exige iniciar sesion (salvo acciones con [AllowAnonymous]).
-            GlobalFilters.Filters.Add(new AutorizarAttribute());
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-
-            // Inyeccion de dependencias: repositorios + servicios de negocio + controladores.
-            var services = new ServiceCollection();
-            services.AddHotelManager();
-
-            var controllers = typeof(MvcApplication).Assembly.GetTypes()
-                .Where(t => typeof(IController).IsAssignableFrom(t) && !t.IsAbstract);
-            foreach (var controller in controllers)
-                services.AddTransient(controller);
-
-            var proveedor = services.BuildServiceProvider();
-            DependencyResolver.SetResolver(new ServiceProviderDependencyResolver(proveedor));
-
-            // Cuentas iniciales (admin, recepcion, notificaciones, huesped) si aun no hay usuarios.
-            if (ErrorBaseDatos == null)
-            {
-                try
-                {
-                    using (var scope = proveedor.CreateScope())
-                        foreach (var creado in scope.ServiceProvider.GetRequiredService<Business.Interfaces.IUsuarioService>().CrearUsuariosIniciales())
-                            System.Diagnostics.Trace.TraceInformation("Usuario inicial creado: " + creado);
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Trace.TraceError("No se pudieron crear los usuarios iniciales: " + ex);
-                }
-            }
+            Program.Iniciar();
         }
 
         // Carga el usuario de la cookie de sesion en cada peticion.

@@ -3,6 +3,8 @@
     ViewBag.Title = "Hoteles";
     var fondos = new[] { "", "alt", "alt2", "alt3" };
     var i = 0;
+    var esAdmin = User.IsInRole("Administrador");
+    int? categoria = ViewBag.Categoria;
 }
 <div class="hm-page-head">
     <div class="hm-page-title">
@@ -10,10 +12,13 @@
         <div>
             <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Hoteles</div>
             <h1>Gestión de hoteles</h1>
-            <p class="hm-sub">Establecimientos de la cadena y su estructura.</p>
+            <p class="hm-sub">Abra un hotel para gestionar sus bloques, pisos, habitaciones y reservas en un solo lugar.</p>
         </div>
     </div>
-    <a class="btn btn-gold" href="@Url.Action("Crear")"><i class="bi bi-plus-lg me-1"></i> Nuevo hotel</a>
+    @if (esAdmin)
+    {
+        <a class="btn btn-gold" href="@Url.Action("Crear")"><i class="bi bi-plus-lg me-1"></i> Nuevo hotel</a>
+    }
 </div>
 
 <div class="row g-3 mb-4">
@@ -44,6 +49,16 @@
             <option value="Inactivo" @(ViewBag.Estado == "Inactivo" ? "selected" : "")>Inactivos</option>
         </select>
     </div>
+    <div class="hm-field">
+        <label for="categoria">Categoría</label>
+        <select class="form-select" id="categoria" name="categoria" data-autosubmit>
+            <option value="">Todas</option>
+            @for (var c = 5; c >= 3; c--)
+            {
+                <option value="@c" @(categoria == c ? "selected" : "")>@c estrellas</option>
+            }
+        </select>
+    </div>
     <button class="btn btn-ghost" type="submit"><i class="bi bi-funnel me-1"></i> Filtrar</button>
 </form>
 
@@ -59,6 +74,7 @@
             <div class="hm-card hm-entity">
                 <div class="hm-entity-top @fondos[i++ % fondos.Length]">
                     <span class="hm-entity-state hm-badge @EstadoHelper.CssActivo(h.Estado)">@h.Estado</span>
+                    <span class="hm-badge gold position-absolute" style="top:.9rem;left:1rem;z-index:1">@CatalogoHelper.Estrellas(h.Categoria)</span>
                     <div class="hm-entity-icon"><i class="bi bi-building"></i></div>
                 </div>
                 <div class="hm-entity-body">
@@ -71,9 +87,11 @@
                     </div>
                 </div>
                 <div class="hm-entity-foot acciones">
-                    <a class="btn-icon i-view" href="@Url.Action("Detalle", new { id = h.IdHotel })" title="Ver detalle"><i class="bi bi-eye"></i></a>
+                    <a class="btn btn-gold btn-sm me-auto" href="@Url.Action("Detalle", new { id = h.IdHotel })"><i class="bi bi-gear me-1"></i>@(esAdmin ? "Gestionar" : "Reservar aquí")</a>
+                    @if (esAdmin)
+                    {
                     <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = h.IdHotel })" title="Editar"><i class="bi bi-pencil"></i></a>
-                    @using (Html.BeginForm("CambiarEstado", "Hoteles", new { id = h.IdHotel }, FormMethod.Post))
+                    using (Html.BeginForm("CambiarEstado", "Hoteles", new { id = h.IdHotel }, FormMethod.Post))
                     {
                         @Html.AntiForgeryToken()
                         if (h.Estado == "Activo")
@@ -84,6 +102,7 @@
                         {
                             <button class="btn-icon i-off" title="Activar"><i class="bi bi-toggle-off"></i></button>
                         }
+                    }
                     }
                 </div>
             </div>

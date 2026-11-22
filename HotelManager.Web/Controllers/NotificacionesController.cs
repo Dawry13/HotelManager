@@ -111,7 +111,7 @@ namespace HotelManager.Web.Controllers
         public ActionResult MarcarFallida(int id, string detalle, string returnUrl)
         {
             EjecutarConMensaje(() => _notificacionService.RegistrarResultado(id, false, detalle),
-                "Fallo registrado. La reserva se conserva sin cambios (RN-015).");
+                "Fallo registrado. La reserva se conserva sin cambios.");
             return Volver(returnUrl);
         }
 

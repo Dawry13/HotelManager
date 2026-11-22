@@ -89,7 +89,7 @@
                         </td>
                         <td class="text-capitalize">@h.NombreTipo</td>
                         <td class="text-center"><i class="bi bi-people me-1 text-secondary"></i>@h.Capacidad</td>
-                        <td class="text-end fw-semibold">RD$ @string.Format("{0:N2}", h.Tarifa)</td>
+                        <td class="text-end fw-semibold">@if (h.Tarifa > 0) { <text>RD$ @string.Format("{0:N2}", h.Tarifa)</text> } else { <span class="hm-badge warn">Sin precio</span> }</td>
                         <td>
                             @* CU-004: cambiar el estado operativo desde el listado *@
                             @using (Html.BeginForm("CambiarEstado", "Habitaciones", FormMethod.Post, new { @class = "d-flex gap-2 align-items-center" }))
@@ -112,5 +112,5 @@
     </div>
 </div>
 <p class="small text-secondary mt-3">
-    <i class="bi bi-info-circle me-1"></i> Solo las habitaciones en estado <strong class="text-white">Disponible</strong> pueden reservarse (RN-007).
+    <i class="bi bi-info-circle me-1"></i> Solo las habitaciones en estado <strong class="text-white">Disponible</strong> pueden reservarse.
 </p>

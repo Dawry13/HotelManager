@@ -1,0 +1,17 @@
+﻿@model CaracteristicasSelectorViewModel
+@{
+    var seleccionadas = new HashSet<string>(Model.Seleccionadas ?? Enumerable.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+    var n = 0;
+}
+<div class="hm-feature-picker">
+    @foreach (var op in Model.Opciones)
+    {
+        var id = Model.Prefijo + "_" + (n++);
+        <input class="btn-check" type="checkbox" id="@id" name="@Model.Nombre" value="@op.Key" autocomplete="off" @(seleccionadas.Contains(op.Key) ? "checked" : "") />
+        <label class="hm-feature-option" for="@id"><i class="bi @op.Value"></i>@op.Key</label>
+    }
+</div>
+<div class="mt-2">
+    <label class="form-label small mb-1" for="@(Model.Prefijo)_otras">Otras características <span class="text-secondary">(separadas por coma)</span></label>
+    <input class="form-control form-control-sm" id="@(Model.Prefijo)_otras" name="@Model.NombreOtras" value="@Model.Otras" maxlength="250" placeholder="Ej.: Terraza, Karaoke" />
+</div>

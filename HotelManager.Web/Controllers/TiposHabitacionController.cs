@@ -38,7 +38,7 @@ namespace HotelManager.Web.Controllers
 
         public ActionResult Crear()
         {
-            return View(new TipoHabitacionViewModel { CapacidadMaxima = 1, TarifaBase = 0 });
+            return View(new TipoHabitacionViewModel { CapacidadMaxima = 1 });
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -98,7 +98,7 @@ namespace HotelManager.Web.Controllers
                 Nombre = vm.Nombre,
                 Descripcion = vm.Descripcion,
                 CapacidadMaxima = vm.CapacidadMaxima.Value,
-                TarifaBase = vm.TarifaBase.Value
+                TarifaBase = 0   // el precio se asigna en cada habitacion
             };
         }
 
@@ -110,7 +110,6 @@ namespace HotelManager.Web.Controllers
                 Nombre = t.Nombre,
                 Descripcion = t.Descripcion,
                 CapacidadMaxima = t.CapacidadMaxima,
-                TarifaBase = t.TarifaBase,
                 Estado = t.Estado
             };
         }

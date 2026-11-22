@@ -10,7 +10,7 @@
         <div>
             <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / <a href="@Url.Action("Index")">Reservas</a> / Disponibilidad</div>
             <h1>Consultar disponibilidad</h1>
-            <p class="hm-sub">CU-006: habitaciones que pueden reservarse para un rango de fechas y cantidad de huéspedes.</p>
+            <p class="hm-sub">Habitaciones que pueden reservarse para un rango de fechas y cantidad de huéspedes.</p>
         </div>
     </div>
     <a class="btn btn-ghost" href="@Url.Action("Crear", new { idHuesped = Model.IdHuesped })"><i class="bi bi-pencil-square me-1"></i> Reserva manual</a>
@@ -25,11 +25,11 @@
     <input type="hidden" name="idHuesped" value="@Model.IdHuesped" />
     <div class="hm-field" style="flex-basis:170px">
         <label for="entrada">Entrada</label>
-        <input type="date" class="form-control" id="entrada" name="entrada" min="@hoyIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" required />
+        <input type="date" class="form-control" id="entrada" name="entrada" min="@hoyIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" data-rango="entrada" data-sin-pasado required />
     </div>
     <div class="hm-field" style="flex-basis:170px">
         <label for="salida">Salida</label>
-        <input type="date" class="form-control" id="salida" name="salida" min="@hoyIso" value="@Model.Salida.ToString("yyyy-MM-dd")" required />
+        <input type="date" class="form-control" id="salida" name="salida" min="@hoyIso" value="@Model.Salida.ToString("yyyy-MM-dd")" data-rango="salida" data-sin-pasado required />
     </div>
     <div class="hm-field" style="flex-basis:120px">
         <label for="huespedes">Huéspedes</label>

@@ -70,7 +70,7 @@ namespace HotelManager.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Crear(PisoViewModel vm)
+        public ActionResult Crear(PisoViewModel vm, string returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -82,10 +82,12 @@ namespace HotelManager.Web.Controllers
                 };
                 if (Ejecutar(() => _pisoService.Crear(dto)))
                 {
-                    Exito("Piso registrado correctamente.");
-                    return RedirectToAction("Index", new { idHotel = vm.IdHotel });
+                    Exito("Piso " + dto.Numero + " registrado correctamente.");
+                    return VolverA(returnUrl, true) ?? RedirectToAction("Index", new { idHotel = vm.IdHotel });
                 }
             }
+            var volver = VolverA(returnUrl, false);
+            if (volver != null) return volver;
             CargarListas(vm, true);
             return View(vm);
         }

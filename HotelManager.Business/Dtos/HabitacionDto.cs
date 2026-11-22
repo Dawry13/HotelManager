@@ -1,4 +1,6 @@
-﻿namespace HotelManager.Business.Dtos
+﻿using System.Collections.Generic;
+
+namespace HotelManager.Business.Dtos
 {
     public class HabitacionDto
     {
@@ -9,5 +11,6 @@
         public string Estado { get; set; }
         public int IdPiso { get; set; }
         public int? IdTipoHabitacion { get; set; }
+        public List<string> Caracteristicas { get; set; } = new List<string>();
     }
 }

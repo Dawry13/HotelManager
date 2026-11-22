@@ -13,6 +13,7 @@ namespace HotelManager.Data.Base
         public const string ScriptEstructura = "HotelManager.Data.Database.01_HotelManagerDB.sql";
         public const string ScriptExtension = "HotelManager.Data.Database.02_bloques_tipos_habitacion.sql";
         public const string ScriptUsuarios = "HotelManager.Data.Database.03_usuarios_roles.sql";
+        public const string ScriptCategorias = "HotelManager.Data.Database.04_categorias_caracteristicas.sql";
 
         private static readonly object Bloqueo = new object();
         private static readonly Regex SeparadorGo =
@@ -68,6 +69,13 @@ namespace HotelManager.Data.Base
                     {
                         EjecutarScript(db, LeerScript(ScriptUsuarios), omitirCreacion: true);
                         acciones.Add("Tabla de usuarios creada con 03_usuarios_roles.sql");
+                    }
+
+                    if (!ExisteColumna(db, "hoteles", "categoria") || !ExisteColumna(db, "hoteles", "caracteristicas")
+                        || !ExisteColumna(db, "hoteles", "descripcion") || !ExisteColumna(db, "habitaciones", "caracteristicas"))
+                    {
+                        EjecutarScript(db, LeerScript(ScriptCategorias), omitirCreacion: true);
+                        acciones.Add("Categorias y caracteristicas agregadas con 04_categorias_caracteristicas.sql");
                     }
                 }
 

@@ -78,6 +78,9 @@ namespace HotelManager.Web.Models
         [DataType(DataType.Password)]
         [Display(Name = "Confirmar contraseña")]
         public string ConfirmarClave { get; set; }
+
+        /// <summary>Pagina a la que se vuelve despues de registrarse (por ejemplo, la reserva elegida).</summary>
+        public string ReturnUrl { get; set; }
     }
 
     /// <summary>Administracion de cuentas (solo Administrador).</summary>

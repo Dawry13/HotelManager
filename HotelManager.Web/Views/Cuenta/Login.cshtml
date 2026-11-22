@@ -2,10 +2,15 @@
 @{
     ViewBag.Title = "Iniciar sesión";
     Layout = "~/Views/Shared/_LayoutPublico.cshtml";
+    var reservando = !string.IsNullOrEmpty(Model.ReturnUrl) && Model.ReturnUrl.IndexOf("/Explorar/Reservar", StringComparison.OrdinalIgnoreCase) >= 0;
 }
 <div class="hm-card hm-card-body p-4">
-    <h1 class="h3 fw-bold mb-1">Iniciar sesión</h1>
-    <p class="text-secondary mb-4">Ingrese con su usuario y contraseña.</p>
+    <h1 class="h3 fw-bold mb-1">@(reservando ? "Un paso más para reservar" : "Iniciar sesión")</h1>
+    <p class="text-secondary mb-4">@(reservando ? "Inicie sesión si ya tiene cuenta. Si es su primera vez, cree su cuenta y volverá directo a su reserva." : "Ingrese con su usuario y contraseña.")</p>
+    @if (reservando)
+    {
+        <a class="btn btn-primary w-100 py-2 mb-4" href="@Url.Action("Registro", new { returnUrl = Model.ReturnUrl })"><i class="bi bi-person-plus me-1"></i> Soy nuevo: crear mi cuenta</a>
+    }
 
     @using (Html.BeginForm("Login", "Cuenta", FormMethod.Post))
     {
@@ -35,6 +40,9 @@
     <hr class="my-4" />
     <p class="text-center mb-0 small text-secondary">
         ¿Es huésped y aún no tiene cuenta?
-        <a class="hm-link" href="@Url.Action("Registro")">Regístrese para solicitar reservas</a>
+        <a class="hm-link" href="@Url.Action("Registro", new { returnUrl = Model.ReturnUrl })">Regístrese para solicitar reservas</a>
+    </p>
+    <p class="text-center mt-2 mb-0 small">
+        <a class="hm-link" href="@Url.Action("Index", "Explorar")"><i class="bi bi-arrow-left me-1"></i>Seguir viendo hoteles sin iniciar sesión</a>
     </p>
 </div>

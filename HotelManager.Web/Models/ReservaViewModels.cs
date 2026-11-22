@@ -93,6 +93,7 @@ namespace HotelManager.Web.Models
         public int Capacidad { get; set; }
         public decimal TarifaPromedio { get; set; }
         public decimal CostoTotal { get; set; }
+        public List<string> Caracteristicas { get; set; } = new List<string>();
     }
 
     /// <summary>Fila del historial global de reservas (CU-010).</summary>

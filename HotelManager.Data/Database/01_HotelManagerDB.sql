@@ -345,6 +345,7 @@ begin
       and p.estado = 'activo'
       and ho.estado = 'activo'
       and h.capacidad >= @cantidad_huespedes
+      and h.tarifa > 0                 -- sin precio asignado no se reserva
       and (@id_hotel is null or ho.id_hotel = @id_hotel)
       and not exists (
             select 1
@@ -452,11 +453,12 @@ insert into hoteles (nombre, direccion) values
 
 insert into pisos (numero, id_hotel) values (1,1),(2,1),(1,2);
 
+-- sin precio: el administrador asigna la tarifa de cada habitacion (0 = sin precio, no se reserva)
 insert into habitaciones (numero, capacidad, tarifa, id_piso, id_hotel) values
-('101', 2, 3500.00, 1, 1),
-('102', 4, 5500.00, 1, 1),
-('201', 2, 4000.00, 2, 1),
-('101', 3, 6000.00, 3, 2);
+('101', 2, 0, 1, 1),
+('102', 4, 0, 1, 1),
+('201', 2, 0, 2, 1),
+('101', 3, 0, 3, 2);
 
 insert into huespedes (nombre, documento, telefono, correo) values
 ('juan perez', '001-0000000-1', '809-555-0101', 'juan@correo.com'),

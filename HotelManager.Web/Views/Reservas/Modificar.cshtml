@@ -6,7 +6,7 @@
     ViewData["Modulo"] = "Reservas";
     ViewData["ModuloUrl"] = Url.Action("Detalle", new { id = Model.IdReserva });
     ViewData["Titulo"] = "Modificar reserva #" + Model.IdReserva;
-    ViewData["Subtitulo"] = "CU-008: cambie fechas, habitación o cantidad de huéspedes; el costo se recalcula.";
+    ViewData["Subtitulo"] = "Cambie fechas, habitación o cantidad de huéspedes; el costo se recalcula.";
 }
 @Html.Partial("_FormPage")
 @Html.Partial("_Form", Model)

@@ -26,6 +26,25 @@ namespace HotelManager.Web.Infrastructure
                 .Where(p => p.Length > 0).Take(2).Select(p => char.ToUpper(p[0])).ToArray());
 
             viewBag.NotificacionesPendientes = 0;
+            viewBag.SolicitudesTotal = 0;
+            viewBag.Solicitudes = new System.Collections.Generic.List<SolicitudPendiente>();
+
+            // Administrador y Recepcionista: solicitudes de reserva de huespedes por aprobar (campana).
+            var esPersonal = usuario != null && (usuario.IsInRole(Roles.Administrador) || usuario.IsInRole(Roles.Recepcionista));
+            if (esPersonal)
+            {
+                try
+                {
+                    var solicitudes = SolicitudesPendientes.Cargar(6);
+                    viewBag.SolicitudesTotal = solicitudes.Item1;
+                    viewBag.Solicitudes = solicitudes.Item2;
+                }
+                catch
+                {
+                    // Si la base de datos no responde, la campana se muestra vacia.
+                }
+            }
+
             var veNotificaciones = usuario != null && (usuario.IsInRole(Roles.Administrador)
                 || usuario.IsInRole(Roles.Recepcionista) || usuario.IsInRole(Roles.ServicioNotificacion));
             if (!veNotificaciones) return;

@@ -20,7 +20,7 @@
                     </div>
                     @Html.ValidationMessageFor(m => m.Nombre, "", new { @class = "small" })
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                     @Html.LabelFor(m => m.Direccion, new { @class = "form-label" })
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
@@ -29,9 +29,37 @@
                     @Html.ValidationMessageFor(m => m.Direccion, "", new { @class = "small" })
                 </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar hotel")</button>
-                    <a class="btn btn-ghost" href="@Url.Action("Index")">Cancelar</a>
+                <div class="hm-form-section mt-4">Categoría</div>
+                <div class="hm-category-picker mb-1" role="radiogroup" aria-label="Categoría del hotel">
+                    @for (var c = 3; c <= 5; c++)
+                    {
+                        <input class="btn-check" type="radio" name="Categoria" id="cat@(c)" value="@c" @(Model.Categoria == c ? "checked" : "") />
+                        <label class="hm-category-option" for="cat@(c)">
+                            @CatalogoHelper.Estrellas(c)
+                            <span>@CatalogoHelper.NombreCategoria(c)</span>
+                        </label>
+                    }
+                </div>
+                @Html.ValidationMessageFor(m => m.Categoria, "", new { @class = "small" })
+
+                <div class="hm-form-section mt-4">Lo que verán los huéspedes</div>
+                <div class="mb-3">
+                    @Html.LabelFor(m => m.Descripcion, new { @class = "form-label" })
+                    @Html.TextAreaFor(m => m.Descripcion, 3, 0, new { @class = "form-control", maxlength = "500", placeholder = "Ej.: Frente al mar, a 10 minutos del aeropuerto, ideal para familias." })
+                    @Html.ValidationMessageFor(m => m.Descripcion, "", new { @class = "small" })
+                </div>
+                <label class="form-label">Características y servicios <span class="text-secondary small">(se muestran al pasar el mouse sobre el hotel)</span></label>
+                @Html.Partial("_SelectorCaracteristicas", new CaracteristicasSelectorViewModel
+                {
+                    Opciones = CatalogoHelper.CaracteristicasHotel,
+                    Seleccionadas = Model.Caracteristicas,
+                    Otras = Model.OtrasCaracteristicas,
+                    Prefijo = "carHotel"
+                })
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar y continuar con la estructura")</button>
+                    <a class="btn btn-ghost" href="@(esEdicion ? Url.Action("Detalle", new { id = Model.IdHotel }) : Url.Action("Index"))">Cancelar</a>
                 </div>
             }
         </div>
@@ -39,9 +67,14 @@
     <div class="col-lg-4">
         <div class="hm-card hm-card-body">
             <div class="hm-form-section">Reglas de negocio</div>
-            <div class="hm-rule"><i class="bi bi-shield-check"></i><div><strong>RF-001</strong>Cada hotel se registra con nombre y dirección.</div></div>
-            <div class="hm-rule"><i class="bi bi-fingerprint"></i><div><strong>Nombre único</strong>No pueden existir dos hoteles con el mismo nombre.</div></div>
-            <div class="hm-rule"><i class="bi bi-diagram-3"></i><div><strong>RN-001</strong>Un hotel puede contener uno o varios pisos.</div></div>
+            <div class="hm-rule"><i class="bi bi-shield-check"></i><div>Cada hotel se registra con nombre y dirección.</div></div>
+            <div class="hm-rule"><i class="bi bi-fingerprint"></i><div>No pueden existir dos hoteles con el mismo nombre.</div></div>
+            <div class="hm-rule"><i class="bi bi-star"></i><div>La categoría puede ser de 3, 4 o 5 estrellas.</div></div>
+            <div class="hm-rule"><i class="bi bi-diagram-3"></i><div>Un hotel puede contener uno o varios pisos.</div></div>
+            @if (!esEdicion)
+            {
+                <div class="hm-form-section mt-3">Siguiente paso</div>
+            }
         </div>
     </div>
 </div>

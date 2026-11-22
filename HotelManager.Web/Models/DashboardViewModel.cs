@@ -13,6 +13,8 @@ namespace HotelManager.Web.Models
         public int TiposHabitacion { get; set; }
         public int ReservasActivas { get; set; }
         public int ReservasHoy { get; set; }
+        /// <summary>Reservas activas cuya fecha de salida es hoy (check-out del dia).</summary>
+        public int SalidasHoy { get; set; }
         public int Huespedes { get; set; }
 
         // Disponibilidad de habitaciones hoy

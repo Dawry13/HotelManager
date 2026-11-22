@@ -10,7 +10,7 @@
         <div>
             <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Tipos de habitación</div>
             <h1>Tipos de habitación</h1>
-            <p class="hm-sub">Catálogo con la capacidad máxima y la tarifa base de cada tipo.</p>
+            <p class="hm-sub">Catálogo de tipos con su capacidad máxima. El precio se asigna en cada habitación.</p>
         </div>
     </div>
     <a class="btn btn-gold" href="@Url.Action("Crear")"><i class="bi bi-plus-lg me-1"></i> Nuevo tipo</a>
@@ -50,7 +50,6 @@
                     <div class="hm-cell-sub" style="min-height:2.4em">@t.Descripcion</div>
                     <div class="hm-entity-metrics">
                         <div><strong><i class="bi bi-people fs-6 me-1"></i>@t.CapacidadMaxima</strong><span>Capacidad</span></div>
-                        <div style="grid-column: span 2"><strong class="text-gold">RD$ @string.Format("{0:N0}", t.TarifaBase)</strong><span>Tarifa base / noche</span></div>
                     </div>
                     <a class="hm-link d-inline-block mt-3" href="@Url.Action("Index", "Habitaciones", new { idTipo = t.IdTipoHabitacion })">
                         @t.TotalHabitaciones habitación(es) <i class="bi bi-arrow-right"></i>

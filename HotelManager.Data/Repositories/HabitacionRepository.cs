@@ -22,7 +22,8 @@ namespace HotelManager.Data.Repositories
             Tarifa = (decimal)r["tarifa"],
             Estado = EstadoDesdeTexto((string)r["estado"]),
             IdPiso = (int)r["id_piso"],
-            IdTipoHabitacion = EnteroNulo(r, "id_tipo_habitacion")
+            IdTipoHabitacion = EnteroNulo(r, "id_tipo_habitacion"),
+            Caracteristicas = Texto(r, "caracteristicas")
         };
 
         // ck_habitaciones_estado: 'disponible','mantenimiento','fuera_de_servicio','inactiva'
@@ -55,8 +56,8 @@ namespace HotelManager.Data.Repositories
         // Se usa scope_identity() porque la tabla tiene el trigger tr_habitaciones_piso_activo
         // (SQL Server no permite OUTPUT sin INTO en tablas con triggers).
         public override int Add(Habitacion e)
-            => Convert.ToInt32(Scalar(@"insert into habitaciones (numero, capacidad, tarifa, estado, id_piso, id_hotel, id_tipo_habitacion)
-                             select @n, @c, @t, @e, p.id_piso, p.id_hotel, @tipo
+            => Convert.ToInt32(Scalar(@"insert into habitaciones (numero, capacidad, tarifa, estado, id_piso, id_hotel, id_tipo_habitacion, caracteristicas)
+                             select @n, @c, @t, @e, p.id_piso, p.id_hotel, @tipo, @car
                              from pisos p where p.id_piso = @p;
                              select cast(scope_identity() as int);",
                 new SqlParameter("@n", e.Numero),
@@ -64,12 +65,14 @@ namespace HotelManager.Data.Repositories
                 new SqlParameter("@t", e.Tarifa),
                 new SqlParameter("@e", EstadoTexto(e.Estado)),
                 new SqlParameter("@p", e.IdPiso),
-                new SqlParameter("@tipo", SqlDbType.Int) { Value = DbVal(e.IdTipoHabitacion) }));
+                new SqlParameter("@tipo", SqlDbType.Int) { Value = DbVal(e.IdTipoHabitacion) },
+                new SqlParameter("@car", SqlDbType.VarChar, 500) { Value = DbVal(e.Caracteristicas) }));
 
         public override bool Update(Habitacion e)
             => Execute(@"update h
                          set numero = @n, capacidad = @c, tarifa = @t, estado = @e,
-                             id_piso = p.id_piso, id_hotel = p.id_hotel, id_tipo_habitacion = @tipo
+                             id_piso = p.id_piso, id_hotel = p.id_hotel, id_tipo_habitacion = @tipo,
+                             caracteristicas = @car
                          from habitaciones h
                          join pisos p on p.id_piso = @p
                          where h.id_habitacion = @id",
@@ -79,6 +82,7 @@ namespace HotelManager.Data.Repositories
                 new SqlParameter("@e", EstadoTexto(e.Estado)),
                 new SqlParameter("@p", e.IdPiso),
                 new SqlParameter("@tipo", SqlDbType.Int) { Value = DbVal(e.IdTipoHabitacion) },
+                new SqlParameter("@car", SqlDbType.VarChar, 500) { Value = DbVal(e.Caracteristicas) },
                 new SqlParameter("@id", e.IdHabitacion)) > 0;
 
         public IEnumerable<Habitacion> GetByPiso(int idPiso)
@@ -104,6 +108,7 @@ namespace HotelManager.Data.Repositories
                          and p.estado = 'activo'
                          and ho.estado = 'activo'
                          and h.capacidad >= @g                -- rn-011
+                         and h.tarifa > 0                     -- sin precio asignado no se reserva
                          and (@hotel is null or h.id_hotel = @hotel)
                          and not exists (                     -- rn-010 / rn-012
                              select 1 from reservas r

@@ -66,6 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyInjection.cs" />
+    <Compile Include="Catalogos\Caracteristicas.cs" />
+    <Compile Include="Dtos\CuentaInicialDto.cs" />
     <Compile Include="Dtos\DisponibilidadRequestDto.cs" />
     <Compile Include="Dtos\HabitacionDto.cs" />
     <Compile Include="Dtos\HistorialReservaDto.cs" />

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HotelManager.Business.Catalogos;
 using HotelManager.Business.Dtos;
 using HotelManager.Business.Exceptions;
 using HotelManager.Business.Interfaces;
@@ -48,7 +49,8 @@ namespace HotelManager.Business.Services
                 Tarifa = dto.Tarifa,
                 Estado = EstadoHabitacion.Disponible,
                 IdPiso = dto.IdPiso,
-                IdTipoHabitacion = dto.IdTipoHabitacion
+                IdTipoHabitacion = dto.IdTipoHabitacion,
+                Caracteristicas = Caracteristicas.Unir(dto.Caracteristicas)
             };
 
             habitacion.IdHabitacion = _habitacionRepository.Add(habitacion);
@@ -71,6 +73,7 @@ namespace HotelManager.Business.Services
             habitacion.Capacidad = dto.Capacidad;
             habitacion.Tarifa = dto.Tarifa;
             habitacion.IdTipoHabitacion = dto.IdTipoHabitacion;
+            habitacion.Caracteristicas = Caracteristicas.Unir(dto.Caracteristicas);
 
             _habitacionRepository.Update(habitacion);
             return ToDto(habitacion);
@@ -91,6 +94,34 @@ namespace HotelManager.Business.Services
 
             habitacion.Estado = nuevoEstado;
             _habitacionRepository.Update(habitacion);
+        }
+
+        public void ActualizarTarifa(int idHabitacion, decimal tarifa)
+        {
+            ValidarTarifa(tarifa);
+            var habitacion = ObtenerEntidad(idHabitacion);
+            if (habitacion.Tarifa == tarifa) return;
+            habitacion.Tarifa = tarifa;
+            _habitacionRepository.Update(habitacion);
+        }
+
+        public int ActualizarTarifaHotel(int idHotel, decimal tarifa)
+        {
+            ValidarTarifa(tarifa);
+            var cambiadas = 0;
+            foreach (var habitacion in _habitacionRepository.GetByHotel(idHotel).Where(h => h.Tarifa != tarifa))
+            {
+                habitacion.Tarifa = tarifa;
+                _habitacionRepository.Update(habitacion);
+                cambiadas++;
+            }
+            return cambiadas;
+        }
+
+        private static void ValidarTarifa(decimal tarifa)
+        {
+            if (tarifa <= 0) throw new BusinessException("La tarifa debe ser mayor que cero.");
+            if (tarifa > 1000000) throw new BusinessException("La tarifa no puede superar RD$ 1,000,000.");
         }
 
         public HabitacionDto ObtenerPorId(int idHabitacion)
@@ -152,7 +183,8 @@ namespace HotelManager.Business.Services
                 Tarifa = h.Tarifa,
                 Estado = h.Estado.ToString(),
                 IdPiso = h.IdPiso,
-                IdTipoHabitacion = h.IdTipoHabitacion
+                IdTipoHabitacion = h.IdTipoHabitacion,
+                Caracteristicas = Caracteristicas.Separar(h.Caracteristicas)
             };
         }
     }

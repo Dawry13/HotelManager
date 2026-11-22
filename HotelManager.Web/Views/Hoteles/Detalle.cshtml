@@ -1,83 +1,382 @@
-﻿@model HotelViewModel
+﻿@model HotelGestionViewModel
 @{
-    ViewBag.Title = Model.Nombre;
-    var bloques = (List<BloqueDto>)ViewBag.Bloques;
-    var pisos = (List<PisoDto>)ViewBag.Pisos;
-    var bloquesPorId = (Dictionary<int, BloqueDto>)ViewBag.BloquesPorId;
-    var habPorPiso = (Dictionary<int, int>)ViewBag.HabitacionesPorPiso;
+    var h = Model.Hotel;
+    ViewBag.Title = TextoHelper.Titulo(h.Nombre);
+    bool esAdmin = ViewBag.EsAdmin;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var hoyIso = DateTime.Today.ToString("yyyy-MM-dd");
+    var urlEstructura = Url.Action("Detalle", new { id = h.IdHotel, tab = "estructura" });
+    var urlReservas = Url.Action("Detalle", new { id = h.IdHotel, tab = "reservas" });
+    var tabReservas = Model.Tab == "reservas";
+    var pisosActivos = new HashSet<int>(Model.Pisos.Where(p => p.Estado == "Activo").Select(p => p.IdPiso));
+    var habitacionesReservables = Model.HabitacionesPorPiso
+        .Where(kv => pisosActivos.Contains(kv.Key))
+        .SelectMany(kv => kv.Value.Where(r => EstadoHelper.Parse(r.Estado) == EstadoHabitacion.Disponible && r.Tarifa > 0)
+        .Select(r => new { r.IdHabitacion, Texto = "Hab. " + r.Numero + " · " + Model.NombreTipo(r.IdTipoHabitacion) + " · " + Model.EtiquetaPiso[kv.Key] + " (máx. " + r.Capacidad + ")" }))
+        .OrderBy(r => r.Texto)
+        .ToList();
+    var tiposActivos = Model.Tipos.Where(t => t.Estado == "Activo").OrderBy(t => t.Nombre).ToList();
 }
+
 <section class="hm-hero mb-4" style="min-height:220px">
-    <div class="hm-hero-inner">
-        <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / <a href="@Url.Action("Index")">Hoteles</a> / Detalle</div>
-        <span class="hm-badge @EstadoHelper.CssActivo(Model.Estado) mt-2">@Model.Estado</span>
-        <h1 class="text-capitalize" style="font-size:2.3rem">@Model.Nombre</h1>
-        <p class="text-capitalize mb-3"><i class="bi bi-geo-alt me-1"></i>@Model.Direccion</p>
-        <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-gold" href="@Url.Action("Editar", new { id = Model.IdHotel })"><i class="bi bi-pencil me-1"></i> Editar</a>
-            <a class="btn btn-ghost" href="@Url.Action("Index")"><i class="bi bi-arrow-left me-1"></i> Volver</a>
+    <div class="hm-hero-inner" style="max-width:760px">
+        <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / <a href="@Url.Action("Index")">Hoteles</a> / @TextoHelper.Titulo(h.Nombre)</div>
+        <div class="d-flex gap-2 align-items-center mt-2 flex-wrap">
+            <span class="hm-badge @EstadoHelper.CssActivo(h.Estado)">@h.Estado</span>
+            <span class="hm-badge gold">@CatalogoHelper.Estrellas(h.Categoria) <span class="ms-1">@CatalogoHelper.NombreCategoria(h.Categoria)</span></span>
+        </div>
+        <h1 class="text-capitalize" style="font-size:2.3rem">@h.Nombre</h1>
+        <p class="text-capitalize mb-2"><i class="bi bi-geo-alt me-1"></i>@h.Direccion</p>
+        @CatalogoHelper.Chips(h.TodasLasCaracteristicas())
+        <div class="d-flex gap-2 flex-wrap mt-3">
+            @if (esAdmin)
+            {
+                <a class="btn btn-gold" href="@Url.Action("Editar", new { id = h.IdHotel })"><i class="bi bi-pencil me-1"></i> Editar hotel</a>
+            }
+            <a class="btn btn-ghost" href="@Url.Action("Hotel", "Explorar", new { id = h.IdHotel })" target="_blank"><i class="bi bi-eye me-1"></i> Ver como huésped</a>
+            <a class="btn btn-ghost" href="@Url.Action("Index")"><i class="bi bi-arrow-left me-1"></i> Hoteles</a>
         </div>
     </div>
 </section>
 
 <div class="row g-3 mb-4">
-    <div class="col-4"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-grid-1x2"></i></div><div><div class="hm-stat-value">@Model.TotalBloques</div><div class="hm-stat-label">Bloques</div></div></div></div>
-    <div class="col-4"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-layers"></i></div><div><div class="hm-stat-value">@Model.TotalPisos</div><div class="hm-stat-label">Pisos</div></div></div></div>
-    <div class="col-4"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-door-closed"></i></div><div><div class="hm-stat-value">@Model.TotalHabitaciones</div><div class="hm-stat-label">Habitaciones</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-grid-1x2"></i></div><div><div class="hm-stat-value">@h.TotalBloques</div><div class="hm-stat-label">Bloques</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-layers"></i></div><div><div class="hm-stat-value">@h.TotalPisos</div><div class="hm-stat-label">Pisos</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-door-closed"></i></div><div><div class="hm-stat-value">@h.TotalHabitaciones</div><div class="hm-stat-label">Habitaciones</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="hm-stat gold compact"><div class="hm-stat-icon"><i class="bi bi-calendar-week"></i></div><div><div class="hm-stat-value">@Model.Reservas.Count</div><div class="hm-stat-label">Reservas próximas</div></div></div></div>
 </div>
 
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="hm-card h-100">
-            <div class="hm-card-head">
-                <h2 class="hm-card-title"><i class="bi bi-grid-1x2"></i> Bloques</h2>
-                <a class="btn btn-primary btn-sm" href="@Url.Action("Crear", "Bloques", new { idHotel = Model.IdHotel })"><i class="bi bi-plus-lg"></i> Bloque</a>
-            </div>
-            @if (!bloques.Any())
-            {
-                <div class="hm-empty"><i class="bi bi-grid-1x2"></i>Sin bloques registrados.</div>
-            }
-            @foreach (var b in bloques)
-            {
-                <div class="hm-res-item purple">
-                    <span class="hm-code ms-2">@b.Codigo</span>
-                    <div class="flex-grow-1"><div class="hm-cell-main text-capitalize">@b.Nombre</div><div class="hm-cell-sub">@b.Descripcion</div></div>
-                    <span class="hm-badge @EstadoHelper.CssActivo(b.Estado)">@b.Estado</span>
+<ul class="nav hm-tabs mb-4" role="tablist">
+    @if (esAdmin)
+    {
+        <li class="nav-item"><button class="nav-link @(tabReservas ? "" : "active")" data-bs-toggle="tab" data-bs-target="#tabEstructura" type="button" role="tab"><i class="bi bi-diagram-3 me-1"></i> Estructura</button></li>
+    }
+    <li class="nav-item"><button class="nav-link @(tabReservas ? "active" : "")" data-bs-toggle="tab" data-bs-target="#tabReservas" type="button" role="tab"><i class="bi bi-calendar-plus me-1"></i> Reservas</button></li>
+</ul>
+
+<div class="tab-content">
+    @* ===================== ESTRUCTURA ===================== *@
+    @if (esAdmin)
+    {
+        <div class="tab-pane fade @(tabReservas ? "" : "show active")" id="tabEstructura" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-xl-4">
+                    <div class="hm-card">
+                        <div class="hm-card-head">
+                            <h2 class="hm-card-title"><i class="bi bi-grid-1x2"></i> Bloques</h2>
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalBloque"><i class="bi bi-plus-lg"></i> Bloque</button>
+                        </div>
+                        @if (!Model.Bloques.Any())
+                        {
+                            <div class="hm-empty"><i class="bi bi-grid-1x2"></i>Sin bloques. Son opcionales: úselos si el hotel tiene varias torres o edificios.</div>
+                        }
+                        @foreach (var b in Model.Bloques)
+                        {
+                            <div class="hm-res-item purple">
+                                <span class="hm-code ms-2">@b.Codigo</span>
+                                <div class="flex-grow-1" style="min-width:0"><div class="hm-cell-main text-capitalize">@b.Nombre</div><div class="hm-cell-sub">@b.Descripcion</div></div>
+                                <span class="hm-badge @EstadoHelper.CssActivo(b.Estado)">@b.Estado</span>
+                                <button class="btn-icon i-view" title="Agregar piso a este bloque" data-bs-toggle="modal" data-bs-target="#modalPiso" data-set-bloque="@b.IdBloque"><i class="bi bi-plus-lg"></i></button>
+                                <a class="btn-icon i-edit" href="@Url.Action("Editar", "Bloques", new { id = b.IdBloque })" title="Editar"><i class="bi bi-pencil"></i></a>
+                            </div>
+                        }
+                    </div>
                 </div>
+
+                <div class="col-xl-8">
+                    <div class="hm-card">
+                        <div class="hm-card-head">
+                            <h2 class="hm-card-title"><i class="bi bi-layers"></i> Pisos y habitaciones</h2>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPiso"><i class="bi bi-plus-lg"></i> Piso</button>
+                                <button class="btn btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#modalHabitacion" @(Model.PisosActivos.Any() ? "" : "disabled")><i class="bi bi-plus-lg"></i> Habitación</button>
+                            </div>
+                        </div>
+                        @if (!Model.Pisos.Any())
+                        {
+                            <div class="hm-empty"><i class="bi bi-layers"></i>Registre el primer piso para poder agregar habitaciones.
+                                <div class="mt-2"><button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalPiso"><i class="bi bi-plus-lg"></i> Agregar piso</button></div>
+                            </div>
+                        }
+                        @foreach (var p in Model.Pisos)
+                        {
+                            var habs = Model.HabitacionesPorPiso.ContainsKey(p.IdPiso) ? Model.HabitacionesPorPiso[p.IdPiso] : new List<HabitacionDto>();
+                            <div class="hm-floor-row">
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    <span class="hm-code">@p.Numero</span>
+                                    <strong class="text-capitalize">@Model.EtiquetaPiso[p.IdPiso]</strong>
+                                    <span class="hm-badge @EstadoHelper.CssActivo(p.Estado)">@p.Estado</span>
+                                    <span class="small text-secondary">@habs.Count habitación(es)</span>
+                                    <div class="ms-auto d-flex gap-1">
+                                        @if (p.Estado == "Activo")
+                                        {
+                                            <button class="btn-icon i-view" title="Agregar habitación en este piso" data-bs-toggle="modal" data-bs-target="#modalHabitacion" data-set-piso="@p.IdPiso"><i class="bi bi-door-open"></i></button>
+                                        }
+                                        <a class="btn-icon i-edit" href="@Url.Action("Editar", "Pisos", new { id = p.IdPiso })" title="Editar piso"><i class="bi bi-pencil"></i></a>
+                                    </div>
+                                </div>
+                                <div class="hm-room-chips">
+                                    @if (!habs.Any())
+                                    {
+                                        <span class="small text-secondary">Sin habitaciones todavía.</span>
+                                    }
+                                    @foreach (var r in habs)
+                                    {
+                                        var est = EstadoHelper.Parse(r.Estado);
+                                        <a class="hm-room-chip hm-hover-card @EstadoHelper.Css(est)" href="@Url.Action("Editar", "Habitaciones", new { id = r.IdHabitacion })" tabindex="0">
+                                            <i class="bi bi-door-closed"></i> @r.Numero
+                                            <span class="hm-hover-info hm-hover-pop" aria-hidden="true">
+                                                <strong class="d-block">Habitación @r.Numero · @Model.NombreTipo(r.IdTipoHabitacion)</strong>
+                                                <span class="d-block small text-secondary mb-1">@EstadoHelper.Texto(est) · @r.Capacidad persona(s) · @(r.Tarifa > 0 ? "RD$ " + r.Tarifa.ToString("N0") + "/noche" : "Sin precio asignado")</span>
+                                                @if (r.Caracteristicas.Any())
+                                                {
+                                                    @CatalogoHelper.Chips(r.Caracteristicas)
+                                                }
+                                                else
+                                                {
+                                                    <span class="small text-secondary">Sin características registradas. Pulse para editar.</span>
+                                                }
+                                            </span>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ===================== RESERVAS ===================== *@
+    <div class="tab-pane fade @(tabReservas || !esAdmin ? "show active" : "")" id="tabReservas" role="tabpanel">
+        <form method="get" action="@Url.Action("Detalle", new { id = h.IdHotel })" class="hm-card hm-filters mb-4">
+            <input type="hidden" name="tab" value="reservas" />
+            <div class="hm-field" style="flex-basis:170px">
+                <label for="entrada">Entrada</label>
+                <input type="date" class="form-control" id="entrada" name="entrada" min="@hoyIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" data-rango="entrada" data-sin-pasado required />
+            </div>
+            <div class="hm-field" style="flex-basis:170px">
+                <label for="salida">Salida</label>
+                <input type="date" class="form-control" id="salida" name="salida" min="@hoyIso" value="@Model.Salida.ToString("yyyy-MM-dd")" data-rango="salida" data-sin-pasado required />
+            </div>
+            <div class="hm-field" style="flex-basis:120px">
+                <label for="huespedes">Personas</label>
+                <input type="number" class="form-control" id="huespedes" name="huespedes" min="1" max="20" value="@Model.Huespedes" required />
+            </div>
+            <button class="btn btn-gold" type="submit"><i class="bi bi-search me-1"></i> Ver disponibles</button>
+            <button class="btn btn-ghost" type="button" data-bs-toggle="modal" data-bs-target="#modalReserva" @(habitacionesReservables.Any() ? "" : "disabled")><i class="bi bi-plus-lg me-1"></i> Nueva reserva</button>
+        </form>
+
+        @if (Model.ErrorDisponibilidad != null)
+        {
+            <div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.ErrorDisponibilidad</div>
+        }
+        else if (Model.Consultado)
+        {
+            <h2 class="h5 mb-3">@Model.Disponibles.Count habitación(es) disponible(s) <span class="text-secondary fs-6 fw-normal">· @Model.Entrada.ToString("dd MMM", culture) – @Model.Salida.ToString("dd MMM yyyy", culture) · @Model.Noches noche(s)</span></h2>
+            if (!Model.Disponibles.Any())
+            {
+                <div class="hm-card hm-empty mb-4"><i class="bi bi-calendar-x"></i>No hay habitaciones libres para esas fechas en este hotel.</div>
+            }
+            <div class="row g-3 mb-4">
+                @foreach (var d in Model.Disponibles)
+                {
+                    <div class="col-sm-6 col-xl-4">
+                        <div class="hm-room-card hm-hover-card libre" tabindex="0">
+                            <div class="d-flex justify-content-between">
+                                <div><div class="hm-room-num">Hab. @d.Numero</div><div class="hm-cell-sub">@d.Tipo · @d.Ubicacion</div></div>
+                                <span class="hm-badge ok">Libre</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end mt-2">
+                                <div><div class="small text-secondary"><i class="bi bi-people me-1"></i>@d.Capacidad · RD$ @d.TarifaPromedio.ToString("N0")/noche</div><div class="fw-bold text-gold">RD$ @d.CostoTotal.ToString("N2")</div></div>
+                                <button type="button" class="btn btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#modalReserva"
+                                        data-set-habitacion="@d.IdHabitacion" data-set-entrada="@Model.Entrada.ToString("yyyy-MM-dd")"
+                                        data-set-salida="@Model.Salida.ToString("yyyy-MM-dd")" data-set-huespedes="@Model.Huespedes">Reservar</button>
+                            </div>
+                            <div class="hm-hover-info hm-hover-pop" aria-hidden="true">
+                                <strong class="d-block mb-1">@d.Tipo · Habitación @d.Numero</strong>
+                                @if (d.Caracteristicas.Any()) { @CatalogoHelper.Chips(d.Caracteristicas) } else { <span class="small text-secondary">Sin características registradas.</span> }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="hm-card">
+            <div class="hm-card-head">
+                <h2 class="hm-card-title"><i class="bi bi-calendar-week"></i> Reservas próximas y en curso</h2>
+                <a class="hm-link" href="@Url.Action("Index", "Reservas", new { idHotel = h.IdHotel })">Ver todas</a>
+            </div>
+            @if (!Model.Reservas.Any())
+            {
+                <div class="hm-empty"><i class="bi bi-calendar"></i>No hay reservas activas para este hotel.</div>
+            }
+            @foreach (var r in Model.Reservas)
+            {
+                <a class="hm-res-item @EstadoHelper.CssReserva(r.Estado) text-reset text-decoration-none" href="@Url.Action("Detalle", "Reservas", new { id = r.Id })">
+                    <span class="hm-code ms-2">#@r.Id</span>
+                    <div class="flex-grow-1" style="min-width:0">
+                        <div class="hm-res-name">@r.Huesped</div>
+                        <div class="hm-cell-sub">Hab. @r.Habitacion · @r.Ubicacion · @r.Huespedes persona(s)</div>
+                    </div>
+                    <div class="hm-res-date d-none d-sm-block"><i class="bi bi-calendar3 me-1 text-secondary"></i>@r.Entrada.ToString("dd MMM", culture) – @r.Salida.ToString("dd MMM", culture)</div>
+                    <span class="hm-badge @EstadoHelper.CssReserva(r.Estado)">@r.Estado</span>
+                </a>
             }
         </div>
     </div>
-    <div class="col-lg-7">
-        <div class="hm-card h-100">
-            <div class="hm-card-head">
-                <h2 class="hm-card-title"><i class="bi bi-layers"></i> Pisos</h2>
-                <a class="btn btn-primary btn-sm" href="@Url.Action("Crear", "Pisos", new { idHotel = Model.IdHotel })"><i class="bi bi-plus-lg"></i> Piso</a>
-            </div>
-            <div class="table-responsive">
-                <table class="table hm-table table-hover">
-                    <thead><tr><th>Piso</th><th>Bloque</th><th class="text-center">Habitaciones</th><th>Estado</th><th></th></tr></thead>
-                    <tbody>
-                        @if (!pisos.Any())
-                        {
-                            <tr><td colspan="5" class="hm-empty"><i class="bi bi-layers"></i>Sin pisos registrados.</td></tr>
-                        }
-                        @foreach (var p in pisos)
-                        {
-                            <tr>
-                                <td><span class="hm-code">@p.Numero</span></td>
-                                <td class="text-capitalize">@(p.IdBloque.HasValue && bloquesPorId.ContainsKey(p.IdBloque.Value) ? bloquesPorId[p.IdBloque.Value].Nombre : "—")</td>
-                                <td class="text-center">@(habPorPiso.ContainsKey(p.IdPiso) ? habPorPiso[p.IdPiso] : 0)</td>
-                                <td><span class="hm-badge @EstadoHelper.CssActivo(p.Estado)">@p.Estado</span></td>
-                                <td class="text-end">
-                                    @if (p.Estado == "Activo")
-                                    {
-                                        <a class="btn-icon i-view" href="@Url.Action("Crear", "Habitaciones", new { idHotel = Model.IdHotel, idPiso = p.IdPiso })" title="Agregar habitación"><i class="bi bi-door-open"></i></a>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+</div>
+
+@* ===================== VENTANAS EMERGENTES ===================== *@
+@if (esAdmin)
+{
+    <div class="modal fade" id="modalBloque" tabindex="-1" aria-labelledby="tituloBloque" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            @using (Html.BeginForm("Crear", "Bloques", FormMethod.Post, new { @class = "modal-content hm-modal" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="IdHotel" value="@h.IdHotel" />
+                <input type="hidden" name="returnUrl" value="@urlEstructura" />
+                <div class="modal-header"><h2 class="modal-title h5" id="tituloBloque"><i class="bi bi-grid-1x2 me-2 text-gold"></i>Nuevo bloque</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                <div class="modal-body">
+                    <p class="small text-secondary">Un bloque agrupa pisos (por ejemplo, "Torre A" o "Edificio Playa").</p>
+                    <div class="row">
+                        <div class="col-4 mb-3"><label class="form-label" for="bCodigo">Código</label><input class="form-control" id="bCodigo" name="Codigo" maxlength="10" required placeholder="A" /></div>
+                        <div class="col-8 mb-3"><label class="form-label" for="bNombre">Nombre</label><input class="form-control" id="bNombre" name="Nombre" maxlength="100" required placeholder="Torre A" /></div>
+                    </div>
+                    <label class="form-label" for="bDesc">Descripción <span class="text-secondary small">(opcional)</span></label>
+                    <textarea class="form-control" id="bDesc" name="Descripcion" rows="2" maxlength="250"></textarea>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-gold"><i class="bi bi-save me-1"></i> Guardar bloque</button></div>
+            }
         </div>
+    </div>
+
+    <div class="modal fade" id="modalPiso" tabindex="-1" aria-labelledby="tituloPiso" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            @using (Html.BeginForm("Crear", "Pisos", FormMethod.Post, new { @class = "modal-content hm-modal" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="IdHotel" value="@h.IdHotel" />
+                <input type="hidden" name="returnUrl" value="@urlEstructura" />
+                <div class="modal-header"><h2 class="modal-title h5" id="tituloPiso"><i class="bi bi-layers me-2 text-gold"></i>Nuevo piso</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-5 mb-3"><label class="form-label" for="pNumero">Número de piso</label><input class="form-control" type="number" id="pNumero" name="Numero" min="0" max="200" required value="@(Model.Pisos.Any() ? Model.Pisos.Max(p => p.Numero) + 1 : 1)" /></div>
+                        <div class="col-sm-7 mb-3">
+                            <label class="form-label" for="pBloque">Bloque</label>
+                            <select class="form-select" id="pBloque" name="IdBloque">
+                                <option value="">Sin bloque</option>
+                                @foreach (var b in Model.Bloques.Where(x => x.Estado == "Activo"))
+                                {
+                                    <option value="@b.IdBloque">@b.Codigo - @TextoHelper.Titulo(b.Nombre)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-0">El número de piso no puede repetirse dentro del mismo bloque.</p>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-gold"><i class="bi bi-save me-1"></i> Guardar piso</button></div>
+            }
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalHabitacion" tabindex="-1" aria-labelledby="tituloHabitacion" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            @using (Html.BeginForm("Crear", "Habitaciones", FormMethod.Post, new { @class = "modal-content hm-modal" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="IdHotel" value="@h.IdHotel" />
+                <input type="hidden" name="returnUrl" value="@urlEstructura" />
+                <div class="modal-header"><h2 class="modal-title h5" id="tituloHabitacion"><i class="bi bi-door-open me-2 text-gold"></i>Nueva habitación</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label" for="IdPiso">Piso</label>
+                            <select class="form-select" id="IdPiso" name="IdPiso" required>
+                                <option value="">-- Seleccione el piso --</option>
+                                @foreach (var p in Model.PisosActivos)
+                                {
+                                    <option value="@p.Value">@p.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label" for="IdTipoHabitacion">Tipo de habitación</label>
+                            <select class="form-select" id="IdTipoHabitacion" name="IdTipoHabitacion" data-autollenar required>
+                                <option value="">-- Seleccione el tipo --</option>
+                                @foreach (var t in tiposActivos)
+                                {
+                                    <option value="@t.IdTipoHabitacion" data-capacidad="@t.CapacidadMaxima">@TextoHelper.Titulo(t.Nombre) (máx. @t.CapacidadMaxima)</option>
+                                }
+                            </select>
+                            @if (!tiposActivos.Any())
+                            {
+                                <div class="form-text">No hay tipos activos. <a class="hm-link" href="@Url.Action("Crear", "TiposHabitacion")">Cree uno</a>.</div>
+                            }
+                        </div>
+                        <div class="col-sm-4 mb-3"><label class="form-label" for="Numero">Número</label><input class="form-control" id="Numero" name="Numero" maxlength="10" required placeholder="101" /></div>
+                        <div class="col-sm-4 mb-3"><label class="form-label" for="Capacidad">Capacidad</label><input class="form-control" type="number" id="Capacidad" name="Capacidad" min="1" max="20" value="1" required /><div class="form-text" id="ayudaTipo"></div></div>
+                        <div class="col-sm-4 mb-3"><label class="form-label" for="Tarifa">Tarifa por noche (RD$)</label><input class="form-control" type="number" id="Tarifa" name="Tarifa" min="0.01" step="0.01" required /></div>
+                    </div>
+                    <label class="form-label">Comodidades</label>
+                    @Html.Partial("_SelectorCaracteristicas", new CaracteristicasSelectorViewModel { Opciones = CatalogoHelper.CaracteristicasHabitacion, Prefijo = "mHab" })
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-gold"><i class="bi bi-save me-1"></i> Guardar habitación</button></div>
+            }
+        </div>
+    </div>
+}
+
+<div class="modal fade" id="modalReserva" tabindex="-1" aria-labelledby="tituloReserva" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        @using (Html.BeginForm("Crear", "Reservas", FormMethod.Post, new { @class = "modal-content hm-modal" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@urlReservas" />
+            <div class="modal-header"><h2 class="modal-title h5" id="tituloReserva"><i class="bi bi-calendar-plus me-2 text-gold"></i>Nueva reserva en @TextoHelper.Titulo(h.Nombre)</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="IdHuesped">Huésped</label>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" id="IdHuesped" name="IdHuesped" required>
+                            <option value="">-- Seleccione el huésped --</option>
+                            @foreach (var g in Model.ListaHuespedes)
+                            {
+                                <option value="@g.Value">@g.Text</option>
+                            }
+                        </select>
+                        <a class="btn btn-ghost text-nowrap" href="@Url.Action("Crear", "Huespedes", new { returnUrl = urlReservas })" title="Registrar huésped nuevo"><i class="bi bi-person-plus"></i> Nuevo</a>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="IdHabitacion">Habitación</label>
+                    <select class="form-select" id="IdHabitacion" name="IdHabitacion" data-cotizar required>
+                        <option value="">-- Seleccione la habitación --</option>
+                        @foreach (var r in habitacionesReservables)
+                        {
+                            <option value="@r.IdHabitacion">@r.Texto</option>
+                        }
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 mb-3"><label class="form-label" for="Entrada">Entrada</label><input class="form-control" type="date" id="Entrada" name="Entrada" min="@hoyIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" data-cotizar data-sin-pasado required /></div>
+                    <div class="col-sm-4 mb-3"><label class="form-label" for="Salida">Salida</label><input class="form-control" type="date" id="Salida" name="Salida" min="@hoyIso" value="@Model.Salida.ToString("yyyy-MM-dd")" data-cotizar data-sin-pasado required /></div>
+                    <div class="col-sm-4 mb-3"><label class="form-label" for="CantidadHuespedes">Personas</label><input class="form-control" type="number" id="CantidadHuespedes" name="CantidadHuespedes" min="1" max="20" value="@Model.Huespedes" required /></div>
+                </div>
+                <div class="hm-cotizacion" id="cotizacion" data-url="@Url.Action("Cotizar", "Reservas")">
+                    <i class="bi bi-calculator"></i>
+                    <div>
+                        <div class="small text-secondary">Costo estimado de la estadía</div>
+                        <div class="fs-4 fw-bold text-gold" id="cotizacionTotal">—</div>
+                        <div class="small text-secondary" id="cotizacionDetalle">Seleccione habitación y fechas.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-gold"><i class="bi bi-check2-circle me-1"></i> Confirmar reserva</button></div>
+        }
     </div>
 </div>

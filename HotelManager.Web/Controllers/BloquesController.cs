@@ -55,7 +55,7 @@ namespace HotelManager.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Crear(BloqueViewModel vm)
+        public ActionResult Crear(BloqueViewModel vm, string returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -68,10 +68,12 @@ namespace HotelManager.Web.Controllers
                 };
                 if (Ejecutar(() => _bloqueService.Crear(dto)))
                 {
-                    Exito("Bloque registrado correctamente.");
-                    return RedirectToAction("Index", new { idHotel = vm.IdHotel });
+                    Exito("Bloque \"" + dto.Nombre + "\" registrado correctamente.");
+                    return VolverA(returnUrl, true) ?? RedirectToAction("Index", new { idHotel = vm.IdHotel });
                 }
             }
+            var volver = VolverA(returnUrl, false);
+            if (volver != null) return volver;
             CargarHoteles(vm.IdHotel, true);
             return View(vm);
         }

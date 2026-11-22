@@ -10,6 +10,7 @@
     @using (Html.BeginForm("Registro", "Cuenta", FormMethod.Post))
     {
         @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.ReturnUrl)
         @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
 
         <div class="hm-form-section">Sus datos</div>
@@ -59,5 +60,5 @@
 
         <button type="submit" class="btn btn-gold w-100 py-2"><i class="bi bi-person-plus me-1"></i> Crear cuenta</button>
     }
-    <p class="text-center mt-3 mb-0 small text-secondary">¿Ya tiene cuenta? <a class="hm-link" href="@Url.Action("Login")">Inicie sesión</a></p>
+    <p class="text-center mt-3 mb-0 small text-secondary">¿Ya tiene cuenta? <a class="hm-link" href="@Url.Action("Login", new { returnUrl = Model.ReturnUrl })">Inicie sesión</a> · <a class="hm-link" href="@Url.Action("Index", "Explorar")">Volver a los hoteles</a></p>
 </div>

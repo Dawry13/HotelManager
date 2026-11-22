@@ -18,11 +18,11 @@
 <form method="get" class="hm-card hm-filters mb-4">
     <div class="hm-field" style="flex-basis:170px">
         <label for="entrada">Entrada</label>
-        <input type="date" class="form-control" id="entrada" name="entrada" min="@minIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" required />
+        <input type="date" class="form-control" id="entrada" name="entrada" min="@minIso" value="@Model.Entrada.ToString("yyyy-MM-dd")" data-rango="entrada" data-sin-pasado required />
     </div>
     <div class="hm-field" style="flex-basis:170px">
         <label for="salida">Salida</label>
-        <input type="date" class="form-control" id="salida" name="salida" min="@minIso" value="@Model.Salida.ToString("yyyy-MM-dd")" required />
+        <input type="date" class="form-control" id="salida" name="salida" min="@minIso" value="@Model.Salida.ToString("yyyy-MM-dd")" data-rango="salida" data-sin-pasado required />
     </div>
     <div class="hm-field" style="flex-basis:120px">
         <label for="huespedes">Personas</label>

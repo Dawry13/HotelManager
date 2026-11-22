@@ -1,0 +1,115 @@
+﻿@model CatalogoIndexViewModel
+@{
+    ViewBag.Title = "Encuentre su hotel";
+    var fondos = new[] { "", "alt", "alt2", "alt3" };
+    var i = 0;
+}
+
+<section class="hm-hero hm-hero-catalogo mb-4">
+    <div class="hm-hero-inner">
+        <h1>Encuentre su <span>próxima estadía</span></h1>
+        <form method="get" action="@Url.Action("Index")" class="hm-hero-search" role="search">
+            <div class="hm-hero-search-field">
+                <i class="bi bi-search"></i>
+                <input type="search" name="buscar" value="@Model.Buscar" placeholder="Nombre, ciudad o servicio (piscina, spa...)" aria-label="Buscar hoteles" />
+            </div>
+            <select name="categoria" class="form-select" aria-label="Categoría">
+                <option value="">Todas las categorías</option>
+                @for (var c = 5; c >= 3; c--)
+                {
+                    <option value="@c" @(Model.Categoria == c ? "selected" : "")>@c estrellas</option>
+                }
+            </select>
+            <button class="btn btn-gold" type="submit"><i class="bi bi-search me-1"></i> Buscar</button>
+        </form>
+    </div>
+</section>
+
+<div class="hm-steps mb-4" aria-label="Cómo reservar">
+    <div class="hm-step"><span>1</span><div><strong>Explore</strong>Elija hotel y vea sus habitaciones.</div></div>
+    <div class="hm-step"><span>2</span><div><strong>Elija fechas</strong>Vea precio y disponibilidad al instante.</div></div>
+    <div class="hm-step"><span>3</span><div><strong>Reserve</strong>Inicie sesión o cree su cuenta y envíe la solicitud.</div></div>
+</div>
+
+<div class="hm-cat-tabs mb-4" role="tablist" aria-label="Categoría del hotel">
+    <a class="hm-chip-link @(Model.Categoria == null ? "active" : "")" href="@Url.Action("Index", new { buscar = Model.Buscar })">Todos <span class="hm-count">@Model.Total</span></a>
+    @for (var c = 5; c >= 3; c--)
+    {
+        <a class="hm-chip-link @(Model.Categoria == c ? "active" : "")" href="@Url.Action("Index", new { buscar = Model.Buscar, categoria = c })">
+            @CatalogoHelper.Estrellas(c) <span class="ms-1">@c estrellas</span> <span class="hm-count">@Model.PorCategoria[c]</span>
+        </a>
+    }
+</div>
+
+@if (!Model.Hoteles.Any())
+{
+    <div class="hm-card hm-empty">
+        <i class="bi bi-buildings"></i>
+        No encontramos hoteles con ese criterio.
+        <div class="mt-2"><a class="hm-link" href="@Url.Action("Index")">Ver todos los hoteles</a></div>
+    </div>
+}
+
+<div class="row g-4">
+    @foreach (var h in Model.Hoteles)
+    {
+        var url = Url.Action("Hotel", new { id = h.IdHotel });
+        <div class="col-md-6 col-xl-4">
+            <article class="hm-card hm-entity hm-hover-card" tabindex="0">
+                <a href="@url" class="hm-entity-top @fondos[i++ % fondos.Length] text-decoration-none">
+                    <span class="hm-entity-state hm-badge gold">@CatalogoHelper.Estrellas(h.Categoria)</span>
+                    <div class="hm-entity-icon"><i class="bi bi-building"></i></div>
+                </a>
+                <div class="hm-entity-body">
+                    <h3><a class="text-reset text-decoration-none" href="@url">@h.Nombre</a></h3>
+                    <div class="hm-cell-sub"><i class="bi bi-geo-alt me-1"></i>@h.Direccion</div>
+                    <div class="hm-entity-metrics">
+                        <div><strong>@h.TotalBloques</strong><span>Bloques</span></div>
+                        <div><strong>@h.TotalPisos</strong><span>Pisos</span></div>
+                        <div><strong>@h.TotalHabitaciones</strong><span>Habitaciones</span></div>
+                    </div>
+                </div>
+                <div class="hm-entity-foot align-items-center justify-content-between">
+                    <div>
+                        @if (h.PrecioDesde.HasValue)
+                        {
+                            <div class="small text-secondary">Desde</div>
+                            <div class="fs-5 fw-bold text-gold">RD$ @h.PrecioDesde.Value.ToString("N0") <small class="fs-6 fw-normal text-secondary">/ noche</small></div>
+                        }
+                        else
+                        {
+                            <div class="small text-secondary">Próximamente</div>
+                        }
+                    </div>
+                    <a class="btn btn-gold" href="@url">Ver hotel <i class="bi bi-arrow-right ms-1"></i></a>
+                </div>
+
+                @* Al pasar el mouse (o enfocar con teclado) se muestran las caracteristicas *@
+                <div class="hm-hover-info" aria-hidden="true">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <strong>@h.Nombre</strong>
+                        @CatalogoHelper.Estrellas(h.Categoria)
+                    </div>
+                    <div class="small text-secondary mb-2">@CatalogoHelper.NombreCategoria(h.Categoria)</div>
+                    @if (!string.IsNullOrWhiteSpace(h.Descripcion))
+                    {
+                        <p class="small mb-2">@h.Descripcion</p>
+                    }
+                    @if (h.Caracteristicas.Any())
+                    {
+                        @CatalogoHelper.Chips(h.Caracteristicas, 10)
+                    }
+                    else
+                    {
+                        <p class="small text-secondary mb-2">Este hotel aún no ha publicado sus servicios.</p>
+                    }
+                    @if (h.CapacidadMaxima > 0)
+                    {
+                        <div class="small text-secondary mt-2"><i class="bi bi-people me-1"></i>Habitaciones hasta @h.CapacidadMaxima persona(s)</div>
+                    }
+                    <a class="btn btn-gold btn-sm mt-3 w-100" href="@url">Ver habitaciones y precios</a>
+                </div>
+            </article>
+        </div>
+    }
+</div>

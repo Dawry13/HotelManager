@@ -72,7 +72,7 @@ namespace HotelManager.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Crear(HabitacionViewModel vm)
+        public ActionResult Crear(HabitacionViewModel vm, string returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -82,14 +82,17 @@ namespace HotelManager.Web.Controllers
                     IdTipoHabitacion = vm.IdTipoHabitacion,
                     Numero = vm.Numero,
                     Capacidad = vm.Capacidad.Value,
-                    Tarifa = vm.Tarifa.Value
+                    Tarifa = vm.Tarifa.Value,
+                    Caracteristicas = vm.TodasLasCaracteristicas()
                 };
                 if (Ejecutar(() => _habitacionService.Crear(dto)))
                 {
                     Exito("Habitación " + dto.Numero + " registrada correctamente.");
-                    return RedirectToAction("Index", new { idHotel = vm.IdHotel });
+                    return VolverA(returnUrl, true) ?? RedirectToAction("Index", new { idHotel = vm.IdHotel });
                 }
             }
+            var volver = VolverA(returnUrl, false);
+            if (volver != null) return volver;
             CargarListas(vm);
             return View(vm);
         }
@@ -119,7 +122,8 @@ namespace HotelManager.Web.Controllers
                     IdTipoHabitacion = vm.IdTipoHabitacion,
                     Numero = vm.Numero,
                     Capacidad = vm.Capacidad.Value,
-                    Tarifa = vm.Tarifa.Value
+                    Tarifa = vm.Tarifa.Value,
+                    Caracteristicas = vm.TodasLasCaracteristicas()
                 };
                 if (Ejecutar(() => _habitacionService.Actualizar(dto)))
                 {
@@ -216,7 +220,9 @@ namespace HotelManager.Web.Controllers
                 Numero = h.Numero,
                 Capacidad = h.Capacidad,
                 Tarifa = h.Tarifa,
-                Estado = EstadoHelper.Parse(h.Estado)
+                Estado = EstadoHelper.Parse(h.Estado),
+                Caracteristicas = h.Caracteristicas.Where(c => CatalogoHelper.CaracteristicasHabitacion.ContainsKey(c)).ToList(),
+                OtrasCaracteristicas = CatalogoHelper.Otras(h.Caracteristicas, CatalogoHelper.CaracteristicasHabitacion)
             };
         }
     }

@@ -110,6 +110,9 @@
     <EmbeddedResource Include="Database\03_usuarios_roles.sql">
       <LogicalName>HotelManager.Data.Database.03_usuarios_roles.sql</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Database\04_categorias_caracteristicas.sql">
+      <LogicalName>HotelManager.Data.Database.04_categorias_caracteristicas.sql</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HotelManager.Domain\HotelManager.Domain.csproj">

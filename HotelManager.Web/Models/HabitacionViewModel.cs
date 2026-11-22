@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using HotelManager.Domain.Enums;
+using HotelManager.Web.Helpers;
 
 namespace HotelManager.Web.Models
 {
@@ -34,6 +36,18 @@ namespace HotelManager.Web.Models
         public decimal? Tarifa { get; set; }
 
         public EstadoHabitacion Estado { get; set; }
+
+        /// <summary>Caracteristicas marcadas (aire acondicionado, TV, balcon...).</summary>
+        public List<string> Caracteristicas { get; set; } = new List<string>();
+
+        [StringLength(250, ErrorMessage = "Máximo 250 caracteres.")]
+        [Display(Name = "Otras características")]
+        public string OtrasCaracteristicas { get; set; }
+
+        public List<string> TodasLasCaracteristicas()
+        {
+            return CatalogoHelper.Combinar(Caracteristicas, OtrasCaracteristicas);
+        }
 
         public string NombreHotel { get; set; }
         public string DescripcionPiso { get; set; }

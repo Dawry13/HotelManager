@@ -137,6 +137,70 @@ namespace HotelManager.Web.Controllers
             return View(vm);
         }
 
+        // GET: /Portal/Confirmar?idHabitacion=&entrada=&salida=&huespedes=
+        // Resumen de la estadia elegida en el catalogo antes de enviar la solicitud.
+        public ActionResult Confirmar(int idHabitacion, DateTime entrada, DateTime salida, int huespedes)
+        {
+            var ctx = Contexto();
+            var idHotel = ctx.IdHotelDeHabitacion(idHabitacion);
+            if (idHotel == 0) return HttpNotFound();
+
+            HabitacionDisponibleDto disponible = null;
+            try
+            {
+                disponible = _disponibilidadService.Consultar(new DisponibilidadRequestDto
+                {
+                    Entrada = entrada.Date,
+                    Salida = salida.Date,
+                    CantidadHuespedes = huespedes,
+                    IdHotel = idHotel
+                }).FirstOrDefault(d => d.IdHabitacion == idHabitacion);
+            }
+            catch (BusinessException ex)
+            {
+                Error(ex.Message);
+                return VolverAlHotel(idHotel, entrada, salida, huespedes);
+            }
+
+            if (disponible == null)
+            {
+                Error("La habitación ya no está disponible para esas fechas. Elija otra opción.");
+                return VolverAlHotel(idHotel, entrada, salida, huespedes);
+            }
+
+            var hotel = ctx.Hoteles[idHotel];
+            var vm = new ConfirmarReservaViewModel
+            {
+                IdHotel = idHotel,
+                Hotel = TextoHelper.Titulo(hotel.Nombre),
+                Categoria = hotel.Categoria,
+                Direccion = TextoHelper.Titulo(hotel.Direccion),
+                IdHabitacion = idHabitacion,
+                Habitacion = disponible.Numero,
+                Tipo = ctx.TipoDeHabitacion(idHabitacion),
+                Ubicacion = ctx.UbicacionHabitacion(idHabitacion),
+                Caracteristicas = ctx.Habitaciones[idHabitacion].Caracteristicas,
+                Entrada = entrada.Date,
+                Salida = salida.Date,
+                Huespedes = huespedes,
+                TarifaPromedio = disponible.TarifaPorNoche,
+                CostoTotal = disponible.CostoEstimado,
+                Huesped = _huespedService.ObtenerPorId(IdHuesped)
+            };
+            return View(vm);
+        }
+
+        private ActionResult VolverAlHotel(int idHotel, DateTime entrada, DateTime salida, int huespedes)
+        {
+            return RedirectToAction("Hotel", "Explorar", new
+            {
+                id = idHotel,
+                entrada = entrada.ToString("yyyy-MM-dd"),
+                salida = salida.ToString("yyyy-MM-dd"),
+                huespedes
+            });
+        }
+
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult Solicitar(int idHabitacion, DateTime entrada, DateTime salida, int huespedes)
         {
@@ -156,7 +220,9 @@ namespace HotelManager.Web.Controllers
                 return RedirectToAction("Detalle", new { id = solicitada.Id });
             }
 
-            Error(string.Join(" ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+            Error(ErroresDelModelo());
+            var idHotelHabitacion = Contexto().IdHotelDeHabitacion(idHabitacion);
+            if (idHotelHabitacion > 0) return VolverAlHotel(idHotelHabitacion, entrada, salida, huespedes);
             return RedirectToAction("Solicitar", new
             {
                 entrada = entrada.ToString("yyyy-MM-dd"),

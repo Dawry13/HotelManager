@@ -19,25 +19,36 @@ namespace HotelManager.Data.Repositories
             IdHotel = (int)r["id_hotel"],
             Nombre = (string)r["nombre"],
             Direccion = (string)r["direccion"],
-            Estado = EsActivo(r["estado"])
+            Estado = EsActivo(r["estado"]),
+            Categoria = r["categoria"] == DBNull.Value ? 3 : Convert.ToInt32(r["categoria"]),
+            Caracteristicas = Texto(r, "caracteristicas"),
+            Descripcion = Texto(r, "descripcion")
         };
 
         public override IEnumerable<Hotel> GetAll()
             => Query("select * from hoteles order by nombre");
 
         public override int Add(Hotel e)
-            => (int)Scalar(@"insert into hoteles (nombre, direccion, estado)
+            => (int)Scalar(@"insert into hoteles (nombre, direccion, estado, categoria, caracteristicas, descripcion)
                              output inserted.id_hotel
-                             values (@n, @d, @e)",
-                new SqlParameter("@n", e.Nombre),
-                new SqlParameter("@d", e.Direccion),
-                new SqlParameter("@e", EstadoTexto(e.Estado)));
-
-        public override bool Update(Hotel e)
-            => Execute(@"update hoteles set nombre = @n, direccion = @d, estado = @e where id_hotel = @id",
+                             values (@n, @d, @e, @cat, @car, @des)",
                 new SqlParameter("@n", e.Nombre),
                 new SqlParameter("@d", e.Direccion),
                 new SqlParameter("@e", EstadoTexto(e.Estado)),
+                new SqlParameter("@cat", e.Categoria),
+                new SqlParameter("@car", SqlDbType.VarChar, 500) { Value = DbVal(e.Caracteristicas) },
+                new SqlParameter("@des", SqlDbType.VarChar, 500) { Value = DbVal(e.Descripcion) });
+
+        public override bool Update(Hotel e)
+            => Execute(@"update hoteles set nombre = @n, direccion = @d, estado = @e,
+                                categoria = @cat, caracteristicas = @car, descripcion = @des
+                         where id_hotel = @id",
+                new SqlParameter("@n", e.Nombre),
+                new SqlParameter("@d", e.Direccion),
+                new SqlParameter("@e", EstadoTexto(e.Estado)),
+                new SqlParameter("@cat", e.Categoria),
+                new SqlParameter("@car", SqlDbType.VarChar, 500) { Value = DbVal(e.Caracteristicas) },
+                new SqlParameter("@des", SqlDbType.VarChar, 500) { Value = DbVal(e.Descripcion) },
                 new SqlParameter("@id", e.IdHotel)) > 0;
 
         public IEnumerable<Hotel> GetActivos()

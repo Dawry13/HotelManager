@@ -19,7 +19,7 @@
                         @Html.HiddenFor(m => m.IdHotel)
                         @Html.HiddenFor(m => m.NombreHotel)
                         <input class="form-control text-capitalize" value="@Model.NombreHotel" readonly />
-                        <div class="form-text">Un piso pertenece a un único hotel (RN-001).</div>
+                        <div class="form-text">Un piso pertenece a un único hotel.</div>
                     }
                     else
                     {
@@ -52,9 +52,9 @@
     <div class="col-lg-4">
         <div class="hm-card hm-card-body">
             <div class="hm-form-section">Reglas de negocio</div>
-            <div class="hm-rule"><i class="bi bi-diagram-3"></i><div><strong>RN-001</strong>Un piso pertenece a un único hotel.</div></div>
-            <div class="hm-rule"><i class="bi bi-123"></i><div><strong>RN-002</strong>No pueden existir dos pisos activos con el mismo número en un hotel.</div></div>
-            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div><strong>RN-006</strong>Un piso inactivo no puede recibir nuevas habitaciones.</div></div>
+            <div class="hm-rule"><i class="bi bi-diagram-3"></i><div>Un piso pertenece a un único hotel.</div></div>
+            <div class="hm-rule"><i class="bi bi-123"></i><div>No pueden existir dos pisos activos con el mismo número en un hotel.</div></div>
+            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div>Un piso inactivo no puede recibir nuevas habitaciones.</div></div>
         </div>
     </div>
 </div>

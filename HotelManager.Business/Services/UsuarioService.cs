@@ -175,34 +175,42 @@ namespace HotelManager.Business.Services
             return ToDto(_usuarios.GetById(usuario.IdUsuario));
         }
 
-        public IList<string> CrearUsuariosIniciales()
+        public IList<string> CrearUsuariosIniciales(IEnumerable<CuentaInicialDto> cuentas)
         {
             var creados = new List<string>();
-            if (_usuarios.GetAll().Any()) return creados;
+            if (cuentas == null) return creados;
 
-            Action<string, string, string, RolUsuario, int?> crear = (usuario, nombre, clave, rol, idHuesped) =>
+            foreach (var cuenta in cuentas)
             {
+                var nombreUsuario = Normalizar(cuenta.Usuario);
+                if (string.IsNullOrEmpty(nombreUsuario) || _usuarios.ExisteNombreUsuario(nombreUsuario, null))
+                    continue;
+
+                int? idHuesped = null;
+                var nombre = cuenta.Nombre;
+                if (cuenta.Rol == RolUsuario.Huesped)
+                {
+                    // Huesped de ejemplo: el primer huesped registrado que aun no tenga cuenta.
+                    var huesped = _huespedes.GetAll()
+                        .OrderBy(h => h.IdHuesped)
+                        .FirstOrDefault(h => _usuarios.GetByHuesped(h.IdHuesped) == null);
+                    if (huesped == null) continue;
+                    idHuesped = huesped.IdHuesped;
+                    nombre = huesped.Nombre;
+                }
+
                 _usuarios.Add(new Usuario
                 {
-                    NombreUsuario = usuario,
+                    NombreUsuario = nombreUsuario,
                     Nombre = nombre,
-                    ClaveHash = ClaveSegura.Hash(clave),
-                    Rol = rol,
+                    ClaveHash = ClaveSegura.Hash(cuenta.Clave),
+                    Rol = cuenta.Rol,
                     Estado = true,
-                    DebeCambiarClave = true,   // se pide cambiarla en el primer ingreso
+                    DebeCambiarClave = cuenta.DebeCambiarClave,
                     IdHuesped = idHuesped
                 });
-                creados.Add(usuario + " / " + clave + " (" + Roles.Descripcion(rol) + ")");
-            };
-
-            crear("admin", "Administrador del sistema", "Admin2026", RolUsuario.Administrador, null);
-            crear("recepcion", "Recepción", "Recepcion2026", RolUsuario.Recepcionista, null);
-            crear("notificaciones", "Servicio de notificaciones", "Notifica2026", RolUsuario.ServicioNotificacion, null);
-
-            // Huesped de ejemplo vinculado al primer huesped de los datos iniciales.
-            var huesped = _huespedes.GetAll().OrderBy(h => h.IdHuesped).FirstOrDefault();
-            if (huesped != null)
-                crear("huesped", huesped.Nombre, "Huesped2026", RolUsuario.Huesped, huesped.IdHuesped);
+                creados.Add(nombreUsuario + " (" + Roles.Descripcion(cuenta.Rol) + ")");
+            }
 
             return creados;
         }

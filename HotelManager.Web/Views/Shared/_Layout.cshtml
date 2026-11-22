@@ -11,6 +11,9 @@
     var esServicio = User.IsInRole("ServicioNotificacion");
     var gestion = esAdmin || esRecepcion;
     var verNotificaciones = gestion || esServicio;
+    int solicitudesTotal = ViewBag.SolicitudesTotal ?? 0;
+    var solicitudes = (List<HotelManager.Web.Infrastructure.SolicitudPendiente>)ViewBag.Solicitudes
+                      ?? new List<HotelManager.Web.Infrastructure.SolicitudPendiente>();
 }
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
@@ -23,7 +26,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="~/Content/site.css" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/site.css")?v=@System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Content/site.css")).Ticks" />
 </head>
 <body>
     <div class="hm-shell">
@@ -62,11 +65,11 @@
                     <li><a class="@(controlador == "Reservas" && accion != "Disponibilidad" && accion != "Historial" ? "active" : "")" href="@Url.Action("Index", "Reservas")"><i class="bi bi-calendar-week"></i> Reservas</a></li>
                     <li><a class="@(controlador == "Reservas" && accion == "Disponibilidad" ? "active" : "")" href="@Url.Action("Disponibilidad", "Reservas")"><i class="bi bi-search-heart"></i> Disponibilidad</a></li>
                     <li><a class="@activo("Huespedes")" href="@Url.Action("Index", "Huespedes")"><i class="bi bi-people"></i> Huéspedes</a></li>
+                    <li><a class="@activo("Hoteles")" href="@Url.Action("Index", "Hoteles")"><i class="bi bi-buildings"></i> Hoteles</a></li>
                 }
                 @if (esAdmin)
                 {
                     <li class="hm-nav-label">Estructura hotelera</li>
-                    <li><a class="@activo("Hoteles")" href="@Url.Action("Index", "Hoteles")"><i class="bi bi-buildings"></i> Hoteles</a></li>
                     <li><a class="@activo("Bloques")" href="@Url.Action("Index", "Bloques")"><i class="bi bi-grid-1x2"></i> Bloques</a></li>
                     <li><a class="@activo("Pisos")" href="@Url.Action("Index", "Pisos")"><i class="bi bi-layers"></i> Pisos</a></li>
                     <li><a class="@activo("Habitaciones")" href="@Url.Action("Index", "Habitaciones")"><i class="bi bi-door-closed"></i> Habitaciones</a></li>
@@ -99,6 +102,8 @@
                     <li class="hm-nav-label">Seguridad</li>
                     <li><a class="@activo("Usuarios")" href="@Url.Action("Index", "Usuarios")"><i class="bi bi-person-gear"></i> Usuarios y roles</a></li>
                 }
+                <li class="hm-nav-label">Sitio público</li>
+                <li><a href="@Url.Action("Index", "Explorar")"><i class="bi bi-globe2"></i> Ver catálogo de huéspedes</a></li>
             </ul>
 
             <div class="hm-sidebar-quote">Grandes experiencias, comienzan con una buena reserva.</div>
@@ -115,7 +120,54 @@
                         <input type="search" name="q" value="@Request.QueryString["q"]" placeholder="Buscar reservas, huéspedes o habitaciones..." aria-label="Buscar" />
                     </form>
                 }
-                @if (verNotificaciones)
+                @if (gestion)
+                {
+                    @* Campana del personal: solicitudes de reserva de huespedes por aprobar *@
+                    <div class="dropdown ms-auto" id="campanaSolicitudes"
+                         data-url="@Url.Action("SolicitudesPendientes", "Reservas")"
+                         data-ultimo="@(solicitudes.Any() ? solicitudes.Max(s => s.IdReserva) : 0)"
+                         data-total="@solicitudesTotal">
+                        <button class="hm-bell border-0" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                                aria-label="Solicitudes de reserva por aprobar" title="@solicitudesTotal solicitud(es) por aprobar">
+                            <i class="bi bi-bell"></i>
+                            <span class="hm-dot @(solicitudesTotal > 0 ? "" : "d-none")" id="campanaContador">@(solicitudesTotal > 99 ? "99+" : solicitudesTotal.ToString())</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end hm-campana p-0">
+                            <div class="hm-campana-head">
+                                <strong><i class="bi bi-bell me-1"></i> Solicitudes por aprobar</strong>
+                                <span class="hm-badge @(solicitudesTotal > 0 ? "warn" : "off")">@solicitudesTotal</span>
+                            </div>
+                            @if (!solicitudes.Any())
+                            {
+                                <div class="hm-empty py-4"><i class="bi bi-check2-all"></i>No hay solicitudes pendientes.</div>
+                            }
+                            @foreach (var s in solicitudes)
+                            {
+                                <div class="hm-campana-item">
+                                    <div class="d-flex justify-content-between gap-2">
+                                        <div style="min-width:0">
+                                            <div class="fw-semibold text-truncate">@s.Huesped</div>
+                                            <div class="small text-secondary text-truncate">@s.Hotel · Hab. @s.Habitacion · @s.Personas persona(s)</div>
+                                            <div class="small"><i class="bi bi-calendar3 me-1 text-secondary"></i>@s.Entrada.ToString("dd/MM") → @s.Salida.ToString("dd/MM/yyyy") · <span class="text-gold">RD$ @s.Costo.ToString("N0")</span></div>
+                                        </div>
+                                        <span class="hm-code align-self-start">#@s.IdReserva</span>
+                                    </div>
+                                    <div class="d-flex gap-2 mt-2">
+                                        @using (Html.BeginForm("Confirmar", "Reservas", new { id = s.IdReserva }, FormMethod.Post))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                                            <button class="btn btn-gold btn-sm"><i class="bi bi-check2-circle me-1"></i>Aprobar</button>
+                                        }
+                                        <a class="btn btn-ghost btn-sm" href="@Url.Action("Detalle", "Reservas", new { id = s.IdReserva })">Ver detalle</a>
+                                    </div>
+                                </div>
+                            }
+                            <a class="hm-campana-foot" href="@Url.Action("Index", "Reservas", new { estado = "Pendiente" })">Ver todas las solicitudes <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+                }
+                else if (verNotificaciones)
                 {
                     <a class="hm-bell" href="@Url.Action("Index", "Notificaciones", new { estado = "Pendiente" })" title="@pendientes notificación(es) pendiente(s)">
                         <i class="bi bi-bell"></i>
@@ -160,8 +212,28 @@
         </div>
     </div>
 
+    @if (gestion)
+    {
+        @* Aviso emergente cuando llega una solicitud nueva mientras se usa el sistema *@
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div class="toast hm-toast" id="avisoSolicitud" role="status" aria-live="polite" aria-atomic="true" data-bs-delay="10000">
+                <div class="toast-header">
+                    <i class="bi bi-bell-fill text-gold me-2"></i><strong class="me-auto">Nueva solicitud de reserva</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                </div>
+                <div class="toast-body">
+                    <span id="avisoSolicitudTexto">Un huésped solicitó una reserva.</span>
+                    <div class="mt-2 d-flex gap-2">
+                        <a class="btn btn-gold btn-sm" href="@Url.Action("Index", "Reservas", new { estado = "Pendiente" })">Revisar ahora</a>
+                        <a class="btn btn-ghost btn-sm" href="@Request.RawUrl">Actualizar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/Scripts/site.js"></script>
+    <script src="@Url.Content("~/Scripts/site.js")?v=@System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/site.js")).Ticks"></script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

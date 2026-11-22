@@ -12,7 +12,7 @@
         <span class="hm-chip"><i class="bi bi-person-heart"></i> Portal del huésped</span>
         <h1 style="font-size:2.4rem">Hola, <span>@TextoHelper.Titulo(huesped.Nombre)</span></h1>
         <p>Solicite su próxima estadía y consulte el estado de sus reservas.</p>
-        <a class="btn btn-gold btn-lg" href="@Url.Action("Solicitar")"><i class="bi bi-calendar-plus me-2"></i>Solicitar reserva <i class="bi bi-arrow-right ms-2"></i></a>
+        <a class="btn btn-gold btn-lg" href="@Url.Action("Index", "Explorar")"><i class="bi bi-compass me-2"></i>Explorar hoteles y reservar <i class="bi bi-arrow-right ms-2"></i></a>
     </div>
 </section>
 
@@ -28,7 +28,7 @@
             <div class="hm-card-head"><h2 class="hm-card-title"><i class="bi bi-calendar-week"></i> Próximas estadías</h2></div>
             @if (!proximas.Any())
             {
-                <div class="hm-empty"><i class="bi bi-calendar-plus"></i>No tiene reservas activas. <a class="hm-link" href="@Url.Action("Solicitar")">Solicite una</a>.</div>
+                <div class="hm-empty"><i class="bi bi-calendar-plus"></i>No tiene reservas activas. <a class="hm-link" href="@Url.Action("Index", "Explorar")">Explore los hoteles</a> y reserve.</div>
             }
             @foreach (var r in proximas)
             {

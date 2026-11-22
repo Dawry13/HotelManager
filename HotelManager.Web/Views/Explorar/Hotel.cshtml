@@ -1,0 +1,177 @@
+﻿@model CatalogoHotelViewModel
+@{
+    var h = Model.Hotel;
+    ViewBag.Title = h.Nombre;
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    var hoyIso = DateTime.Today.ToString("yyyy-MM-dd");
+    var entradaIso = Model.Entrada.ToString("yyyy-MM-dd");
+    var salidaIso = Model.Salida.ToString("yyyy-MM-dd");
+    var esPersonal = User.IsInRole("Administrador") || User.IsInRole("Recepcionista");
+}
+
+<section class="hm-hero mb-4" style="min-height:240px">
+    <div class="hm-hero-inner">
+        <div class="hm-breadcrumb"><a href="@Url.Action("Index")">Hoteles</a> / @h.Nombre</div>
+        <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+            <span class="hm-badge gold">@CatalogoHelper.Estrellas(h.Categoria) <span class="ms-1">@CatalogoHelper.NombreCategoria(h.Categoria)</span></span>
+            @if (esPersonal)
+            {
+                <a class="hm-chip-link" href="@Url.Action("Detalle", "Hoteles", new { id = h.IdHotel })"><i class="bi bi-gear me-1"></i>Gestionar este hotel</a>
+            }
+        </div>
+        <h1 style="font-size:2.4rem">@h.Nombre</h1>
+        <p class="mb-2"><i class="bi bi-geo-alt me-1"></i>@h.Direccion</p>
+        @if (!string.IsNullOrWhiteSpace(h.Descripcion))
+        {
+            <p class="mb-3" style="max-width:720px">@h.Descripcion</p>
+        }
+        @CatalogoHelper.Chips(h.Caracteristicas)
+    </div>
+</section>
+
+<form method="get" action="@Url.Action("Hotel", new { id = h.IdHotel })" class="hm-card hm-filters mb-4 hm-sticky-search" id="buscarDisponibilidad">
+    <div class="hm-field" style="flex-basis:170px">
+        <label for="entrada">Llegada</label>
+        <input type="date" class="form-control" id="entrada" name="entrada" min="@hoyIso" value="@entradaIso" data-rango="entrada" data-sin-pasado required />
+    </div>
+    <div class="hm-field" style="flex-basis:170px">
+        <label for="salida">Salida</label>
+        <input type="date" class="form-control" id="salida" name="salida" min="@hoyIso" value="@salidaIso" data-rango="salida" data-sin-pasado required />
+    </div>
+    <div class="hm-field" style="flex-basis:120px">
+        <label for="huespedes">Personas</label>
+        <input type="number" class="form-control" id="huespedes" name="huespedes" min="1" max="20" value="@Model.Huespedes" required />
+    </div>
+    <button class="btn btn-gold" type="submit"><i class="bi bi-calendar-check me-1"></i> Ver disponibilidad</button>
+    <div class="form-text w-100 mt-0"><i class="bi bi-lock me-1"></i>Las fechas pasadas están bloqueadas en el calendario.</div>
+</form>
+
+@if (Model.Error != null)
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.Error</div>
+}
+else if (Model.Consultado)
+{
+    <div class="alert @(Model.Disponibles > 0 ? "alert-success" : "alert-info") d-flex align-items-center gap-2">
+        <i class="bi @(Model.Disponibles > 0 ? "bi-check-circle-fill" : "bi-calendar-x")"></i>
+        <span>
+            @if (Model.Disponibles > 0)
+            {
+                <text><strong>@Model.Disponibles habitación(es) disponible(s)</strong> del @Model.Entrada.ToString("dd MMM", culture) al @Model.Salida.ToString("dd MMM yyyy", culture) · @Model.Noches noche(s) · @Model.Huespedes persona(s). Pulse <strong>Reservar</strong> en la que prefiera.</text>
+            }
+            else
+            {
+                <text>No hay habitaciones libres para esas fechas y cantidad de personas. Pruebe con otras fechas.</text>
+            }
+        </span>
+    </div>
+}
+
+@if (!Model.Bloques.Any())
+{
+    <div class="hm-card hm-empty"><i class="bi bi-door-closed"></i>Este hotel aún no tiene habitaciones publicadas.</div>
+}
+
+@foreach (var b in Model.Bloques)
+{
+    <section class="hm-card hm-card-body mb-4">
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+            @if (!string.IsNullOrEmpty(b.Codigo))
+            {
+                <span class="hm-code">@b.Codigo</span>
+            }
+            <h2 class="h5 mb-0"><i class="bi bi-grid-1x2 me-1 text-gold"></i>@b.Nombre</h2>
+            <span class="text-secondary small ms-auto">@b.Pisos.Count piso(s) · @b.TotalHabitaciones habitación(es)</span>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(b.Descripcion))
+        {
+            <p class="text-secondary small mb-2">@b.Descripcion</p>
+        }
+
+        @foreach (var p in b.Pisos)
+        {
+            <div class="hm-floor-label"><i class="bi bi-layers me-1"></i>Piso @p.Numero</div>
+            <div class="row g-3 mb-2">
+                @foreach (var r in p.Habitaciones)
+                {
+                    var estadoCss = r.DisponibleEnFechas == false ? "ocupada" : (r.DisponibleEnFechas == true ? "libre" : "");
+                    <div class="col-sm-6 col-lg-4 col-xxl-3">
+                        <div class="hm-room-card hm-hover-card @estadoCss" tabindex="0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="hm-room-num">Hab. @r.Numero</div>
+                                    <div class="hm-cell-sub">@r.Tipo</div>
+                                </div>
+                                @if (r.DisponibleEnFechas == true)
+                                {
+                                    <span class="hm-badge ok">Libre</span>
+                                }
+                                else if (r.DisponibleEnFechas == false)
+                                {
+                                    <span class="hm-badge off">Ocupada</span>
+                                }
+                            </div>
+                            <div class="d-flex gap-3 small text-secondary my-2">
+                                <span><i class="bi bi-people me-1"></i>@r.Capacidad</span>
+                                <span><i class="bi bi-stars me-1"></i>@r.Caracteristicas.Count servicio(s)</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <div>
+                                    @if (r.CostoTotal.HasValue)
+                                    {
+                                        <div class="small text-secondary">Total @Model.Noches noche(s)</div>
+                                        <div class="fw-bold text-gold">RD$ @r.CostoTotal.Value.ToString("N2")</div>
+                                    }
+                                    else
+                                    {
+                                        <div class="small text-secondary">Desde</div>
+                                        <div class="fw-bold text-gold">RD$ @r.Tarifa.ToString("N0") <small class="text-secondary fw-normal">/ noche</small></div>
+                                    }
+                                </div>
+                                @if (r.DisponibleEnFechas == true)
+                                {
+                                    <a class="btn btn-gold btn-sm" href="@Url.Action("Reservar", new { idHabitacion = r.IdHabitacion, entrada = entradaIso, salida = salidaIso, huespedes = Model.Huespedes })">Reservar</a>
+                                }
+                                else if (r.DisponibleEnFechas == null)
+                                {
+                                    <a class="btn btn-ghost btn-sm" href="#buscarDisponibilidad" data-enfocar="#entrada">Elegir fechas</a>
+                                }
+                            </div>
+
+                            <div class="hm-hover-info" aria-hidden="true">
+                                <strong class="d-block mb-1">@r.Tipo · Habitación @r.Numero</strong>
+                                @if (!string.IsNullOrWhiteSpace(r.DescripcionTipo))
+                                {
+                                    <p class="small text-secondary mb-2">@r.DescripcionTipo</p>
+                                }
+                                <div class="small mb-2"><i class="bi bi-people me-1"></i>Hasta @r.Capacidad persona(s) · Piso @p.Numero</div>
+                                @if (r.Caracteristicas.Any())
+                                {
+                                    @CatalogoHelper.Chips(r.Caracteristicas)
+                                }
+                                else
+                                {
+                                    <p class="small text-secondary mb-0">Características por confirmar con recepción.</p>
+                                }
+                                <div class="mt-auto pt-2">
+                                    @if (r.DisponibleEnFechas == true)
+                                    {
+                                        <a class="btn btn-gold btn-sm w-100" href="@Url.Action("Reservar", new { idHabitacion = r.IdHabitacion, entrada = entradaIso, salida = salidaIso, huespedes = Model.Huespedes })">Reservar · RD$ @r.CostoTotal.Value.ToString("N0")</a>
+                                    }
+                                    else if (r.DisponibleEnFechas == null)
+                                    {
+                                        <a class="btn btn-ghost btn-sm w-100" href="#buscarDisponibilidad" data-enfocar="#entrada">Elegir fechas para reservar</a>
+                                    }
+                                    else
+                                    {
+                                        <div class="small text-secondary"><i class="bi bi-calendar-x me-1"></i>Ocupada en esas fechas.</div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+}

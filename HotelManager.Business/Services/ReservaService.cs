@@ -206,7 +206,9 @@ namespace HotelManager.Business.Services
             var habitacion = _habitaciones.GetById(idHabitacion);
             if (habitacion == null) throw new BusinessException("La habitación no existe.");
             if (!EsReservable(habitacion))
-                throw new BusinessException("La habitación no está disponible para reservas.");         
+                throw new BusinessException("La habitación no está disponible para reservas.");
+            if (habitacion.Tarifa <= 0)
+                throw new BusinessException("La habitación aún no tiene precio asignado. Asígnele una tarifa antes de reservarla.");
             if (huespedes <= 0 || huespedes > habitacion.Capacidad)
                 throw new BusinessException("La cantidad de huéspedes excede la capacidad de la habitación."); 
             return habitacion;

@@ -80,6 +80,28 @@ namespace HotelManager.Web.Controllers
             }
         }
 
+        /// <summary>Todos los errores del ModelState en un solo texto (para mostrarlos como mensaje temporal).</summary>
+        protected string ErroresDelModelo()
+        {
+            var errores = ModelState.Values.SelectMany(v => v.Errors)
+                .Select(e => string.IsNullOrEmpty(e.ErrorMessage) ? (e.Exception != null ? e.Exception.Message : "") : e.ErrorMessage)
+                .Where(m => m.Length > 0)
+                .Distinct();
+            var texto = string.Join(" ", errores);
+            return texto.Length > 0 ? texto : "Revise los datos ingresados.";
+        }
+
+        /// <summary>
+        /// Formularios rapidos (ventanas emergentes) que vuelven a la pagina de origen,
+        /// por ejemplo el detalle del hotel. Devuelve null si no hay una URL local valida.
+        /// </summary>
+        protected ActionResult VolverA(string returnUrl, bool exito)
+        {
+            if (string.IsNullOrEmpty(returnUrl) || !Url.IsLocalUrl(returnUrl)) return null;
+            if (!exito) Error(ErroresDelModelo());
+            return Redirect(returnUrl);
+        }
+
         protected static bool EsActivo(string estado)
         {
             return string.Equals(estado, "Activo", StringComparison.OrdinalIgnoreCase);

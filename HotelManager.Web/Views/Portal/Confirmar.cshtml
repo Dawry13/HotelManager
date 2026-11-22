@@ -1,0 +1,69 @@
+﻿@model ConfirmarReservaViewModel
+@{
+    ViewBag.Title = "Confirmar reserva";
+    var culture = new System.Globalization.CultureInfo("es-DO");
+    var volver = Url.Action("Hotel", "Explorar", new { id = Model.IdHotel, entrada = Model.Entrada.ToString("yyyy-MM-dd"), salida = Model.Salida.ToString("yyyy-MM-dd"), huespedes = Model.Huespedes });
+}
+<div class="hm-page-head">
+    <div class="hm-page-title">
+        <div class="hm-page-icon gold"><i class="bi bi-calendar-check"></i></div>
+        <div>
+            <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Explorar")">Hoteles</a> / <a href="@volver">@Model.Hotel</a> / Confirmar</div>
+            <h1>Revise y confirme su reserva</h1>
+            <p class="hm-sub">Último paso: envíe la solicitud y recepción la confirmará por correo.</p>
+        </div>
+    </div>
+    <a class="btn btn-ghost" href="@volver"><i class="bi bi-arrow-left me-1"></i> Cambiar habitación</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="hm-card hm-card-body">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                    <h2 class="h4 mb-1">@Model.Hotel</h2>
+                    <div class="text-secondary small"><i class="bi bi-geo-alt me-1"></i>@Model.Direccion</div>
+                </div>
+                <span class="hm-badge gold">@CatalogoHelper.Estrellas(Model.Categoria)</span>
+            </div>
+            <hr />
+            <div class="row g-3">
+                <div class="col-sm-6"><div class="hm-form-section mb-1">Habitación</div><div class="fw-semibold">@Model.Tipo · @Model.Habitacion</div><div class="small text-secondary">@Model.Ubicacion</div></div>
+                <div class="col-sm-6"><div class="hm-form-section mb-1">Personas</div><div class="fw-semibold"><i class="bi bi-people me-1"></i>@Model.Huespedes</div></div>
+                <div class="col-sm-6"><div class="hm-form-section mb-1">Llegada</div><div class="fw-semibold">@Model.Entrada.ToString("dddd dd 'de' MMMM yyyy", culture)</div></div>
+                <div class="col-sm-6"><div class="hm-form-section mb-1">Salida</div><div class="fw-semibold">@Model.Salida.ToString("dddd dd 'de' MMMM yyyy", culture)</div></div>
+            </div>
+            @if (Model.Caracteristicas.Any())
+            {
+                <div class="hm-form-section mt-4">Incluye</div>
+                @CatalogoHelper.Chips(Model.Caracteristicas)
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="hm-card hm-card-body">
+            <div class="hm-form-section">Resumen del costo</div>
+            <div class="d-flex justify-content-between mb-1"><span class="text-secondary">Tarifa promedio por noche</span><span>RD$ @Model.TarifaPromedio.ToString("N2")</span></div>
+            <div class="d-flex justify-content-between mb-3"><span class="text-secondary">Noches</span><span>@Model.Noches</span></div>
+            <div class="d-flex justify-content-between align-items-end border-top pt-3 mb-4">
+                <span class="fw-semibold">Total estimado</span>
+                <span class="fs-3 fw-bold text-gold">RD$ @Model.CostoTotal.ToString("N2")</span>
+            </div>
+
+            <div class="hm-form-section">Reserva a nombre de</div>
+            <p class="mb-1"><i class="bi bi-person me-2 text-secondary"></i>@TextoHelper.Titulo(Model.Huesped.Nombre)</p>
+            <p class="mb-4"><i class="bi bi-envelope me-2 text-secondary"></i>@Model.Huesped.Correo</p>
+
+            @using (Html.BeginForm("Solicitar", "Portal", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="idHabitacion" value="@Model.IdHabitacion" />
+                <input type="hidden" name="entrada" value="@Model.Entrada.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="salida" value="@Model.Salida.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="huespedes" value="@Model.Huespedes" />
+                <button class="btn btn-gold w-100 py-2"><i class="bi bi-send me-1"></i> Enviar solicitud de reserva</button>
+            }
+            <div class="form-text mt-2 text-center">Su solicitud queda pendiente hasta que recepción la confirme.</div>
+        </div>
+    </div>
+</div>

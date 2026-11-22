@@ -47,16 +47,16 @@ namespace HotelManager.Web.Controllers
         public ActionResult Salir()
         {
             Autenticacion.CerrarSesion(HttpContext);
-            Exito("Sesión cerrada.");
-            return RedirectToAction("Login");
+            Exito("Sesión cerrada. ¡Vuelva pronto!");
+            return RedirectToAction("Index", "Explorar");
         }
 
-        // ACT-003: el huesped crea su cuenta para solicitar reservas.
+        // ACT-003: el huesped crea su cuenta al momento de solicitar una reserva.
         [AllowAnonymous]
-        public ActionResult Registro()
+        public ActionResult Registro(string returnUrl)
         {
-            if (User.Identity.IsAuthenticated) return RedirectToAction("Index", "Home");
-            return View(new RegistroHuespedViewModel());
+            if (User.Identity.IsAuthenticated) return RedirigirSegunRol(User.Identity as UsuarioIdentidad, returnUrl);
+            return View(new RegistroHuespedViewModel { ReturnUrl = returnUrl });
         }
 
         [HttpPost, AllowAnonymous, ValidateAntiForgeryToken]
@@ -80,7 +80,7 @@ namespace HotelManager.Web.Controllers
 
             Autenticacion.IniciarSesion(HttpContext, usuario);
             Exito("¡Bienvenido! Su cuenta fue creada. Ya puede solicitar reservas.");
-            return RedirectToAction("Index", "Portal");
+            return RedirigirSegunRol(Roles.Huesped, vm.ReturnUrl);
         }
 
         public ActionResult CambiarClave()
@@ -124,7 +124,7 @@ namespace HotelManager.Web.Controllers
 
             switch (rol)
             {
-                case Roles.Huesped: return RedirectToAction("Index", "Portal");
+                case Roles.Huesped: return RedirectToAction("Index", "Explorar");
                 case Roles.ServicioNotificacion: return RedirectToAction("Index", "Notificaciones");
                 default: return RedirectToAction("Index", "Home");
             }

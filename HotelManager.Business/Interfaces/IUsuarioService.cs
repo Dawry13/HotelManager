@@ -25,7 +25,11 @@ namespace HotelManager.Business.Interfaces
         /// <summary>ACT-003: un huesped crea su cuenta (y su registro de huesped si no existe).</summary>
         UsuarioDto RegistrarHuesped(HuespedDto huesped, string nombreUsuario, string clave);
 
-        /// <summary>Crea las cuentas iniciales si la tabla de usuarios esta vacia. Devuelve "usuario / clave" creadas.</summary>
-        IList<string> CrearUsuariosIniciales();
+        /// <summary>
+        /// Crea las cuentas indicadas que aun no existan (por nombre de usuario).
+        /// Una cuenta de huesped se vincula al primer huesped registrado que no tenga cuenta.
+        /// Devuelve "usuario (rol)" de las cuentas creadas.
+        /// </summary>
+        IList<string> CrearUsuariosIniciales(IEnumerable<CuentaInicialDto> cuentas);
     }
 }

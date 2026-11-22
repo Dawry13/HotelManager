@@ -40,19 +40,19 @@
                 <div class="mb-3">
                     @Html.LabelFor(m => m.IdHabitacion, new { @class = "form-label" })
                     @Html.DropDownListFor(m => m.IdHabitacion, habitaciones, "-- Seleccione la habitación --", new { @class = "form-select", data_cotizar = "" })
-                    <div class="form-text">Solo habitaciones disponibles en pisos y hoteles activos (RN-007). <a class="hm-link" href="@Url.Action("Disponibilidad")">Consultar disponibilidad por fechas</a></div>
+                    <div class="form-text">Solo habitaciones disponibles en pisos y hoteles activos. <a class="hm-link" href="@Url.Action("Disponibilidad")">Consultar disponibilidad por fechas</a></div>
                     @Html.ValidationMessageFor(m => m.IdHabitacion, "", new { @class = "small" })
                 </div>
                 <div class="row">
                     <div class="col-sm-4 mb-3">
                         @Html.LabelFor(m => m.Entrada, new { @class = "form-label" })
-                        <input class="form-control" type="date" id="Entrada" name="Entrada" min="@hoyIso" data-cotizar
+                        <input class="form-control" type="date" id="Entrada" name="Entrada" min="@hoyIso" data-cotizar data-sin-pasado
                                value="@(Model.Entrada.HasValue ? Model.Entrada.Value.ToString("yyyy-MM-dd") : "")" />
                         @Html.ValidationMessageFor(m => m.Entrada, "", new { @class = "small" })
                     </div>
                     <div class="col-sm-4 mb-3">
                         @Html.LabelFor(m => m.Salida, new { @class = "form-label" })
-                        <input class="form-control" type="date" id="Salida" name="Salida" min="@hoyIso" data-cotizar
+                        <input class="form-control" type="date" id="Salida" name="Salida" min="@hoyIso" data-cotizar data-sin-pasado
                                value="@(Model.Salida.HasValue ? Model.Salida.Value.ToString("yyyy-MM-dd") : "")" />
                         @Html.ValidationMessageFor(m => m.Salida, "", new { @class = "small" })
                     </div>
@@ -85,12 +85,12 @@
     <div class="col-lg-4">
         <div class="hm-card hm-card-body">
             <div class="hm-form-section">Reglas que se validan</div>
-            <div class="hm-rule"><i class="bi bi-calendar-range"></i><div><strong>RN-008 / RN-009</strong>La salida debe ser posterior a la entrada y no se permiten fechas pasadas.</div></div>
-            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div><strong>RN-007</strong>Solo se reservan habitaciones disponibles.</div></div>
-            <div class="hm-rule"><i class="bi bi-people"></i><div><strong>RN-011</strong>Los huéspedes no pueden superar la capacidad.</div></div>
-            <div class="hm-rule"><i class="bi bi-intersect"></i><div><strong>RN-010</strong>No se permiten reservas activas solapadas en la misma habitación.</div></div>
-            <div class="hm-rule"><i class="bi bi-cash-coin"></i><div><strong>RN-013</strong>El costo se calcula por noche con la tarifa vigente.</div></div>
-            <div class="hm-rule"><i class="bi bi-bell"></i><div><strong>RN-014 / RN-015</strong>Se genera una notificación; si falla, la reserva se conserva.</div></div>
+            <div class="hm-rule"><i class="bi bi-calendar-range"></i><div>La salida debe ser posterior a la entrada y no se permiten fechas pasadas.</div></div>
+            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div>Solo se reservan habitaciones disponibles.</div></div>
+            <div class="hm-rule"><i class="bi bi-people"></i><div>Los huéspedes no pueden superar la capacidad.</div></div>
+            <div class="hm-rule"><i class="bi bi-intersect"></i><div>No se permiten reservas activas solapadas en la misma habitación.</div></div>
+            <div class="hm-rule"><i class="bi bi-cash-coin"></i><div>El costo se calcula por noche con la tarifa vigente.</div></div>
+            <div class="hm-rule"><i class="bi bi-bell"></i><div>Se genera una notificación; si falla, la reserva se conserva.</div></div>
         </div>
     </div>
 </div>

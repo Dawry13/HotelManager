@@ -558,3 +558,174 @@ a.hm-stat:hover { transform: translateY(-3px); color: #fff; box-shadow: 0 16px 3
     .hm-search { max-width: none; }
     .hm-table thead { display: none; }
 }
+
+/* =========================================================
+   Catalogo publico, categorias, caracteristicas y panel del hotel
+   ========================================================= */
+.hm-body-catalogo { display: flex; flex-direction: column; min-height: 100vh; }
+.hm-catalogo-main { flex: 1; padding-top: 1.5rem; padding-bottom: 2rem; }
+.hm-catalogo-footer { border-top: 1px solid var(--hm-border); padding: 1.2rem 0; }
+
+.hm-topnav {
+    position: sticky; top: 0; z-index: 1030;
+    background: rgba(11, 11, 31, .88); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--hm-border); padding: .7rem 0;
+}
+.hm-topnav-brand { font-size: 1.35rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: .5rem; }
+.hm-topnav-brand i, .hm-topnav-brand span { color: var(--hm-gold); }
+.hm-topnav-brand:hover { color: #fff; }
+.hm-topnav .nav-link { color: #cfc9ff; border-radius: 10px; padding: .45rem .8rem !important; }
+.hm-topnav .nav-link:hover, .hm-topnav .nav-link.active { color: #fff; background: rgba(124, 58, 237, .22); }
+.hm-topnav .navbar-toggler { border: 0; color: #fff; box-shadow: none; }
+
+/* Estrellas */
+.hm-stars { display: inline-flex; gap: 2px; color: var(--hm-gold-2); white-space: nowrap; }
+.hm-stars i { font-size: .85em; }
+.hm-badge.gold .hm-stars { color: inherit; }
+
+/* Lista de caracteristicas */
+.hm-feature-list { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.hm-feature-list li {
+    display: inline-flex; align-items: center; gap: .35rem; font-size: .76rem;
+    padding: .22rem .6rem; border-radius: 999px;
+    background: rgba(255, 255, 255, .07); border: 1px solid var(--hm-border); color: #e1ddff;
+}
+.hm-feature-list li i { color: var(--hm-gold-2); }
+.hm-feature-list li.mas { color: var(--hm-muted); }
+
+/* Selector de caracteristicas (formularios) */
+.hm-feature-picker { display: flex; flex-wrap: wrap; gap: .45rem; }
+.hm-feature-option {
+    display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; user-select: none;
+    padding: .38rem .8rem; border-radius: 999px; font-size: .82rem;
+    border: 1px solid var(--hm-border); background: rgba(255, 255, 255, .04); color: #cfc9ff;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.hm-feature-option:hover { border-color: rgba(245, 180, 0, .6); color: #fff; }
+.btn-check:checked + .hm-feature-option { background: rgba(245, 180, 0, .16); border-color: var(--hm-gold); color: var(--hm-gold-2); }
+.btn-check:focus-visible + .hm-feature-option { outline: 2px solid var(--hm-gold); outline-offset: 2px; }
+
+/* Selector de categoria */
+.hm-category-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+.hm-category-option {
+    display: flex; flex-direction: column; align-items: center; gap: .3rem; cursor: pointer; text-align: center;
+    padding: .9rem .5rem; border-radius: 14px; border: 1px solid var(--hm-border); background: rgba(255, 255, 255, .03);
+    font-size: .8rem; color: #cfc9ff;
+}
+.hm-category-option .hm-stars { font-size: 1.15rem; }
+.btn-check:checked + .hm-category-option { border-color: var(--hm-gold); background: rgba(245, 180, 0, .12); color: #fff; box-shadow: 0 0 0 3px rgba(245, 180, 0, .15); }
+@media (max-width: 575.98px) { .hm-category-picker { grid-template-columns: 1fr; } }
+
+/* Informacion que aparece al pasar el mouse (o al enfocar con teclado / tocar) */
+.hm-hover-card { position: relative; }
+.hm-hover-info {
+    position: absolute; inset: 0; z-index: 5;
+    display: flex; flex-direction: column;
+    padding: 1.1rem 1.2rem; overflow-y: auto;
+    background: linear-gradient(180deg, rgba(23, 22, 58, .98), rgba(29, 27, 71, .98));
+    border-radius: inherit;
+    opacity: 0; visibility: hidden; transform: translateY(6px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s;
+}
+.hm-hover-card:hover > .hm-hover-info,
+.hm-hover-card:focus-within > .hm-hover-info { opacity: 1; visibility: visible; transform: none; }
+/* Variante flotante: globo sobre el elemento, no tapa los botones */
+.hm-hover-info.hm-hover-pop {
+    inset: auto auto calc(100% + 8px) 50%; transform: translate(-50%, 6px);
+    width: 280px; max-width: 80vw; overflow: visible; border: 1px solid var(--hm-border); border-radius: 14px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .5); pointer-events: none; text-align: left; color: var(--hm-text);
+    font-weight: 400; z-index: 30;
+}
+.hm-hover-card:hover > .hm-hover-info.hm-hover-pop,
+.hm-hover-card:focus > .hm-hover-info.hm-hover-pop,
+.hm-hover-card:focus-within > .hm-hover-info.hm-hover-pop { transform: translate(-50%, 0); opacity: 1; visibility: visible; }
+
+/* Catalogo: buscador del banner */
+.hm-hero-catalogo { min-height: 320px; }
+.hm-hero-catalogo .hm-hero-inner { max-width: 760px; }
+.hm-hero-search { display: flex; flex-wrap: wrap; gap: .6rem; background: rgba(11, 10, 31, .7); padding: .6rem; border-radius: 18px; border: 1px solid var(--hm-border); }
+.hm-hero-search .form-select { width: auto; flex: 0 1 200px; }
+.hm-hero-search-field { flex: 1 1 260px; display: flex; align-items: center; gap: .5rem; padding: 0 .8rem; background: rgba(255, 255, 255, .06); border-radius: 12px; }
+.hm-hero-search-field input { flex: 1; background: none; border: 0; color: #fff; padding: .6rem 0; outline: none; min-width: 0; }
+.hm-hero-search-field i { color: var(--hm-muted); }
+
+/* Pasos */
+.hm-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: .8rem; }
+.hm-step {
+    display: flex; gap: .8rem; align-items: center; text-align: left; text-decoration: none; color: var(--hm-text);
+    padding: .9rem 1rem; border-radius: 16px; border: 1px solid var(--hm-border); background: rgba(255, 255, 255, .03);
+    font-size: .82rem;
+}
+.hm-step div { color: var(--hm-muted); }
+.hm-step div strong { display: block; font-size: .95rem; color: var(--hm-text); }
+.hm-step > span {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 700; background: rgba(124, 58, 237, .3); color: #fff;
+}
+button.hm-step, a.hm-step { cursor: pointer; transition: border-color .15s, transform .15s; }
+button.hm-step:hover, a.hm-step:hover { border-color: rgba(245, 180, 0, .6); transform: translateY(-1px); color: var(--hm-text); }
+button.hm-step:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.hm-step.current { border-color: var(--hm-gold); background: rgba(245, 180, 0, .08); }
+.hm-step.current > span { background: var(--hm-gold); color: #231a00; }
+.hm-step.done > span { background: var(--hm-green); }
+
+/* Pestanas de categoria */
+.hm-cat-tabs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.hm-cat-tabs .hm-chip-link { display: inline-flex; align-items: center; gap: .25rem; padding: .45rem 1rem; font-size: .88rem; }
+.hm-cat-tabs .hm-chip-link.active .hm-stars { color: #231a00; }
+.hm-count { margin-left: .35rem; font-size: .72rem; padding: .05rem .45rem; border-radius: 999px; background: rgba(255, 255, 255, .12); }
+.hm-chip-link.active .hm-count { background: rgba(0, 0, 0, .15); }
+
+/* Habitaciones del catalogo */
+.hm-floor-label { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--hm-muted); margin: 1rem 0 .6rem; }
+.hm-room-card {
+    height: 100%; padding: .95rem 1rem; border-radius: 16px;
+    border: 1px solid var(--hm-border); background: rgba(255, 255, 255, .035);
+    transition: border-color .15s, transform .15s;
+}
+.hm-room-card:hover { border-color: rgba(245, 180, 0, .5); transform: translateY(-2px); }
+.hm-room-card.libre { border-color: rgba(16, 185, 129, .45); }
+.hm-room-card.ocupada { opacity: .55; }
+.hm-room-num { font-weight: 700; font-size: 1.05rem; }
+.hm-sticky-search { position: sticky; top: 72px; z-index: 20; }
+@media (max-width: 991.98px) { .hm-sticky-search { position: static; } }
+
+/* Panel del hotel */
+.hm-tabs { border-bottom: 1px solid var(--hm-border); gap: .3rem; }
+.hm-tabs .nav-link { color: var(--hm-muted); border: 0; border-bottom: 2px solid transparent; border-radius: 0; padding: .7rem 1rem; font-weight: 500; background: none; }
+.hm-tabs .nav-link:hover { color: #fff; }
+.hm-tabs .nav-link.active { color: var(--hm-gold-2); border-bottom-color: var(--hm-gold); }
+.hm-floor-row { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(140, 120, 255, .08); }
+.hm-floor-row:last-child { border-bottom: 0; }
+.hm-room-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+.hm-room-chip {
+    display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .75rem; border-radius: 10px;
+    font-size: .82rem; font-weight: 600; text-decoration: none; color: #e1ddff;
+    border: 1px solid var(--hm-border); background: rgba(255, 255, 255, .05);
+}
+.hm-room-chip:hover { color: #fff; border-color: var(--hm-gold); }
+.hm-room-chip.ok { border-left: 3px solid var(--hm-green); }
+.hm-room-chip.warn { border-left: 3px solid var(--hm-gold); }
+.hm-room-chip.bad { border-left: 3px solid var(--hm-red); }
+.hm-room-chip.off { border-left: 3px solid #6b7280; opacity: .75; }
+/* las tarjetas con globo no deben recortarlo */
+.hm-card:has(.hm-hover-pop) { overflow: visible; }
+
+/* Ventanas emergentes */
+.hm-modal { background: var(--hm-surface); border: 1px solid var(--hm-border); border-radius: 20px; color: var(--hm-text); }
+.hm-modal .modal-header, .hm-modal .modal-footer { border-color: var(--hm-border); }
+
+/* Fecha invalida (pasada) */
+input[type="date"]:invalid { border-color: rgba(239, 68, 68, .6); }
+
+/* ---------- Campana: solicitudes de reserva por aprobar ---------- */
+button.hm-bell { background: none; padding: 0; }
+.hm-campana { width: 360px; max-width: calc(100vw - 2rem); overflow: hidden; }
+.hm-campana-head { display: flex; justify-content: space-between; align-items: center; padding: .85rem 1rem; border-bottom: 1px solid var(--hm-border); }
+.hm-campana-item { padding: .8rem 1rem; border-bottom: 1px solid rgba(140, 120, 255, .1); }
+.hm-campana-item:hover { background: rgba(124, 58, 237, .12); }
+.hm-campana-item form { margin: 0; }
+.hm-campana-foot { display: block; text-align: center; padding: .7rem; font-size: .85rem; text-decoration: none; color: #6ea8ff; }
+.hm-campana-foot:hover { background: rgba(124, 58, 237, .15); color: #9fc4ff; }
+.hm-toast { background: var(--hm-surface-2); border: 1px solid rgba(245, 180, 0, .5); color: var(--hm-text); border-radius: 14px; }
+.hm-toast .toast-header { background: transparent; color: var(--hm-text); border-bottom: 1px solid var(--hm-border); }

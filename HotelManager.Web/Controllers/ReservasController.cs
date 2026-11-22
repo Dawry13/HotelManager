@@ -175,7 +175,7 @@ namespace HotelManager.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Crear(ReservaFormViewModel vm)
+        public ActionResult Crear(ReservaFormViewModel vm, string returnUrl)
         {
             if (ModelState.IsValid)
             {
@@ -191,9 +191,11 @@ namespace HotelManager.Web.Controllers
                 if (Ejecutar(() => creada = _reservaService.Crear(dto)))
                 {
                     Exito("Reserva #" + creada.Id + " registrada. Costo total: RD$ " + creada.CostoTotal.ToString("N2") + ".");
-                    return RedirectToAction("Detalle", new { id = creada.Id });
+                    return VolverA(returnUrl, true) ?? RedirectToAction("Detalle", new { id = creada.Id });
                 }
             }
+            var volver = VolverA(returnUrl, false);
+            if (volver != null) return volver;
             CargarListas(vm);
             return View(vm);
         }
@@ -273,10 +275,19 @@ namespace HotelManager.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Confirmar(int id)
+        public ActionResult Confirmar(int id, string returnUrl)
         {
-            EjecutarConMensaje(() => _reservaService.Confirmar(id), "Reserva #" + id + " confirmada.");
+            EjecutarConMensaje(() => _reservaService.Confirmar(id), "Reserva #" + id + " aprobada. Se envió la confirmación al huésped.");
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
             return RedirectToAction("Detalle", new { id });
+        }
+
+        // GET: /Reservas/SolicitudesPendientes  -> JSON para que la campana avise de solicitudes nuevas
+        [HttpGet]
+        public ActionResult SolicitudesPendientes()
+        {
+            var resumen = Infrastructure.SolicitudesPendientes.Resumen();
+            return Json(new { total = resumen.Item1, ultimoId = resumen.Item2 }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost, ValidateAntiForgeryToken]

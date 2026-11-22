@@ -62,10 +62,10 @@ go
 
 if not exists (select 1 from tipos_habitacion)
 insert into tipos_habitacion (nombre, descripcion, capacidad_maxima, tarifa_base) values
-('sencilla', 'una cama individual', 1, 2500.00),
-('doble', 'dos camas o una cama matrimonial', 2, 3500.00),
-('triple', 'tres camas individuales', 3, 4500.00),
-('familiar', 'habitacion amplia para familias', 4, 5500.00);
+('sencilla', 'una cama individual', 1, 0),
+('doble', 'dos camas o una cama matrimonial', 2, 0),
+('triple', 'tres camas individuales', 3, 0),
+('familiar', 'habitacion amplia para familias', 4, 0);
 go
 
 if not exists (select 1 from bloques)

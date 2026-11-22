@@ -10,8 +10,8 @@ using HotelManager.Web.Models;
 
 namespace HotelManager.Web.Controllers
 {
-    // Cualquier usuario autenticado puede llegar a "/": el huesped y el servicio de notificaciones
-    // se envian a su seccion; el panel es solo para Administrador y Recepcionista.
+    // "/" es la primera pantalla: invitados y huespedes ven el catalogo publico de hoteles;
+    // el servicio de notificaciones va a su seccion y el panel es para Administrador y Recepcionista.
     public class HomeController : BaseController
     {
         private readonly IHotelService _hotelService;
@@ -35,9 +35,10 @@ namespace HotelManager.Web.Controllers
             _huespedService = huespedService;
         }
 
+        [AllowAnonymous]
         public ActionResult Index()
         {
-            if (User.IsInRole(Roles.Huesped)) return RedirectToAction("Index", "Portal");
+            if (!User.Identity.IsAuthenticated || User.IsInRole(Roles.Huesped)) return RedirectToAction("Index", "Explorar");
             if (User.IsInRole(Roles.ServicioNotificacion)) return RedirectToAction("Index", "Notificaciones");
             if (!User.IsInRole(Roles.Administrador) && !User.IsInRole(Roles.Recepcionista))
                 return RedirectToAction("AccesoDenegado", "Cuenta");
@@ -70,6 +71,7 @@ namespace HotelManager.Web.Controllers
                 Habitaciones = habitaciones.Count,
                 ReservasActivas = reservas.Count,
                 ReservasHoy = reservas.Count(r => r.FechaEntrada.Date == hoy),
+                SalidasHoy = reservas.Count(r => r.FechaSalida.Date == hoy),
                 Huespedes = huespedes.Count,
                 Ocupadas = ocupadasHoy.Count(id => disponiblesSet.Contains(id)),
                 Disponibles = disponiblesSet.Count(id => !ocupadasHoy.Contains(id)),

@@ -16,6 +16,8 @@ namespace HotelManager.Domain.Entities
         public EstadoHabitacion Estado { get; set; }
         public int IdPiso { get; set; }
         public int? IdTipoHabitacion { get; set; }
+        /// <summary>Caracteristicas separadas por ';' (Aire acondicionado;TV;Balcon).</summary>
+        public string Caracteristicas { get; set; }
     }
 }
 

@@ -98,6 +98,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Controllers\ExplorarController.cs" />
+    <Compile Include="Helpers\CatalogoHelper.cs" />
+    <Compile Include="Models\CatalogoViewModels.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\BloquesController.cs" />
     <Compile Include="Controllers\HabitacionesController.cs" />
@@ -119,6 +123,7 @@
     </Compile>
     <Compile Include="Helpers\EstadoHelper.cs" />
     <Compile Include="Infrastructure\LayoutDataFilter.cs" />
+    <Compile Include="Infrastructure\SolicitudesPendientes.cs" />
     <Compile Include="Infrastructure\Autenticacion.cs" />
     <Compile Include="Infrastructure\AutorizarAttribute.cs" />
     <Compile Include="Controllers\CuentaController.cs" />
@@ -200,6 +205,13 @@
     <Content Include="Views\Portal\Index.cshtml" />
     <Content Include="Views\Portal\Solicitar.cshtml" />
     <Content Include="Views\Portal\Detalle.cshtml" />
+    <Content Include="Views\Portal\Confirmar.cshtml" />
+    <Content Include="Views\Portal\_ViewStart.cshtml" />
+    <Content Include="Views\Explorar\_ViewStart.cshtml" />
+    <Content Include="Views\Explorar\Index.cshtml" />
+    <Content Include="Views\Explorar\Hotel.cshtml" />
+    <Content Include="Views\Shared\_LayoutCatalogo.cshtml" />
+    <Content Include="Views\Shared\_SelectorCaracteristicas.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

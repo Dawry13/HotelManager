@@ -1,25 +1,28 @@
-﻿@model List<TarifaViewModel>
+﻿@model List<TarifasHotelViewModel>
 @{
     ViewBag.Title = "Tarifas";
     int? idHabitacion = ViewBag.IdHabitacion;
+    var temporadas = (List<TarifaViewModel>)ViewBag.Temporadas;
     var culture = new System.Globalization.CultureInfo("es-DO");
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    var volver = Request.RawUrl;
 }
 <div class="hm-page-head">
     <div class="hm-page-title">
         <div class="hm-page-icon gold"><i class="bi bi-cash-coin"></i></div>
         <div>
             <div class="hm-breadcrumb"><a href="@Url.Action("Index", "Home")">Inicio</a> / Tarifas</div>
-            <h1>Tarifas por temporada</h1>
-            <p class="hm-sub">Valor por noche con vigencia. Si no hay tarifa vigente se usa la tarifa base de la habitación (RN-013).</p>
+            <h1>Tarifas por hotel</h1>
+            <p class="hm-sub">Asigne la tarifa base de cada habitación y, si lo necesita, tarifas por temporada. La tarifa de temporada vigente reemplaza a la base en esas fechas.</p>
         </div>
     </div>
-    <a class="btn btn-gold" href="@Url.Action("Crear", new { idHabitacion })"><i class="bi bi-plus-lg me-1"></i> Nueva tarifa</a>
+    <a class="btn btn-gold" href="@Url.Action("Crear", new { idHabitacion })"><i class="bi bi-plus-lg me-1"></i> Nueva tarifa de temporada</a>
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-sm-4"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-check2-circle"></i></div><div><div class="hm-stat-value">@Model.Count(t => t.EstadoVigencia == "Vigente")</div><div class="hm-stat-label">Vigentes hoy</div></div></div></div>
-    <div class="col-sm-4"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-calendar-event"></i></div><div><div class="hm-stat-value">@Model.Count(t => t.EstadoVigencia == "Futura")</div><div class="hm-stat-label">Futuras</div></div></div></div>
-    <div class="col-sm-4"><div class="hm-stat purple compact"><div class="hm-stat-icon"><i class="bi bi-archive"></i></div><div><div class="hm-stat-value">@Model.Count(t => t.EstadoVigencia == "Vencida")</div><div class="hm-stat-label">Vencidas</div></div></div></div>
+    <div class="col-sm-4"><div class="hm-stat green compact"><div class="hm-stat-icon"><i class="bi bi-check2-circle"></i></div><div><div class="hm-stat-value">@temporadas.Count(t => t.EstadoVigencia == "Vigente")</div><div class="hm-stat-label">Temporadas vigentes hoy</div></div></div></div>
+    <div class="col-sm-4"><div class="hm-stat blue compact"><div class="hm-stat-icon"><i class="bi bi-calendar-event"></i></div><div><div class="hm-stat-value">@temporadas.Count(t => t.EstadoVigencia == "Futura")</div><div class="hm-stat-label">Futuras</div></div></div></div>
+    <div class="col-sm-4"><div class="hm-stat pink compact"><div class="hm-stat-icon"><i class="bi bi-exclamation-circle"></i></div><div><div class="hm-stat-value">@Model.Sum(h => h.Habitaciones.Count(x => x.TarifaBase <= 0))</div><div class="hm-stat-label">Habitaciones sin precio</div></div></div></div>
 </div>
 
 <form method="get" class="hm-card hm-filters mb-4">
@@ -36,41 +39,127 @@
     }
 </form>
 
-<div class="hm-card">
-    <div class="table-responsive">
-        <table class="table hm-table table-hover">
-            <thead><tr><th>Habitación</th><th>Vigencia</th><th class="text-end">Valor / noche</th><th class="text-end">Tarifa base</th><th>Estado</th><th></th></tr></thead>
-            <tbody>
-                @if (!Model.Any())
+@if (!Model.Any())
+{
+    <div class="hm-card hm-empty"><i class="bi bi-buildings"></i>No hay hoteles que mostrar.</div>
+}
+
+@foreach (var h in Model)
+{
+    var sinPrecio = h.Habitaciones.Count(x => x.TarifaBase <= 0);
+    <section class="hm-card mb-4">
+        <div class="hm-card-head flex-wrap">
+            <div>
+                <h2 class="hm-card-title"><i class="bi bi-building"></i> @h.Hotel <span class="hm-badge gold ms-1">@CatalogoHelper.Estrellas(h.Categoria)</span></h2>
+                <div class="small text-secondary mt-1">
+                    @h.Habitaciones.Count habitación(es) · @h.Temporadas.Count tarifa(s) de temporada
+                    @if (sinPrecio > 0)
+                    {
+                        <span class="hm-badge warn ms-1">@sinPrecio sin precio</span>
+                    }
+                </div>
+            </div>
+            @if (h.Habitaciones.Any())
+            {
+                using (Html.BeginForm("ActualizarBaseHotel", "Tarifas", FormMethod.Post, new { @class = "d-flex align-items-end gap-2 flex-wrap" }))
                 {
-                    <tr><td colspan="6" class="hm-empty"><i class="bi bi-cash-coin"></i>No hay tarifas registradas. Las habitaciones usan su tarifa base.</td></tr>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="idHotel" value="@h.IdHotel" />
+                    <input type="hidden" name="returnUrl" value="@volver" />
+                    <div>
+                        <label class="form-label small mb-1" for="tarifaHotel@(h.IdHotel)">Tarifa base para todo el hotel</label>
+                        <div class="input-group input-group-sm" style="max-width:220px">
+                            <span class="input-group-text">RD$</span>
+                            <input class="form-control" type="number" id="tarifaHotel@(h.IdHotel)" name="tarifa" min="0.01" step="0.01" required placeholder="0.00" />
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="return confirm('¿Aplicar esta tarifa base a las @h.Habitaciones.Count habitación(es) de @h.Hotel?');"><i class="bi bi-check2-all me-1"></i> Aplicar a todas</button>
                 }
-                @foreach (var t in Model)
-                {
-                    var dif = t.TarifaBase == 0 ? 0 : (t.ValorNoche.Value - t.TarifaBase) * 100 / t.TarifaBase;
-                    <tr>
-                        <td><div class="d-flex align-items-center gap-3"><span class="hm-code">@t.Habitacion</span><span class="hm-cell-sub">@t.Hotel</span></div></td>
-                        <td class="small">
-                            <i class="bi bi-calendar-range me-1 text-secondary"></i>@t.VigenciaDesde.Value.ToString("dd MMM yyyy", culture)
-                            → @(t.VigenciaHasta.HasValue ? t.VigenciaHasta.Value.ToString("dd MMM yyyy", culture) : "sin fin")
-                        </td>
-                        <td class="text-end fw-semibold text-gold">RD$ @t.ValorNoche.Value.ToString("N2")</td>
-                        <td class="text-end">
-                            RD$ @t.TarifaBase.ToString("N2")
-                            <div class="small @(dif >= 0 ? "text-warning" : "text-success")">@(dif >= 0 ? "+" : "")@dif.ToString("0")%</div>
-                        </td>
-                        <td><span class="hm-badge @(t.EstadoVigencia == "Vigente" ? "ok" : t.EstadoVigencia == "Futura" ? "info" : "off")">@t.EstadoVigencia</span></td>
-                        <td class="text-end acciones">
-                            <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = t.IdTarifa })" title="Editar"><i class="bi bi-pencil"></i></a>
-                            @using (Html.BeginForm("Eliminar", "Tarifas", new { id = t.IdTarifa, idHabitacion }, FormMethod.Post))
+            }
+        </div>
+
+        <div class="table-responsive">
+            <table class="table hm-table table-hover mb-0">
+                <thead><tr><th>Habitación</th><th>Ubicación</th><th>Tarifa base / noche</th><th class="text-end">Aplica hoy</th><th class="text-center">Temporadas</th></tr></thead>
+                <tbody>
+                    @if (!h.Habitaciones.Any())
+                    {
+                        <tr><td colspan="5" class="hm-empty"><i class="bi bi-door-closed"></i>Este hotel no tiene habitaciones. <a class="hm-link" href="@Url.Action("Detalle", "Hoteles", new { id = h.IdHotel })">Agréguelas desde el hotel</a>.</td></tr>
+                    }
+                    @foreach (var x in h.Habitaciones)
+                    {
+                        var hoy = x.TarifaHoy ?? x.TarifaBase;
+                        <tr>
+                            <td><span class="hm-code">@x.Numero</span> <span class="hm-cell-sub ms-1">@x.Tipo</span></td>
+                            <td class="small text-capitalize">@x.Ubicacion</td>
+                            <td>
+                                @using (Html.BeginForm("ActualizarBase", "Tarifas", FormMethod.Post, new { @class = "d-flex gap-2 align-items-center" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="idHabitacion" value="@x.IdHabitacion" />
+                                    <input type="hidden" name="returnUrl" value="@volver" />
+                                    <div class="input-group input-group-sm" style="max-width:190px">
+                                        <span class="input-group-text">RD$</span>
+                                        <input class="form-control @(x.TarifaBase <= 0 ? "border-warning" : "")" type="number" name="tarifa" min="0.01" step="0.01" required
+                                               value="@(x.TarifaBase > 0 ? x.TarifaBase.ToString("0.00", inv) : "")" placeholder="Sin precio" aria-label="Tarifa base de la habitación @x.Numero" />
+                                    </div>
+                                    <button class="btn-icon i-edit" title="Guardar tarifa base"><i class="bi bi-save"></i></button>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (hoy > 0)
+                                {
+                                    <span class="fw-semibold text-gold">RD$ @hoy.ToString("N2")</span>
+                                    <div class="small text-secondary">@(x.TarifaHoy.HasValue ? "temporada" : "base")</div>
+                                }
+                                else
+                                {
+                                    <span class="hm-badge warn">No se puede reservar</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <a class="hm-link" href="@Url.Action("Crear", new { idHabitacion = x.IdHabitacion })" title="Agregar tarifa de temporada"><i class="bi bi-plus-circle me-1"></i>@x.TotalTemporadas</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (h.Temporadas.Any())
+        {
+            <div class="hm-card-body border-top">
+                <div class="hm-form-section mb-2">Tarifas por temporada</div>
+                <div class="table-responsive">
+                    <table class="table hm-table table-hover mb-0">
+                        <thead><tr><th>Habitación</th><th>Vigencia</th><th class="text-end">Valor / noche</th><th class="text-end">vs. base</th><th>Estado</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var t in h.Temporadas)
                             {
-                                @Html.AntiForgeryToken()
-                                <button class="btn-icon i-del" title="Eliminar" onclick="return confirm('¿Eliminar esta tarifa?');"><i class="bi bi-trash"></i></button>
+                                var dif = t.TarifaBase == 0 ? 0 : (t.ValorNoche.Value - t.TarifaBase) * 100 / t.TarifaBase;
+                                <tr>
+                                    <td><span class="hm-code">@t.Habitacion</span></td>
+                                    <td class="small">
+                                        <i class="bi bi-calendar-range me-1 text-secondary"></i>@t.VigenciaDesde.Value.ToString("dd MMM yyyy", culture)
+                                        → @(t.VigenciaHasta.HasValue ? t.VigenciaHasta.Value.ToString("dd MMM yyyy", culture) : "sin fin")
+                                    </td>
+                                    <td class="text-end fw-semibold text-gold">RD$ @t.ValorNoche.Value.ToString("N2")</td>
+                                    <td class="text-end small @(dif >= 0 ? "text-warning" : "text-success")">@(t.TarifaBase == 0 ? "—" : (dif >= 0 ? "+" : "") + dif.ToString("0") + "%")</td>
+                                    <td><span class="hm-badge @(t.EstadoVigencia == "Vigente" ? "ok" : t.EstadoVigencia == "Futura" ? "info" : "off")">@t.EstadoVigencia</span></td>
+                                    <td class="text-end acciones">
+                                        <a class="btn-icon i-edit" href="@Url.Action("Editar", new { id = t.IdTarifa })" title="Editar"><i class="bi bi-pencil"></i></a>
+                                        @using (Html.BeginForm("Eliminar", "Tarifas", new { id = t.IdTarifa, idHabitacion }, FormMethod.Post))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <button class="btn-icon i-del" title="Eliminar" onclick="return confirm('¿Eliminar esta tarifa de temporada?');"><i class="bi bi-trash"></i></button>
+                                        }
+                                    </td>
+                                </tr>
                             }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </section>
+}

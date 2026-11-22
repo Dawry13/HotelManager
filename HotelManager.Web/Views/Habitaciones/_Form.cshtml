@@ -56,7 +56,6 @@
                         @foreach (var t in tipos)
                         {
                             <option value="@t.IdTipoHabitacion" data-capacidad="@t.CapacidadMaxima"
-                                    data-tarifa="@t.TarifaBase.ToString(inv)"
                                     @(t.IdTipoHabitacion == Model.IdTipoHabitacion ? "selected" : "")>
                                 @TextoHelper.Titulo(t.Nombre) (máx. @t.CapacidadMaxima)@(t.Estado == "Activo" ? "" : " - inactivo")
                             </option>
@@ -94,7 +93,17 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2 mt-2">
+                <div class="hm-form-section mt-3">Comodidades</div>
+                <label class="form-label small text-secondary">Se muestran a los huéspedes al pasar el mouse sobre la habitación.</label>
+                @Html.Partial("_SelectorCaracteristicas", new CaracteristicasSelectorViewModel
+                {
+                    Opciones = CatalogoHelper.CaracteristicasHabitacion,
+                    Seleccionadas = Model.Caracteristicas,
+                    Otras = Model.OtrasCaracteristicas,
+                    Prefijo = "carHab"
+                })
+
+                <div class="d-flex gap-2 mt-4">
                     <button type="submit" class="btn btn-gold"><i class="bi bi-save me-1"></i> @(esEdicion ? "Guardar cambios" : "Registrar habitación")</button>
                     <a class="btn btn-ghost" href="@Url.Action("Index", new { idHotel = Model.IdHotel })">Cancelar</a>
                 </div>
@@ -110,10 +119,10 @@
                     <span class="d-block small text-secondary mt-2">Cámbielo desde el listado de habitaciones.</span></p>
             }
             <div class="hm-form-section">Reglas de negocio</div>
-            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div><strong>RN-006</strong>Solo se agregan habitaciones a pisos activos.</div></div>
-            <div class="hm-rule"><i class="bi bi-hash"></i><div><strong>RN-005</strong>El número es único dentro del hotel.</div></div>
+            <div class="hm-rule"><i class="bi bi-slash-circle"></i><div>Solo se agregan habitaciones a pisos activos.</div></div>
+            <div class="hm-rule"><i class="bi bi-hash"></i><div>El número es único dentro del hotel.</div></div>
             <div class="hm-rule"><i class="bi bi-people"></i><div><strong>Capacidad</strong>No puede superar la capacidad máxima del tipo.</div></div>
-            <div class="hm-rule"><i class="bi bi-calendar-x"></i><div><strong>RN-007</strong>Solo las habitaciones disponibles se pueden reservar.</div></div>
+            <div class="hm-rule"><i class="bi bi-calendar-x"></i><div>Solo las habitaciones disponibles se pueden reservar.</div></div>
         </div>
     </div>
 </div>

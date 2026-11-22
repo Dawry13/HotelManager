@@ -48,4 +48,27 @@ namespace HotelManager.Web.Models
                 yield return new ValidationResult("La vigencia final no puede ser anterior a la inicial.", new[] { "VigenciaHasta" });
         }
     }
+
+    /// <summary>Tarifas agrupadas por hotel: tarifa base de cada habitacion y temporadas.</summary>
+    public class TarifasHotelViewModel
+    {
+        public int IdHotel { get; set; }
+        public string Hotel { get; set; }
+        public int Categoria { get; set; }
+        public List<TarifaHabitacionViewModel> Habitaciones { get; set; } = new List<TarifaHabitacionViewModel>();
+        public List<TarifaViewModel> Temporadas { get; set; } = new List<TarifaViewModel>();
+    }
+
+    public class TarifaHabitacionViewModel
+    {
+        public int IdHabitacion { get; set; }
+        public string Numero { get; set; }
+        public string Tipo { get; set; }
+        public string Ubicacion { get; set; }
+        /// <summary>Precio por noche asignado a la habitacion (0 = sin precio).</summary>
+        public decimal TarifaBase { get; set; }
+        /// <summary>Tarifa de temporada que aplica hoy, si hay una.</summary>
+        public decimal? TarifaHoy { get; set; }
+        public int TotalTemporadas { get; set; }
+    }
 }

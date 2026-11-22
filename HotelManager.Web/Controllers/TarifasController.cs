@@ -38,22 +38,98 @@ namespace HotelManager.Web.Controllers
         }
 
         // GET: /Tarifas?idHotel=&idHabitacion=
+        // Cada hotel con la tarifa base de sus habitaciones (editable) y sus tarifas por temporada.
         public ActionResult Index(int? idHotel, int? idHabitacion)
         {
             var ctx = Contexto();
-            var lista = _tarifaService.Listar()
-                .Where(t => !idHabitacion.HasValue || t.IdHabitacion == idHabitacion.Value)
-                .Where(t => !idHotel.HasValue || ctx.IdHotelDeHabitacion(t.IdHabitacion) == idHotel.Value)
+            var hoy = System.DateTime.Today;
+            var temporadas = _tarifaService.Listar()
                 .Select(t => ToViewModel(t, ctx))
-                .OrderBy(t => t.Hotel).ThenBy(t => t.Habitacion).ThenByDescending(t => t.VigenciaDesde)
                 .ToList();
 
+            var hoteles = ctx.Hoteles.Values
+                .Where(h => !idHotel.HasValue || h.IdHotel == idHotel.Value)
+                .OrderByDescending(h => h.Categoria).ThenBy(h => h.Nombre)
+                .Select(h =>
+                {
+                    var habitaciones = ctx.Habitaciones.Values
+                        .Where(x => ctx.IdHotelDeHabitacion(x.IdHabitacion) == h.IdHotel)
+                        .Where(x => !idHabitacion.HasValue || x.IdHabitacion == idHabitacion.Value)
+                        .OrderBy(x => x.Numero)
+                        .ToList();
+                    var ids = new System.Collections.Generic.HashSet<int>(habitaciones.Select(x => x.IdHabitacion));
+                    var delHotel = temporadas.Where(t => ids.Contains(t.IdHabitacion.Value)).ToList();
+
+                    return new TarifasHotelViewModel
+                    {
+                        IdHotel = h.IdHotel,
+                        Hotel = TextoHelper.Titulo(h.Nombre),
+                        Categoria = h.Categoria,
+                        Habitaciones = habitaciones.Select(x =>
+                        {
+                            var vigente = delHotel
+                                .Where(t => t.IdHabitacion == x.IdHabitacion && t.EstadoVigencia == "Vigente")
+                                .OrderByDescending(t => t.VigenciaDesde)
+                                .FirstOrDefault();
+                            return new TarifaHabitacionViewModel
+                            {
+                                IdHabitacion = x.IdHabitacion,
+                                Numero = x.Numero,
+                                Tipo = ctx.TipoDeHabitacion(x.IdHabitacion),
+                                Ubicacion = ctx.UbicacionHabitacion(x.IdHabitacion),
+                                TarifaBase = x.Tarifa,
+                                TarifaHoy = vigente != null ? vigente.ValorNoche : null,
+                                TotalTemporadas = delHotel.Count(t => t.IdHabitacion == x.IdHabitacion)
+                            };
+                        }).ToList(),
+                        Temporadas = delHotel
+                            .OrderBy(t => t.Habitacion).ThenByDescending(t => t.VigenciaDesde)
+                            .ToList()
+                    };
+                })
+                .Where(h => !idHabitacion.HasValue || h.Habitaciones.Any())
+                .ToList();
+
+            ViewBag.Temporadas = temporadas;
             ViewBag.Hoteles = HotelesSelect(_hotelService.Listar(), idHotel, false);
             ViewBag.IdHotel = idHotel;
             ViewBag.IdHabitacion = idHabitacion;
             if (idHabitacion.HasValue)
                 ViewBag.HabitacionFiltro = "Hab. " + ctx.NumeroHabitacion(idHabitacion.Value) + " · " + ctx.HotelDeHabitacion(idHabitacion.Value);
-            return View(lista);
+            return View(hoteles);
+        }
+
+        // POST: /Tarifas/ActualizarBase  -> precio por noche de una habitacion
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult ActualizarBase(int idHabitacion, decimal? tarifa, string returnUrl)
+        {
+            if (!tarifa.HasValue) Error("Indique la tarifa base.");
+            else EjecutarConMensaje(() => _habitacionService.ActualizarTarifa(idHabitacion, tarifa.Value),
+                "Tarifa base de la habitación actualizada a RD$ " + tarifa.Value.ToString("N2") + ".");
+            return VolverAlListado(returnUrl);
+        }
+
+        // POST: /Tarifas/ActualizarBaseHotel  -> misma tarifa para todas las habitaciones del hotel
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult ActualizarBaseHotel(int idHotel, decimal? tarifa, string returnUrl)
+        {
+            if (!tarifa.HasValue) Error("Indique la tarifa base.");
+            else
+            {
+                var cambiadas = 0;
+                EjecutarConMensaje(() => cambiadas = _habitacionService.ActualizarTarifaHotel(idHotel, tarifa.Value), null);
+                if (TempData["Error"] == null)
+                    Exito(cambiadas == 0
+                        ? "Todas las habitaciones del hotel ya tenían esa tarifa."
+                        : "Tarifa base de RD$ " + tarifa.Value.ToString("N2") + " aplicada a " + cambiadas + " habitación(es) del hotel.");
+            }
+            return VolverAlListado(returnUrl);
+        }
+
+        private ActionResult VolverAlListado(string returnUrl)
+        {
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
+            return RedirectToAction("Index");
         }
 
         public ActionResult Crear(int? idHabitacion)
