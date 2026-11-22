@@ -82,5 +82,6 @@ namespace HotelManager.Data.Base
 
         protected static int? EnteroNulo(IDataRecord r, string columna)
             => r[columna] == DBNull.Value ? (int?)null : Convert.ToInt32(r[columna]);
+
     }
 }
