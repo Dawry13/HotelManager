@@ -1,0 +1,37 @@
+@base = http://localhost:5180/api
+
+### Hoteles
+GET {{base}}/hoteles
+
+### Habitaciones de un hotel
+GET {{base}}/hoteles/3/habitaciones
+
+### Disponibilidad
+GET {{base}}/disponibilidad?Entrada=2026-12-01&Salida=2026-12-03&CantidadHuespedes=2
+
+### Reservas activas
+GET {{base}}/reservas/activas
+
+### Crear reserva
+POST {{base}}/reservas
+Content-Type: application/json
+
+{
+  "huespedId": 1,
+  "habitacionId": 5,
+  "fechaEntrada": "2026-12-01",
+  "fechaSalida": "2026-12-03",
+  "cantidadHuespedes": 2
+}
+
+### Reporte general
+GET {{base}}/reportes/general?desde=2026-01-01&hasta=2026-12-31
+
+### Autenticar
+POST {{base}}/usuarios/autenticar
+Content-Type: application/json
+
+{
+  "nombreUsuario": "admin",
+  "clave": "..."
+}
